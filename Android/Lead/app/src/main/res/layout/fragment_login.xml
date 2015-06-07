@@ -1,0 +1,60 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.orbital.lead.controller.FragmentLogin"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    style="@style/Fragment_Background_Light">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <EditText
+            android:id="@+id/editTextUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            style="@style/EditText_Style"
+            android:hint="Username or email"/>
+
+        <EditText
+            android:id="@+id/editTextPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/editTextUsername"
+            android:layout_below="@+id/editTextUsername"
+            style="@style/EditText_Style"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:password="true"/>
+
+
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/editTextPassword"
+            android:layout_below="@+id/editTextPassword"
+            android:text="@string/button_text_login"
+            style="@style/AppCompat.Button.Flat.Purple.Text" />
+
+
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/btnLoginWithFacebook"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/btn_flat_min_height"
+            android:layout_below="@+id/btnLogin"
+            android:layout_gravity="center_horizontal"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"/>
+
+
+
+    </RelativeLayout>
+
+
+
+</LinearLayout>

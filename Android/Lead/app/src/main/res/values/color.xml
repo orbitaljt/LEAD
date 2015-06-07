@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+    <item name="primary" type="color">#F44336</item>
+    <item name="primary_dark" type="color">#D32F2F</item>
+    <item name="accent" type="color">#FF4081</item>
+    -->
+    <item name="primary" type="color">#673AB7</item>
+    <item name="primary_dark" type="color">#512DA8</item>
+    <item name="accent" type="color">#FF4081</item>
+    <item name="primary_text" type="color">#212121</item>
+    <item name="secondary_text" type="color">#727272</item>
+    <item name="divider_text" type="color">#B6B6B6</item>
+
+
+    <item name="toolbar_primary_text" type="color">#ffffff</item>
+    <item name="white" type="color">#ffffff</item>
+    <item name="black" type="color">#000000</item>
+    <item name="purple" type="color">#512DA8</item>
+
+
+    <item name="retry_grey" type="color">#757575</item>
+
+    <!-- -->
+
+
+    <!-- background color-->
+    <item name="background_light_grey" type="color">#EEEEEE</item>
+
+    <!-- Flat button -->
+    <color name="button_flat_pressed">#66999999</color>
+    <color name="button_flat_disabled_text">#40000000</color>
+    <color name="button_flat_normal_text">@color/primary</color>
+
+
+</resources>
