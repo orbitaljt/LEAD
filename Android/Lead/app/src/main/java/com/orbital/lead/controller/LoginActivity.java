@@ -1,7 +1,11 @@
 package com.orbital.lead.controller;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -10,6 +14,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -19,6 +24,7 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.orbital.lead.R;
 import com.orbital.lead.model.Constant;
+import com.orbital.lead.model.InternetVariableClass;
 
 import java.lang.reflect.Array;
 import java.security.Permissions;
@@ -33,7 +39,8 @@ public class LoginActivity extends AppCompatActivity
     // fragments
     private FragmentLogin mFragmentLogin;
 
-
+    private boolean exit = false;
+    private InternetVariableClass mInternetVar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +86,15 @@ public class LoginActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    /*CHECK NETWORK CONNECTION*/
+    public boolean hasNetworkConnection(){
+        this.mInternetVar = this.getNetworkConnection();
+        if(mInternetVar.getHasData() || mInternetVar.getHasWifi()){
+            return true;
+        }
+        return false;
+    }
+
 
     public void initFragmentManager(){
 
@@ -96,11 +112,6 @@ public class LoginActivity extends AppCompatActivity
         });
     }
 
-
-
-
-
-
     private void displayFragmentLogin(){
         String fragName = Constant.FRAGMENT_LOGIN_NAME;
         this.mFragmentLogin = FragmentLogin.newInstance("", "");
@@ -116,9 +127,43 @@ public class LoginActivity extends AppCompatActivity
         }
     }
 
+    private InternetVariableClass getNetworkConnection(){
+        InternetVariableClass internetvar = new InternetVariableClass(false,false);
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for(NetworkInfo ni : netInfo){
+            if(ni.getTypeName().equalsIgnoreCase("WIFI") && ni.isConnected()){
+                internetvar.setHasWifi(true);
+            }//end if
+            if(ni.getTypeName().equalsIgnoreCase("MOBILE") && ni.isConnected()){
+                internetvar.setHasData(true);
+            }//end if
+        }//end for
+
+        return internetvar;
+    }//end hasNetworkConnection
+
 
     @Override
     public void onFragmentLoginInteraction(Uri uri) {
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(this.exit){
+            this.finish();
+        }else{
+            Toast.makeText(this, "Press back again to exit program.",
+                    Toast.LENGTH_SHORT).show();
+            this.exit = true;
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    exit = false;
+                }//end run
+            }, 1 * 1000);
+        }
     }
 }

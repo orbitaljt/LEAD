@@ -1,8 +1,11 @@
 package com.orbital.lead.controller;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,6 +13,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -25,6 +30,8 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.orbital.lead.R;
 import com.orbital.lead.logic.CustomLogging;
+import com.orbital.lead.logic.Logic;
+import com.orbital.lead.model.InternetVariableClass;
 
 import org.json.JSONObject;
 
@@ -51,6 +58,9 @@ public class FragmentLogin extends Fragment {
     private String mParam2;
 
     private LoginActivity mLoginActivity;
+    private EditText mEditTextUsername;
+    private EditText mEditTextPassword;
+    private Button mBtnLogin;
     // Facebook
     // Controls
     private LoginButton mFacebookLoginButton;
@@ -65,6 +75,10 @@ public class FragmentLogin extends Fragment {
 
     private CustomLogging mLogging;
     private final String TAG_FRAGMENT_LOGIN = this.getClass().getSimpleName();
+
+    private Logic mLogic;
+
+
 
     /**
      * Use this factory method to create a new instance of
@@ -119,7 +133,7 @@ public class FragmentLogin extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_login, container, false);
 
-
+        this.initLogic();
 
         //this.initFacebookCallbackManager();
         this.initFacebookLoginButton(rootView);
@@ -127,6 +141,10 @@ public class FragmentLogin extends Fragment {
         //this.initAccessTokenTrack();
         //Profile.fetchProfileForCurrentAccessToken();
         //this.setProfile(Profile.getCurrentProfile());
+        this.initEditTextUsername(rootView);
+        this.initEditTextPassword(rootView);
+        this.initButtonLogin(rootView);
+
 
         if (this.pendingUpdateForUser != null) {
             setProfile(this.pendingUpdateForUser);
@@ -177,6 +195,35 @@ public class FragmentLogin extends Fragment {
         super.onDestroy();
         this.profileTracker.stopTracking();
         this.accessTokenTracker.startTracking();
+    }
+
+    public void initEditTextUsername(View v){
+        this.mEditTextUsername = (EditText) v.findViewById(R.id.editTextUsername);
+    }
+
+    public String getEditTextUsername(){
+        return this.mEditTextUsername.getText().toString();
+    }
+
+    public void initEditTextPassword(View v){
+        this.mEditTextPassword = (EditText) v.findViewById(R.id.editTextPassword);
+    }
+
+    public String getEditTextPassword(){
+        return this.mEditTextPassword.getText().toString();
+    }
+
+    public void initButtonLogin(View v){
+        this.mBtnLogin = (Button) v.findViewById(R.id.btnLogin);
+        this.mBtnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mLogging.debug(TAG_FRAGMENT_LOGIN, "mBtnLogin onClick");
+                mLogging.debug(TAG_FRAGMENT_LOGIN, "getEditTextUsername() -> " + getEditTextUsername());
+                mLogging.debug(TAG_FRAGMENT_LOGIN, "getEditTextPassword() -> " + getEditTextPassword());
+                mLogic.login(getLoginActivity(), getEditTextUsername(), getEditTextPassword());
+            }
+        });
     }
 
 
@@ -245,7 +292,6 @@ public class FragmentLogin extends Fragment {
         };
     }
 
-
     public void initLoginActivity(LoginActivity activity){
         this.mLoginActivity = activity;
     }
@@ -254,6 +300,9 @@ public class FragmentLogin extends Fragment {
         return this.mLoginActivity;
     }
 
+    public void initLogic(){
+        this.mLogic = Logic.getInstance();
+    }
 
     /**
      * This interface must be implemented by activities that contain this
@@ -367,7 +416,7 @@ public class FragmentLogin extends Fragment {
         }
     }
 
-    private boolean getHasLogin(){
+    private boolean hasLogin(){
         return this.hasLogin;
     }
 
