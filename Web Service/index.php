@@ -1,9 +1,9 @@
 <?php
 
-    require_once 'Database/DatabaseFunction.php';
+    require_once 'database/database_function.php';
 
 	$function = new DatabaseFunction();
-	$function->deleteDB();
+	$function->getTest();
 
 
 

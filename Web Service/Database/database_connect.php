@@ -15,7 +15,7 @@ class DatabaseConnect{
 
 		
 	public function connect(){
-		require_once 'Configuration.php';
+		require_once 'configuration.php';
 		//$conn = mysqli_connect(self::$dbHost, self::$dbUsername, self::$dbPassword, self::$dbName) or die(mysqli_connect_error());
 
 		try{
