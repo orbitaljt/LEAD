@@ -1,8 +1,15 @@
 package com.orbital.lead.logic;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Color;
 
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.SnackbarManager;
+import com.nispok.snackbar.listeners.ActionClickListener;
+import com.orbital.lead.Parser.Parser;
+import com.orbital.lead.controller.FragmentLogin;
 import com.orbital.lead.logic.Asynchronous.AsyncLogin;
 import com.orbital.lead.model.Message;
 
@@ -12,12 +19,14 @@ import com.orbital.lead.model.Message;
 public class Logic {
 
     private static Logic mLogic = new Logic();
+    //private ProgressDialog prog;
+    //private Parser mParser;
 
-    private ProgressDialog prog;
 
     private Logic(){} // private constructor to prevent creating new instance
 
     public static Logic getInstance(){
+        //mLogic.initParser();
         return mLogic;
     }
 
@@ -27,15 +36,20 @@ public class Logic {
      * @return Message object - consists of code and message
      *
      * **/
-    public Message login(Context context, String username, String password){
-        Message returnMsg = null;
-
-        HttpAsyncLogin mAsyncLogin = new HttpAsyncLogin(context);
-        mAsyncLogin.execute(username, password);
-
-        return returnMsg;
+    public void login(FragmentLogin frag, String username, String password){
+        //frag.HttpAsyncLogin mAsyncLogin = new frag.HttpAsyncLogin(frag);
+       // mAsyncLogin.execute(username, password);
     }
 
+    /*
+    private void initParser(){
+        if(this.mParser == null) {
+            this.mParser = Parser.getInstance();
+        }
+    }
+    */
+
+    /*
     private class HttpAsyncLogin extends AsyncLogin {
 
         private Context mContext;
@@ -57,13 +71,47 @@ public class Logic {
                 prog.dismiss();
             }//end if
 
-            System.out.println("onPostExecute");
-            System.out.println(result);
+            Message msg = mParser.parseJsonToMessage(result);
+            System.out.println(msg.getMessage());
 
         }
 
     }
+    */
 
+
+    public void showSnackBarRed(Activity activity){
+        Snackbar mSnackBar = Snackbar.with(activity)
+                .text("")
+                .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
+                .actionLabel("")
+                .actionColor(Color.WHITE)
+                .color(Color.RED)
+                .actionListener(new ActionClickListener() {
+                    @Override
+                    public void onActionClicked(Snackbar snackbar) {
+
+                    }
+                });
+
+        SnackbarManager.show(mSnackBar, activity);
+    }
+
+    public void showSnackBarNormal(Activity activity){
+        Snackbar mSnackBar = Snackbar.with(activity)
+                .text("")
+                .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
+                .actionLabel("")
+                .actionColor(Color.WHITE)
+                .actionListener(new ActionClickListener() {
+                    @Override
+                    public void onActionClicked(Snackbar snackbar) {
+
+                    }
+                });
+
+        SnackbarManager.show(mSnackBar, activity);
+    }
 
 
 

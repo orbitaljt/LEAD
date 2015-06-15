@@ -1,6 +1,7 @@
 package com.orbital.lead.controller;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -28,10 +29,13 @@ import com.facebook.Profile;
 import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.R;
+import com.orbital.lead.logic.Asynchronous.AsyncLogin;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.InternetVariableClass;
+import com.orbital.lead.model.Message;
 
 import org.json.JSONObject;
 
@@ -61,6 +65,8 @@ public class FragmentLogin extends Fragment {
     private EditText mEditTextUsername;
     private EditText mEditTextPassword;
     private Button mBtnLogin;
+    private ProgressDialog prog;
+
     // Facebook
     // Controls
     private LoginButton mFacebookLoginButton;
@@ -77,7 +83,7 @@ public class FragmentLogin extends Fragment {
     private final String TAG_FRAGMENT_LOGIN = this.getClass().getSimpleName();
 
     private Logic mLogic;
-
+    private Parser mParser;
 
 
     /**
@@ -134,6 +140,7 @@ public class FragmentLogin extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_login, container, false);
 
         this.initLogic();
+        this.initParser();
 
         //this.initFacebookCallbackManager();
         this.initFacebookLoginButton(rootView);
@@ -221,7 +228,8 @@ public class FragmentLogin extends Fragment {
                 mLogging.debug(TAG_FRAGMENT_LOGIN, "mBtnLogin onClick");
                 mLogging.debug(TAG_FRAGMENT_LOGIN, "getEditTextUsername() -> " + getEditTextUsername());
                 mLogging.debug(TAG_FRAGMENT_LOGIN, "getEditTextPassword() -> " + getEditTextPassword());
-                mLogic.login(getLoginActivity(), getEditTextUsername(), getEditTextPassword());
+                //mLogic.login(getLoginActivity(), getEditTextUsername(), getEditTextPassword());
+                runLogin(getEditTextUsername(), getEditTextPassword());
             }
         });
     }
@@ -304,6 +312,70 @@ public class FragmentLogin extends Fragment {
         this.mLogic = Logic.getInstance();
     }
 
+    public void initParser(){
+        if(this.mParser == null) {
+            this.mParser = Parser.getInstance();
+        }
+    }
+
+
+    public void runLogin(String username, String password){
+        HttpAsyncLogin mAsyncLogin = new HttpAsyncLogin(getLoginActivity());
+        mAsyncLogin.execute(username, password);
+    }
+
+
+    public void displayMainActivity(){
+        Intent newIntent = new Intent(getLoginActivity(), MainActivity.class);
+        //Bundle mBundle = new Bundle();
+        //mBundle.putString(key, value);
+        //newIntent.putExtras(mBundle);
+        getLoginActivity().startActivity(newIntent);
+    }
+
+
+    public class HttpAsyncLogin extends AsyncLogin {
+
+        private Context mContext;
+
+        public HttpAsyncLogin(Context c){
+            this.mContext = c;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            prog = new ProgressDialog(this.mContext);
+            prog.setMessage("Logging in...");
+            prog.show();
+        }
+
+        @Override
+        protected void onPostExecute(final String result) {
+            if (prog != null && prog.isShowing()) {
+                prog.dismiss();
+            }//end if
+
+            getLoginActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    //System.out.println("result => " + result);
+                    Message msg = mParser.parseJsonToMessage(result);
+
+                    mLogging.debug(TAG_FRAGMENT_LOGIN, "msg.getMessage() => " + msg.getMessage());
+
+                    if (mParser.isMessageSuccess(msg)){ // success login
+                        // open main activity
+                        displayMainActivity();
+                    }
+                }
+
+            });
+
+        }
+
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -365,6 +437,7 @@ public class FragmentLogin extends Fragment {
         } else {
 
             AccessToken at = AccessToken.getCurrentAccessToken();
+            this.mLogging.debug(this.TAG_FRAGMENT_LOGIN, "Current Access Token => " + at.getToken());
             this.accessUserGraph(at);
 
 
@@ -394,7 +467,7 @@ public class FragmentLogin extends Fragment {
                 });
 
         Bundle parameters = new Bundle();
-        parameters.putString("fields", "id,name,picture{url},address,birthday,email,link");
+        parameters.putString("fields", "id,name,picture.type(large){url},address,birthday,email,link");
         request.setParameters(parameters);
         request.executeAsync();
 

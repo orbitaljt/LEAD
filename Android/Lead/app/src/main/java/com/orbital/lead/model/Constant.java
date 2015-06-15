@@ -22,4 +22,12 @@ public class Constant {
     public static final String TYPE_LOGOUT = "101";
 
 
+    // Message json tag {'code'='', 'message':''}
+    public static final String MESSAGE_JSON_CODE_TAG = "code";
+    public static final String MESSAGE_JSON_MESSAGE_TAG = "message";
+
+    // Message code
+    public static final String MESSAGE_SUCCESS_TYPE = ".1";
+    public static final String MESSAGE_FAILURE_TYPE = ".2";
+
 }

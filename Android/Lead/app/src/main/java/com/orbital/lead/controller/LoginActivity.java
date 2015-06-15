@@ -47,14 +47,14 @@ public class LoginActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // hide action bar (remove)
+        this.hideActionBar();
+
         // fragment manager
         this.initFragmentManager();
 
         // Display login first
         this.displayFragmentLogin();
-
-        //Other initialization
-
 
 
     }
@@ -143,6 +143,10 @@ public class LoginActivity extends AppCompatActivity
 
         return internetvar;
     }//end hasNetworkConnection
+
+    private void hideActionBar(){
+        getSupportActionBar().hide();
+    }
 
 
     @Override

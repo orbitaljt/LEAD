@@ -71,5 +71,22 @@
         <item name="android:textSize">@dimen/text_primary</item>
     </style>
 
+    <style name="ImageView_Login_Lead_Style">
+        <item name="android:height">@dimen/logo_login_lead_height</item>
+        <item name="android:paddingTop">@dimen/logo_login_lead_padding_top</item>
+        <item name="android:paddingBottom">@dimen/logo_login_lead_padding_bottom</item>
+        <item name="android:layout_marginTop">@dimen/logo_login_lead_margin_top</item>
+        <item name="android:layout_marginBottom">@dimen/logo_login_lead_margin_bottom</item>
+    </style>
+
+    <style name="TextView_Login_Lead_Style">
+        <item name="android:height">@dimen/text_login_lead_height</item>
+        <item name="android:layout_marginTop">@dimen/text_login_lead_margin_top</item>
+        <item name="android:layout_marginBottom">@dimen/text_login_lead_margin_bottom</item>
+        <item name="android:textSize">@dimen/text_login_lead_text_size</item>
+        <item name="android:textColor">@color/grey</item>
+        <item name="android:textStyle">normal</item>
+
+    </style>
 
 </resources>

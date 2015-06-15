@@ -18,7 +18,7 @@
     <item name="white" type="color">#ffffff</item>
     <item name="black" type="color">#000000</item>
     <item name="purple" type="color">#512DA8</item>
-
+    <item name="grey" type="color">#555555</item>
 
     <item name="retry_grey" type="color">#757575</item>
 

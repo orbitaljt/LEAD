@@ -6,17 +6,34 @@
     android:orientation="vertical"
     style="@style/Fragment_Background_Light">
 
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/imageLeadIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/logo_login_lead_height"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/ic_login_lead"
+            style="@style/ImageView_Login_Lead_Style"/>
+
+        <TextView
+            android:id="@+id/textLead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/imageLeadIcon"
+            android:layout_centerHorizontal="true"
+            android:text="@string/text_login_lead"
+            style="@style/TextView_Login_Lead_Style"/>
 
         <EditText
             android:id="@+id/editTextUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
+            android:layout_below="@+id/textLead"
             style="@style/EditText_Style"
             android:hint="Username or email"/>
 
@@ -39,7 +56,8 @@
             android:layout_alignLeft="@+id/editTextPassword"
             android:layout_below="@+id/editTextPassword"
             android:text="@string/button_text_login"
-            style="@style/AppCompat.Button.Flat.Purple.Text" />
+            android:background="@color/purple"
+            style="@style/AppCompat.Button.Flat.light.Text" />
 
 
         <com.facebook.login.widget.LoginButton

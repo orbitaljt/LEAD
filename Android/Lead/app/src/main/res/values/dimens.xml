@@ -48,4 +48,15 @@
     <!--The next value changes the margin between the FB icon and the login text:-->
     <dimen name="fb_margin_override_textpadding">17dp</dimen>
 
+
+    <dimen name="logo_login_lead_height">100dp</dimen>
+    <dimen name="logo_login_lead_padding_top">8dp</dimen>
+    <dimen name="logo_login_lead_padding_bottom">8dp</dimen>
+    <dimen name="logo_login_lead_margin_top">16dp</dimen>
+    <dimen name="logo_login_lead_margin_bottom">8dp</dimen>
+
+    <dimen name="text_login_lead_height">40dp</dimen>
+    <dimen name="text_login_lead_margin_top">8dp</dimen>
+    <dimen name="text_login_lead_margin_bottom">8dp</dimen>
+    <dimen name="text_login_lead_text_size">24sp</dimen>
 </resources>
