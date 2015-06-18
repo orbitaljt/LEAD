@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity
         setContentView(R.layout.activity_login);
 
         // hide action bar (remove)
-        this.hideActionBar();
+        //this.hideActionBar();
 
         // fragment manager
         this.initFragmentManager();

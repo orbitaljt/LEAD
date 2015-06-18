@@ -59,4 +59,9 @@
     <dimen name="text_login_lead_margin_top">8dp</dimen>
     <dimen name="text_login_lead_margin_bottom">8dp</dimen>
     <dimen name="text_login_lead_text_size">24sp</dimen>
+
+    <!-- ViewPager and tabs -->
+    <dimen name="toolbar_elevation">4dp</dimen>
+    <dimen name="tab_height">48dp</dimen>
+
 </resources>

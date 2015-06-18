@@ -1,23 +1,42 @@
 package com.orbital.lead.controller;
 
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
+import android.view.View;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
+import com.github.ksoichiro.android.observablescrollview.ScrollState;
+import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
+import com.github.ksoichiro.android.observablescrollview.Scrollable;
 import com.orbital.lead.R;
+import com.orbital.lead.controller.iosched.SlidingTabLayout;
 import com.orbital.lead.model.Constant;
 
 
+import com.nineoldandroids.view.ViewHelper;
+import com.nineoldandroids.view.ViewPropertyAnimator;
+
+
 public class MainActivity extends AppCompatActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks{
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+FragmentMainUserJournalList.OnFragmentInteractionListener,
+FragmentDetail.OnFragmentInteractionListener,
+        ObservableScrollViewCallbacks {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -29,9 +48,18 @@ public class MainActivity extends AppCompatActivity
      */
     private CharSequence mTitle;
 
-
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
+
+
+    //private Toolbar mToolbar;
+
+
+    private View mHeaderView;
+    private View mToolbarView;
+    private int mBaseTranslationY;
+    private ViewPager mPager;
+    private CustomFragmentStatePagerAdapter mPagerAdapter;
 
 
     @Override
@@ -48,15 +76,19 @@ public class MainActivity extends AppCompatActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
+        this.initToolbar();
+        this.pushToolbarToActionbar();
+        this.restoreActionBar();
+        this.setToolbarTitle(Constant.TITLE_LEAD);
+        this.initHeader();
+        this.initPagerAdapter();
+        this.initViewPager();
+        this.initSlidingTabLayout();
+
         //Other initialization
-        //this.initFacebook();
 
 
-        // fragment manager
-        this.initFragmentManager();
 
-        // Display login first
-        //this.displayFragmentLogin();
     }
 
     @Override
@@ -98,12 +130,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void restoreActionBar() {
-        //ActionBar actionBar = getSupportActionBar();
-        //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        //actionBar.setDisplayShowTitleEnabled(true);
-        //actionBar.setTitle(mTitle);
-    }
+
 
 
     @Override
@@ -113,7 +140,7 @@ public class MainActivity extends AppCompatActivity
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.main, menu);
-            restoreActionBar();
+            this.restoreActionBar();
             return true;
         }
         return super.onCreateOptionsMenu(menu);
@@ -134,94 +161,247 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    public void restoreActionBar() {
+        //ActionBar actionBar = getSupportActionBar();
+        //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        //actionBar.setDisplayShowTitleEnabled(true);
+        //actionBar.setTitle(mTitle);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
 
 
+        /*
+        final Drawable upArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        upArrow.setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
+        getSupportActionBar().setHomeAsUpIndicator(upArrow);
+        */
 
-/*
-    public void initFacebook(){
-        FacebookSdk.sdkInitialize(getApplicationContext());
     }
-*/
 
-    public void initFragmentManager(){
 
-        this.fragmentManager = getSupportFragmentManager();
-        this.fragmentManager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+    public void initToolbar(){
+        //this.mToolbar = (Toolbar) findViewById(R.id.custom_toolbar);
+        this.mToolbarView = findViewById(R.id.custom_toolbar);
+    }
+
+    public void pushToolbarToActionbar(){
+        setSupportActionBar((Toolbar) this.mToolbarView);
+    }
+
+    public void initHeader(){
+        this.mHeaderView = findViewById(R.id.header);
+        ViewCompat.setElevation(mHeaderView, getResources().getDimension(R.dimen.toolbar_elevation));
+    }
+
+    public void initPagerAdapter(){
+        mPagerAdapter = new CustomFragmentStatePagerAdapter(getSupportFragmentManager());
+    }
+
+    public void initViewPager(){
+        this.mPager = (ViewPager) findViewById(R.id.pager);
+        this.mPager.setAdapter(this.mPagerAdapter);
+    }
+
+    public void initSlidingTabLayout(){
+        SlidingTabLayout slidingTabLayout = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
+        slidingTabLayout.setCustomTabView(R.layout.tab_indicator, R.id.tabtext); //android.R.id.text1
+        slidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.accent));
+        slidingTabLayout.setDistributeEvenly(true);
+        slidingTabLayout.setViewPager(this.mPager);
+
+        // When the page is selected, other fragments' scrollY should be adjusted
+        // according to the toolbar status(shown/hidden)
+        slidingTabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onBackStackChanged() {
-                if (fragmentManager.getBackStackEntryCount() > 0) {
-                    //mNavigationDrawerToggle.setDrawerIndicatorEnabled(false);
-                } else {
-                    //mNavigationDrawerToggle.setDrawerIndicatorEnabled(true);
-                    //mNavigationDrawerToggle.setToolbarNavigationClickListener(mNavigationDrawerFragment.getOriginalToolbarNavigationClickListener());
-                }
+            public void onPageScrolled(int i, float v, int i2) {
+            }
+
+            @Override
+            public void onPageSelected(int i) {
+                propagateToolbarState(toolbarIsShown());
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
             }
         });
+
+        propagateToolbarState(toolbarIsShown());
+
     }
 
-    /*
-    public void displayFragmentLogin(){
-        String fragName = Constant.FRAGMENT_LOGIN_NAME;
-        this.mFragmentLogin = FragmentLogin.newInstance("", "");
-        this.replaceFragment(this.mFragmentLogin, fragName);
-    }
-    */
 
-    public void replaceFragment(Fragment newFrag, String name){
-        if(newFrag != null){
-            this.fragmentTransaction = fragmentManager.beginTransaction();
-            this.fragmentTransaction
-                    .replace(R.id.container, newFrag, name)
-                    .commitAllowingStateLoss();
+    @Override
+    public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging) {
+        if (dragging) {
+            int toolbarHeight = mToolbarView.getHeight();
+            float currentHeaderTranslationY = ViewHelper.getTranslationY(mHeaderView);
+            if (firstScroll) {
+                if (-toolbarHeight < currentHeaderTranslationY) {
+                    mBaseTranslationY = scrollY;
+                }
+            }
+            float headerTranslationY = ScrollUtils.getFloat(-(scrollY - mBaseTranslationY), -toolbarHeight, 0);
+            ViewPropertyAnimator.animate(mHeaderView).cancel();
+            ViewHelper.setTranslationY(mHeaderView, headerTranslationY);
         }
     }
 
-    public void addFragment(Fragment newFrag, String name){
-        if(newFrag != null){
-            if(fragmentManager == null){
-                this.initFragmentManager();
+    @Override
+    public void onDownMotionEvent() {
+    }
+
+    @Override
+    public void onUpOrCancelMotionEvent(ScrollState scrollState) {
+        mBaseTranslationY = 0;
+
+        Fragment fragment = getCurrentFragment();
+        if (fragment == null) {
+            return;
+        }
+        View view = fragment.getView();
+        if (view == null) {
+            return;
+        }
+
+        // ObservableXxxViews have same API
+        // but currently they don't have any common interfaces.
+        adjustToolbar(scrollState, view);
+    }
+
+    public void setToolbarTitle(String title){
+        //this.mToolbar.setTitle(title);
+        getSupportActionBar().setTitle(title);
+    }
+
+
+
+    private void adjustToolbar(ScrollState scrollState, View view) {
+        int toolbarHeight = mToolbarView.getHeight();
+        final Scrollable scrollView = (Scrollable) view.findViewById(R.id.scroll);
+        if (scrollView == null) {
+            return;
+        }
+        int scrollY = scrollView.getCurrentScrollY();
+        if (scrollState == ScrollState.DOWN) {
+            showToolbar();
+        } else if (scrollState == ScrollState.UP) {
+            if (toolbarHeight <= scrollY) {
+                hideToolbar();
+            } else {
+                showToolbar();
+            }
+        } else {
+            // Even if onScrollChanged occurs without scrollY changing, toolbar should be adjusted
+            if (toolbarIsShown() || toolbarIsHidden()) {
+                // Toolbar is completely moved, so just keep its state
+                // and propagate it to other pages
+                propagateToolbarState(toolbarIsShown());
+            } else {
+                // Toolbar is moving but doesn't know which to move:
+                // you can change this to hideToolbar()
+                showToolbar();
+            }
+        }
+    }
+
+    private Fragment getCurrentFragment() {
+        return mPagerAdapter.getItemAt(mPager.getCurrentItem());
+    }
+
+    private void propagateToolbarState(boolean isShown) {
+        int toolbarHeight = mToolbarView.getHeight();
+
+        // Set scrollY for the fragments that are not created yet
+        mPagerAdapter.setScrollY(isShown ? 0 : toolbarHeight);
+
+        // Set scrollY for the active fragments
+        for (int i = 0; i < mPagerAdapter.getCount(); i++) {
+            // Skip current item
+            if (i == mPager.getCurrentItem()) {
+                continue;
             }
 
-            this.fragmentTransaction = fragmentManager.beginTransaction();
-
-            // remove the fragment from manager first if found
-            Fragment searchFrag = fragmentManager.findFragmentByTag(name);
-            if(searchFrag != null){
-                this.removeFragment(searchFrag);
+            // Skip destroyed or not created item
+            Fragment f = mPagerAdapter.getItemAt(i);
+            if (f == null) {
+                continue;
             }
 
-            // add new fragment
-            this.fragmentTransaction
-                    .add(R.id.container, newFrag, name)
-                    .addToBackStack(name)
-                    .commit();
-
+            View view = f.getView();
+            if (view == null) {
+                continue;
+            }
+            propagateToolbarState(isShown, view, toolbarHeight);
         }
     }
 
-    public void removeFragment(Fragment frag){
-        if(frag != null){
-            this.fragmentTransaction
-                    .remove(frag);
+    private void propagateToolbarState(boolean isShown, View view, int toolbarHeight) {
+
+        Scrollable scrollView = (Scrollable) view.findViewById(R.id.scroll);
+        if (scrollView == null) {
+            return;
         }
-    }
-
-
-    public void removeFragmentFromBackStack(){
-        this.fragmentManager.popBackStack();
-        this.fragmentManager.executePendingTransactions();
-    }
-
-    public boolean hasReachedFirstPage(){
-        if(this.fragmentManager.getBackStackEntryCount() == 0){
-            return true;
-        }else{
-            return false;
+        if (isShown) {
+            // Scroll up
+            if (0 < scrollView.getCurrentScrollY()) {
+                scrollView.scrollVerticallyTo(0);
+            }
+        } else {
+            // Scroll down (to hide padding)
+            if (scrollView.getCurrentScrollY() < toolbarHeight) {
+                scrollView.scrollVerticallyTo(toolbarHeight);
+            }
         }
+
+        // check out the scroll from here
+        // https://github.com/ksoichiro/Android-ObservableScrollView/blob/master/samples/res/layout/fragment_scrollview_noheader.xml
+
+    }
+
+    private boolean toolbarIsShown() {
+        return ViewHelper.getTranslationY(mHeaderView) == 0;
+    }
+
+    private boolean toolbarIsHidden() {
+        return ViewHelper.getTranslationY(mHeaderView) == -mToolbarView.getHeight();
+    }
+
+    private void showToolbar() {
+        System.out.println("showToolbar");
+        float headerTranslationY = ViewHelper.getTranslationY(mHeaderView);
+        if (headerTranslationY != 0) {
+            ViewPropertyAnimator.animate(mHeaderView).cancel();
+            ViewPropertyAnimator.animate(mHeaderView).translationY(0).setDuration(200).start();
+        }
+        propagateToolbarState(true);
+    }
+
+    private void hideToolbar() {
+        System.out.println("hideToolbar");
+        float headerTranslationY = ViewHelper.getTranslationY(mHeaderView);
+        int toolbarHeight = mToolbarView.getHeight();
+        if (headerTranslationY != -toolbarHeight) {
+            ViewPropertyAnimator.animate(mHeaderView).cancel();
+            ViewPropertyAnimator.animate(mHeaderView).translationY(-toolbarHeight).setDuration(200).start();
+        }
+        propagateToolbarState(false);
     }
 
 
 
+
+    @Override
+    public void onFragmentMainUserJournalListInteraction(Uri uri) {
+
+    }
+
+    @Override
+    public void onFragmentDetailInteraction(Uri uri) {
+
+    }
 
     /**
      * A placeholder fragment containing a simple view.
@@ -257,5 +437,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     */
+
 
 }

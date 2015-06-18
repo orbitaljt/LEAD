@@ -8,6 +8,9 @@ public class Constant {
     // Fragment names to add back stack
     public static final String FRAGMENT_LOGIN_NAME = "FragmentLogin";
 
+    // Title
+    public static final String TITLE_LEAD = "Lead";
+
 
     // URLs
     public static final String URL_CLIENT_SERVER = "http://52.74.189.72/lead/client/client.php";
