@@ -29,8 +29,8 @@ public class User {
     private int _age;
 
     public User(String fID, String ID, String ppID, String jID, String eID, String fName, String mName, String lName,
-                String birth, String addr, String city, String state, String country, String countryCode, String username,
-                String pw, String email, String createdDate, String createdTime, String lastLoginDate, String lastLoginTime, int age){
+                String birth, String addr, String city, String state, String country, String countryCode, String email,
+                String createdDate, String createdTime, String lastLoginDate, String lastLoginTime, int age){
 
         this._facebookID = fID;
         this._userID = ID;
@@ -46,8 +46,6 @@ public class User {
         this._state = state;
         this._country = country;
         this._countryCode = countryCode;
-        this._username = username;
-        this._password = pw;
         this._email = email;
         this._createdDate = createdDate;
         this._createdTime = createdTime;

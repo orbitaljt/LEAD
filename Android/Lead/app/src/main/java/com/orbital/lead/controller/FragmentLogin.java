@@ -34,6 +34,7 @@ import com.orbital.lead.R;
 import com.orbital.lead.logic.Asynchronous.AsyncLogin;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.Logic;
+import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.InternetVariableClass;
 import com.orbital.lead.model.Message;
 
@@ -75,15 +76,16 @@ public class FragmentLogin extends Fragment {
     private AccessTokenTracker accessTokenTracker;
     private Profile pendingUpdateForUser;
 
-    private boolean hasLogin;
-
     private OnFragmentInteractionListener mListener;
 
     private CustomLogging mLogging;
-    private final String TAG_FRAGMENT_LOGIN = this.getClass().getSimpleName();
-
     private Logic mLogic;
     private Parser mParser;
+
+    private final String TAG_FRAGMENT_LOGIN = this.getClass().getSimpleName();
+    private boolean hasLogin;
+    private boolean isFacebookLogin;
+    private String leadUserID;
 
 
     /**
@@ -229,6 +231,7 @@ public class FragmentLogin extends Fragment {
                 mLogging.debug(TAG_FRAGMENT_LOGIN, "getEditTextUsername() -> " + getEditTextUsername());
                 mLogging.debug(TAG_FRAGMENT_LOGIN, "getEditTextPassword() -> " + getEditTextPassword());
                 //mLogic.login(getLoginActivity(), getEditTextUsername(), getEditTextPassword());
+                setIsNotFacebookLogin();
                 runLogin(getEditTextUsername(), getEditTextPassword());
             }
         });
@@ -266,11 +269,13 @@ public class FragmentLogin extends Fragment {
             @Override
             public void onCancel() {
                 mLogging.debug(TAG_FRAGMENT_LOGIN, "registerCallback onCancel");
+                setIsNotFacebookLogin();
             }
 
             @Override
             public void onError(FacebookException exception) {
                 mLogging.debug(TAG_FRAGMENT_LOGIN, "registerCallback onError -> " + exception.getMessage().toString());
+                setIsNotFacebookLogin();
             }
         });
 
@@ -325,11 +330,17 @@ public class FragmentLogin extends Fragment {
     }
 
 
-    public void displayMainActivity(){
+    public void displayMainActivity(String facebookID, String leadUserID){
         Intent newIntent = new Intent(getLoginActivity(), MainActivity.class);
-        //Bundle mBundle = new Bundle();
-        //mBundle.putString(key, value);
-        //newIntent.putExtras(mBundle);
+        Bundle mBundle = new Bundle();
+
+        mBundle.putBoolean(Constant.BUNDLE_PARAM_IS_FACEBOOK_LOGIN, this.isFacebookLogin()); // true or false
+        mBundle.putString(Constant.BUNDLE_PARAM_LEAD_USER_ID, leadUserID); // "" or value
+        mBundle.putString(Constant.BUNDLE_PARAM_FACEBOOK_USER_ID, facebookID); // "" or value
+        mBundle.putString(Constant.BUNDLE_PARAM_USERNAME, getEditTextUsername());
+        mBundle.putString(Constant.BUNDLE_PARAM_PASSWORD, getEditTextPassword());
+
+        newIntent.putExtras(mBundle);
         getLoginActivity().startActivity(newIntent);
     }
 
@@ -358,15 +369,16 @@ public class FragmentLogin extends Fragment {
             getLoginActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
-                    //System.out.println("result => " + result);
                     Message msg = mParser.parseJsonToMessage(result);
 
                     mLogging.debug(TAG_FRAGMENT_LOGIN, "msg.getMessage() => " + msg.getMessage());
 
                     if (mParser.isMessageSuccess(msg)){ // success login
+                        setLeadUserID(mParser.parseUserIDFromJson(result));
+                        mLogging.debug(TAG_FRAGMENT_LOGIN, "current login user ID => " + getLeadUserID());
                         // open main activity
-                        displayMainActivity();
+                        // pass in current lead user ID
+                        displayMainActivity("", getLeadUserID());
                     }
                 }
 
@@ -462,8 +474,11 @@ public class FragmentLogin extends Fragment {
                             JSONObject object,
                             GraphResponse response) {
                         mLogging.debug(TAG_FRAGMENT_LOGIN, "response -> " + response.toString());
+                        //set that user is login using facebook
+                        setIsFacebookLogin();
 
                     }
+
                 });
 
         Bundle parameters = new Bundle();
@@ -489,6 +504,10 @@ public class FragmentLogin extends Fragment {
         }
     }
 
+    private boolean isFacebookLogin() {
+        return this.isFacebookLogin;
+    }
+
     private boolean hasLogin(){
         return this.hasLogin;
     }
@@ -499,6 +518,22 @@ public class FragmentLogin extends Fragment {
 
     private void setHasLogout(){
         this.hasLogin = false;
+    }
+
+    private void setIsFacebookLogin(){
+        this.isFacebookLogin = true;
+    }
+
+    private void setIsNotFacebookLogin(){
+        this.isFacebookLogin = false;
+    }
+
+    private String getLeadUserID(){
+        return this.leadUserID;
+    }
+
+    private void setLeadUserID(String id){
+        this.leadUserID = id;
     }
 
 }

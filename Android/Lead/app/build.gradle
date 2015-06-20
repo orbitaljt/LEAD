@@ -33,4 +33,9 @@ dependencies {
     compile 'com.google.android.gms:play-services:7.3.0'
     compile 'com.github.ksoichiro:android-observablescrollview:1.5.2'
     compile 'com.nineoldandroids:library:2.4.0'
+    compile 'com.github.siyamed:android-shape-imageview:0.9.+@aar'
+    compile 'com.amazonaws:aws-android-sdk-core:2.2.1'
+    compile 'com.amazonaws:aws-android-sdk-cognito:2.2.1'
+    compile 'com.amazonaws:aws-android-sdk-s3:2.2.1'
+    compile 'com.amazonaws:aws-android-sdk-ddb:2.2.1'
 }

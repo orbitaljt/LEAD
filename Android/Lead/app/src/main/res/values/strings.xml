@@ -20,6 +20,9 @@
     <string name="facebook_app_id">1594135340854170</string>
     <string name="title_activity_login">LoginActivity</string>
 
+    <string name="aws_s3_id">AKIAI5L2JSIGMPXEJI2A</string>
+    <string name="aws_s3_secret_key">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</string>
+
     <string name="hello_world">Hello world!</string>
 
     <string name="test_string">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.

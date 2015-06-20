@@ -16,6 +16,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created by joseph on 4/5/2015.
@@ -23,6 +26,43 @@ import java.net.URL;
 public class WebConnector {
 
     public WebConnector(){}
+
+    public static InputStream downloadUrl(String urlString, String type, HashMap<String, String> mapParam) throws IOException {
+        URL url = new URL(urlString);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setReadTimeout(10000);
+        conn.setConnectTimeout(15000);
+        conn.setRequestMethod("POST");
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+
+        Uri.Builder builder = new Uri.Builder()
+                .appendQueryParameter(Constant.URL_POST_PARAMETER_TAG_QUERY_TYPE, type);
+
+        HashMap<String, String> mp = new HashMap<String, String>(mapParam);
+        Iterator it = mp.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+
+            builder.appendQueryParameter(pair.getKey().toString(), pair.getValue().toString());
+        }
+
+        String query = builder.build().getEncodedQuery();
+        OutputStream os = conn.getOutputStream();
+        BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(os, "UTF-8"));
+        writer.write(query);
+        writer.flush();
+        writer.close();
+        os.close();
+
+        conn.connect();
+
+        // get the response stream
+        InputStream stream = conn.getInputStream();
+        return stream;
+
+    }
 
     public static InputStream downloadUrl(String urlString, String type, String username, String password) throws IOException {
         URL url = new URL(urlString);
@@ -61,6 +101,10 @@ public class WebConnector {
         return stream;
 
     }
+
+
+
+
 
     public static String convertStreamToString(InputStream is)
             throws IOException {

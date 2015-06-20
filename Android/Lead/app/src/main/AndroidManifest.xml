@@ -46,6 +46,11 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
 
+
+        <!-- Declaring Service -->
+        <service
+            android:name=".controller.Service.S3Service" />
+
     </application>
 
 </manifest>

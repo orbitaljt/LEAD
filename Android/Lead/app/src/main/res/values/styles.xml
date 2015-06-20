@@ -94,5 +94,22 @@
         <item name="android:paddingBottom">0dp</item>
     </style>
 
+    <style name="DrawerHeaderStyle">
+        <item name="android:layout_marginLeft">@dimen/drawer_item_margin_left</item>
+        <item name="android:layout_marginRight">@dimen/drawer_item_margin_right</item>
+        <item name="android:layout_marginBottom">@dimen/drawer_item_margin_bottom</item>
+    </style>
+
+    <style name="DrawerListStyle">
+        <item name="android:layout_marginLeft">@dimen/drawer_item_margin_left</item>
+        <item name="android:layout_marginRight">@dimen/drawer_item_margin_right</item>
+        <item name="android:layout_marginTop">@dimen/drawer_item_margin_top</item>
+    </style>
+
+    <style name="DrawerHeaderUserImageStyle">
+        <item name="android:width">@dimen/drawer_user_image_width</item>
+        <item name="android:height">@dimen/drawer_user_image_height</item>
+        <item name="android:layout_marginTop">@dimen/drawer_user_image_margin_top</item>
+    </style>
 
 </resources>

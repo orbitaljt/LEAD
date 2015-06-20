@@ -9,6 +9,7 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 /**
  * Created by joseph on 14/6/2015.
@@ -41,8 +42,13 @@ public class AsyncLogin extends AsyncTask<String, Void, String> {
 
     private String login(String username, String password) throws IOException{
         String url = Constant.URL_CLIENT_SERVER;
-        this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_LOGIN, username, password);
-        return  WebConnector.convertStreamToString(this.urlStream);
+
+        HashMap<String, String> loginParams = new HashMap<String, String>();
+        loginParams.put(Constant.URL_POST_PARAMETER_TAG_USERNAME, username);
+        loginParams.put(Constant.URL_POST_PARAMETER_TAG_PASSWORD, password);
+
+        this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_LOGIN, loginParams);
+        return WebConnector.convertStreamToString(this.urlStream);
     }
 
 

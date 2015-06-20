@@ -19,10 +19,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.github.siyamed.shapeimageview.CircularImageView;
 import com.orbital.lead.R;
+import com.squareup.picasso.Picasso;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -53,8 +57,12 @@ public class NavigationDrawerFragment extends Fragment {
     private android.support.v7.app.ActionBarDrawerToggle mDrawerToggle;
 
     private DrawerLayout mDrawerLayout;
-    private ListView mDrawerListView;
+    //private ListView mDrawerListView;
     private View mFragmentContainerView;
+    private RelativeLayout mDrawerImageHeader;
+    private CircularImageView mDrawerUserProfileImage;
+
+
 
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
@@ -91,6 +99,12 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        View rootView = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
+
+        this.initImageHeader(rootView);
+        this.initImageUserProfile(rootView);
+        /*
         mDrawerListView = (ListView) inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -100,7 +114,7 @@ public class NavigationDrawerFragment extends Fragment {
             }
         });
 
-        /*
+
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
                 getActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_1,
@@ -113,7 +127,7 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         */
 
-        return mDrawerListView;
+        return rootView;
     }
 
     public boolean isDrawerOpen() {
@@ -195,9 +209,11 @@ public class NavigationDrawerFragment extends Fragment {
 
     private void selectItem(int position) {
         mCurrentSelectedPosition = position;
+        /*
         if (mDrawerListView != null) {
             mDrawerListView.setItemChecked(position, true);
         }
+        */
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mFragmentContainerView);
         }
@@ -259,6 +275,30 @@ public class NavigationDrawerFragment extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public MainActivity getMainActivity(){
+        if(getActivity() instanceof MainActivity){
+            return (MainActivity) getActivity();
+        }else{
+            return null;
+        }
+    }
+
+    private void initImageHeader(View v){
+        this.mDrawerImageHeader = (RelativeLayout) v.findViewById(R.id.drawer_image_header);
+        //this.mDrawerImageHeader.setImageResource(R.drawable.singapore_carpark_2);
+    }
+
+    private void initImageUserProfile(View v){
+        this.mDrawerUserProfileImage = (CircularImageView) v.findViewById(R.id.drawer_user_profile_image);
+        String url = "https://www.tripwell.com/assets/static/images/unknown_user.png";
+        Picasso.with(getMainActivity()).load(url).into(this.mDrawerUserProfileImage);
+        //.error(R.drawable.ic_image_not_available)
+    }
+
+
+
+
 
     /**
      * Per the navigation drawer design guidelines, updates the action bar to show the global app

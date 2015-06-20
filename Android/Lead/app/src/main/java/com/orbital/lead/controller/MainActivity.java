@@ -1,8 +1,10 @@
 package com.orbital.lead.controller;
 
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
@@ -24,20 +26,27 @@ import com.github.ksoichiro.android.observablescrollview.ScrollState;
 import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
 import com.github.ksoichiro.android.observablescrollview.Scrollable;
 import com.orbital.lead.R;
+import com.orbital.lead.controller.Service.S3Receiver;
+import com.orbital.lead.controller.Service.S3Service;
 import com.orbital.lead.controller.iosched.SlidingTabLayout;
+import com.orbital.lead.logic.CustomLogging;
+import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.Constant;
 
 
 import com.nineoldandroids.view.ViewHelper;
 import com.nineoldandroids.view.ViewPropertyAnimator;
+import com.orbital.lead.model.User;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
 FragmentMainUserJournalList.OnFragmentInteractionListener,
 FragmentDetail.OnFragmentInteractionListener,
+        S3Receiver.Receiver,
         ObservableScrollViewCallbacks {
 
+    private final String TAG_MAIN_ACTIVITY = this.getClass().getSimpleName();
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -51,15 +60,21 @@ FragmentDetail.OnFragmentInteractionListener,
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
 
-
-    //private Toolbar mToolbar;
-
-
     private View mHeaderView;
     private View mToolbarView;
     private int mBaseTranslationY;
     private ViewPager mPager;
     private CustomFragmentStatePagerAdapter mPagerAdapter;
+
+    private CustomLogging mLogging;
+    private Logic mLogic;
+    private User mCurrentUser;
+    private S3Receiver mReceiver;
+
+
+    private String currentLoginUsername;
+    private String currentLoginPassword;
+
 
 
     @Override
@@ -76,6 +91,10 @@ FragmentDetail.OnFragmentInteractionListener,
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
+        this.initLogging();
+        this.initLogic();
+        this.initS3Service();
+
         this.initToolbar();
         this.pushToolbarToActionbar();
         this.restoreActionBar();
@@ -85,7 +104,26 @@ FragmentDetail.OnFragmentInteractionListener,
         this.initViewPager();
         this.initSlidingTabLayout();
 
-        //Other initialization
+
+        Bundle getBundleExtra = getIntent().getExtras();
+
+        if(getBundleExtra != null){
+            String bundleLeadUserID = getBundleExtra.getString(Constant.BUNDLE_PARAM_LEAD_USER_ID, "");
+            String bundleFacebookUserID = getBundleExtra.getString(Constant.BUNDLE_PARAM_FACEBOOK_USER_ID, "");
+            String bundleUsername = getBundleExtra.getString(Constant.BUNDLE_PARAM_USERNAME, "");
+            String bundlePassword = getBundleExtra.getString(Constant.BUNDLE_PARAM_PASSWORD, "");
+            boolean bundleIsFacebookLogin = getBundleExtra.getBoolean(Constant.BUNDLE_PARAM_IS_FACEBOOK_LOGIN, false);
+
+            this.currentLoginUsername = bundleUsername;
+            this.currentLoginPassword = bundlePassword;
+
+            if(bundleLeadUserID != ""){
+                this.getUserProfile(bundleLeadUserID);
+            }
+        }else{
+            mLogging.debug(TAG_MAIN_ACTIVITY, "No bundle extra from getIntent()");
+        }
+
 
 
 
@@ -161,6 +199,14 @@ FragmentDetail.OnFragmentInteractionListener,
         return super.onOptionsItemSelected(item);
     }
 
+    private void initLogging(){
+        this.mLogging = CustomLogging.getInstance();
+    }
+
+    public void initLogic(){
+        this.mLogic = Logic.getInstance();
+    }
+
     public void restoreActionBar() {
         //ActionBar actionBar = getSupportActionBar();
         //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -179,7 +225,6 @@ FragmentDetail.OnFragmentInteractionListener,
         */
 
     }
-
 
     public void initToolbar(){
         //this.mToolbar = (Toolbar) findViewById(R.id.custom_toolbar);
@@ -276,6 +321,27 @@ FragmentDetail.OnFragmentInteractionListener,
         getSupportActionBar().setTitle(title);
     }
 
+    public void initS3Service(){
+         /* Starting Download Service */
+        this.initS3Receiver();
+        Intent intent = new Intent(Intent.ACTION_SYNC, null, this, S3Service.class);
+
+        /* Send optional extras to Download IntentService */
+        //intent.putExtra("url", url);
+        intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, this.getS3Receiver());
+        //intent.putExtra("requestId", 101);
+
+        startService(intent);
+    }
+
+    public void initS3Receiver(){
+        mReceiver = new S3Receiver(new Handler());
+        mReceiver.setReceiver(this);
+    }
+
+    public S3Receiver getS3Receiver(){
+        return this.mReceiver;
+    }
 
 
     private void adjustToolbar(ScrollState scrollState, View view) {
@@ -390,6 +456,48 @@ FragmentDetail.OnFragmentInteractionListener,
         propagateToolbarState(false);
     }
 
+    /*===================== User profile ================================*/
+    public User getCurrentUser(){
+        return this.mCurrentUser;
+    }
+
+    public void setCurrentUser(User user){
+        mLogging.debug(TAG_MAIN_ACTIVITY, "setCurrentUser");
+        this.mCurrentUser = user;
+        this.mCurrentUser.setUsername(this.currentLoginUsername);
+        this.mCurrentUser.setPassword(this.currentLoginPassword);
+
+    }
+
+    public void getUserProfile(String userID){
+        this.mLogic.getUserProfile(this, userID);
+    }
+
+
+    /**
+     * Get result from S3Receiver
+     * **/
+    @Override
+    public void onReceiveResult(int resultCode, Bundle resultData) {
+        switch (resultCode) {
+            case S3Service.STATUS_RUNNING:
+                this.mLogging.debug(TAG_MAIN_ACTIVITY, "S3Service.STATUS_RUNNING");
+                // here can call progressbar
+
+                break;
+
+            case S3Service.STATUS_FINISHED:
+                this.mLogging.debug(TAG_MAIN_ACTIVITY, "S3Service.STATUS_FINISHED");
+                String result = resultData.getString("result");
+                this.mLogging.debug(TAG_MAIN_ACTIVITY, "Return value from S3Service -> " + result);
+                break;
+
+            case S3Service.STATUS_ERROR:
+                this.mLogging.debug(TAG_MAIN_ACTIVITY, "S3Service.STATUS_ERROR");
+                break;
+
+        }
+    }
 
 
 
