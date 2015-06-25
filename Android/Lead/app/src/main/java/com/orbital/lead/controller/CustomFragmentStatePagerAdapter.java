@@ -5,6 +5,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 
 import com.github.ksoichiro.android.observablescrollview.CacheFragmentStatePagerAdapter;
+import com.orbital.lead.controller.Fragment.FragmentDetail;
+import com.orbital.lead.controller.Fragment.FragmentMainUserJournalList;
 
 /**
  * Created by joseph on 17/6/2015.
@@ -14,9 +16,11 @@ public class CustomFragmentStatePagerAdapter extends CacheFragmentStatePagerAdap
     private static final String[] TITLES = new String[]{"Journal", "Test"};
 
     private int mScrollY;
+    private FragmentMainUserJournalList mFragmentMainUserJournalList;
 
     public CustomFragmentStatePagerAdapter(FragmentManager fm) {
         super(fm);
+        this.initFragmentMainUserJournalList();
     }
 
     public void setScrollY(int scrollY) {
@@ -31,10 +35,16 @@ public class CustomFragmentStatePagerAdapter extends CacheFragmentStatePagerAdap
 
         switch (position){
             case 0:
-                f = FragmentMainUserJournalList.newInstance("","");
+                if (0 <= mScrollY) {
+                    Bundle args = new Bundle();
+                    args.putInt(FragmentMainUserJournalList.ARG_INITIAL_POSITION, 1);
+                    f = this.getFragmentMainUserJournalList();
+                    f.setArguments(args);
+                }
+
                 break;
             case 1:
-                f = FragmentDetail.newInstance("","");
+                f = FragmentDetail.newInstance("", "");
                 break;
         }
 
@@ -80,5 +90,16 @@ public class CustomFragmentStatePagerAdapter extends CacheFragmentStatePagerAdap
     public CharSequence getPageTitle(int position) {
         return TITLES[position];
     }
+
+    public FragmentMainUserJournalList getFragmentMainUserJournalList(){
+        return this.mFragmentMainUserJournalList;
+    }
+
+
+    private void initFragmentMainUserJournalList(){
+        this.mFragmentMainUserJournalList = FragmentMainUserJournalList.newInstance("","");
+    }
+
+
 
 }

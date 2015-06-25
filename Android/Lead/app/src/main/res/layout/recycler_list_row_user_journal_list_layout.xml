@@ -9,16 +9,92 @@
     card_view:cardCornerRadius="2dp"
     card_view:cardUseCompatPadding="true"
     card_view:cardElevation="4dp"
-    card_view:contentPaddingTop="16dp"
-    card_view:contentPaddingLeft="8dp"
-    card_view:contentPaddingRight="8dp"
-    card_view:contentPaddingBottom="8dp"
     style="@style/CardViewStyle">
 
-    <TextView
-        android:id="@+id/text_view_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ViewAnimator
+            android:id="@+id/animator"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateFirstView="false" >
+
+            <com.joooonho.SelectableRoundedImageView
+                xmlns:joooonho="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/cardview_top_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:adjustViewBounds="true"
+                joooonho:sriv_left_top_corner_radius="2dp"
+                joooonho:sriv_right_top_corner_radius="2dp"
+                joooonho:sriv_left_bottom_corner_radius="0dp"
+                joooonho:sriv_right_bottom_corner_radius="0dp"
+                joooonho:sriv_border_width="0dp"
+                joooonho:sriv_border_color="#000000"
+                joooonho:sriv_oval="false" />
+
+            <!--
+            <ProgressBar
+                android:id="@+id/loading_spinner"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:indeterminate="true"
+                style="?android:attr/progressBarStyle"/>
+            -->
+
+            <include layout="@layout/progress_bar_layout" />
+
+            <com.joooonho.SelectableRoundedImageView
+                xmlns:joooonho="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/cardview_failed_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:adjustViewBounds="true"
+                android:src="@drawable/image_blank_picture"
+                joooonho:sriv_left_top_corner_radius="2dp"
+                joooonho:sriv_right_top_corner_radius="2dp"
+                joooonho:sriv_left_bottom_corner_radius="0dp"
+                joooonho:sriv_right_bottom_corner_radius="0dp"
+                joooonho:sriv_border_width="0dp"
+                joooonho:sriv_border_color="#000000"
+                joooonho:sriv_oval="false" />
+
+
+        </ViewAnimator>
+
+<!-- scaleType -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/animator"
+            android:orientation="vertical"
+            style="@style/CardViewContentStyle">
+
+            <TextView
+                android:id="@+id/text_view_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/CardViewTitleStyle"/>
+
+            <TextView
+                android:id="@+id/text_view_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/CardViewSubTitleStyle"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
 
 </android.support.v7.widget.CardView>
 

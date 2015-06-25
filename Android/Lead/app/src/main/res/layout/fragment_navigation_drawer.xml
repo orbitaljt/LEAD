@@ -11,16 +11,50 @@
     <RelativeLayout
         android:id="@+id/drawer_image_header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/navigation_drawer_header_height"
-        style="@style/DrawerHeaderStyle">
+        android:layout_height="@dimen/navigation_drawer_header_height" >
 
-        <com.github.siyamed.shapeimageview.CircularImageView
-            android:id="@+id/drawer_user_profile_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
-            style="@style/DrawerHeaderUserImageStyle"/>
+            style="@style/DrawerHeaderStyle">
+
+            <LinearLayout
+                android:id="@+id/user_profile_image_bind_layout"
+                android:layout_width="@dimen/drawer_user_image_width"
+                android:layout_height="@dimen/drawer_user_image_height"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                style="@style/DrawerHeaderUserImageStyle">
+
+                <com.github.siyamed.shapeimageview.CircularImageView
+                    android:id="@+id/drawer_user_profile_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/text_drawer_user_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/user_profile_image_bind_layout"
+                android:layout_below="@+id/user_profile_image_bind_layout"
+                style="@style/DrawerHeaderUserNameStyle"/>
+
+            <TextView
+                android:id="@+id/text_drawer_user_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/text_drawer_user_name"
+                android:layout_below="@+id/text_drawer_user_name"
+                style="@style/DrawerHeaderUserEmailStyle"/>
+
+
+
+        </RelativeLayout>
+
 
     </RelativeLayout>
 

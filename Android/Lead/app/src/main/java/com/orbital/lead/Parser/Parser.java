@@ -1,8 +1,13 @@
 package com.orbital.lead.Parser;
 
+import android.graphics.Bitmap;
+
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.EnumMessageType;
+import com.orbital.lead.model.EnumPictureType;
+import com.orbital.lead.model.Journal;
+import com.orbital.lead.model.JournalList;
 import com.orbital.lead.model.Message;
 import com.orbital.lead.model.User;
 
@@ -16,7 +21,7 @@ import org.json.JSONObject;
 public class Parser {
     private static Parser mParser = new Parser();
 
-    private final String TAG_PARSER = this.getClass().getSimpleName();
+    private final String TAG = this.getClass().getSimpleName();
     private CustomLogging mLogging;
 
     private Parser(){}
@@ -28,7 +33,7 @@ public class Parser {
 
     public Message parseJsonToMessage(String json){
         try{
-            mLogging.debug(TAG_PARSER, "parseJsonToMessage");
+            mLogging.debug(TAG, "parseJsonToMessage");
             JSONObject obj = new JSONObject(json);
             String code = obj.getString(Constant.MESSAGE_JSON_CODE_TAG);
             String msg = obj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
@@ -37,7 +42,7 @@ public class Parser {
             return mMsg;
 
         }catch (JSONException e){
-            mLogging.debug(TAG_PARSER, "error => " + e.getMessage());
+            mLogging.debug(TAG, "error => " + e.getMessage());
             e.printStackTrace();
             return null;
         }
@@ -45,13 +50,13 @@ public class Parser {
 
     public String parseUserIDFromJson(String json){
         try{
-            mLogging.debug(TAG_PARSER, "parseUserIDFromJson");
+            mLogging.debug(TAG, "parseUserIDFromJson");
             JSONObject obj = new JSONObject(json);
             String id = obj.getString(Constant.MESSAGE_JSON_USER_ID_TAG);
 
             return id;
         }catch (JSONException e){
-            mLogging.debug(TAG_PARSER, "error => " + e.getMessage());
+            mLogging.debug(TAG, "error => " + e.getMessage());
             e.printStackTrace();
             return "";
         }
@@ -60,7 +65,7 @@ public class Parser {
     public User parseJsonToUser(String json){
         User mUser = null;
         try{
-            mLogging.debug(TAG_PARSER, "parseJsonToUser");
+            mLogging.debug(TAG, "parseJsonToUser");
             JSONObject topObj = new JSONObject(json);
             String code = topObj.getString(Constant.MESSAGE_JSON_CODE_TAG);
             String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
@@ -70,6 +75,7 @@ public class Parser {
             mUser = new User(detailObj.getString(Constant.MESSAGE_JSON_FACEBOK_ID_TAG),
                     detailObj.getString(Constant.MESSAGE_JSON_LEAD_USER_ID_TAG),
                     detailObj.getString(Constant.MESSAGE_JSON_PICTURE_PROFILE_ID_TAG),
+                    detailObj.getString(Constant.MESSAGE_JSON_PICTURE_PROFILE_TYPE_TAG),
                     detailObj.getString(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG),
                     detailObj.getString(Constant.MESSAGE_JSON_EXPERIENCE_LIST_TAG),
                     detailObj.getString(Constant.MESSAGE_JSON_FIRST_NAME_TAG),
@@ -90,13 +96,84 @@ public class Parser {
 
             return mUser;
         }catch (JSONException e){
-            mLogging.debug(TAG_PARSER, "error => " + e.getMessage());
+            mLogging.debug(TAG, "error => " + e.getMessage());
             e.printStackTrace();
             return null;
         }
 
-
     }
+
+    public String parseJsonToProfilePictureLink(String json){
+
+        try{
+            mLogging.debug(TAG, "parseJsonToProfilePictureLink");
+            JSONObject topObj = new JSONObject(json);
+            //String code = topObj.getString(Constant.MESSAGE_JSON_CODE_TAG);
+            //String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
+            String link = topObj.getString(Constant.MESSAGE_JSON_DETAIL_TAG);
+
+            return link;
+        }catch (JSONException e){
+            mLogging.debug(TAG, "error => " + e.getMessage());
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public JournalList parseJsonToJournalList(String json){
+        JournalList list = null;
+        try {
+            mLogging.debug(TAG, "parseJsonToJournalList");
+            JSONObject topObj = new JSONObject(json);
+            String code = topObj.getString(Constant.MESSAGE_JSON_CODE_TAG);
+            String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
+
+            Message mMessage = new Message(code, msg);
+            if(isMessageSuccess(mMessage)){
+                list = new JournalList();
+
+                JSONArray detailArray = topObj.getJSONArray(Constant.MESSAGE_JSON_DETAIL_TAG);
+
+                for(int i=0; i < detailArray.length(); i++) {
+                    JSONObject journalObj = detailArray.getJSONObject(i);
+
+                    Journal mJournal = new Journal(journalObj.getString(Constant.MESSAGE_JSON_JOURNAL_ID_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_PICTURE_COVER_ID_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_PICTURE_COVER_TYPE_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_PICTURE_ALBUM_ID_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_TITLE_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_CONTENT_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_JOURNAL_DATE_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_JOURNAL_TIME_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_DATE_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_TIME_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_CREATED_DATE_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_IS_PUBLISHED_TAG));
+
+                    list.addJournal(mJournal);
+
+                }
+            }
+
+            return list;
+
+        } catch (JSONException e){
+            mLogging.debug(TAG, "error => " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public String createPictureCoverUrl(String pictureCoverID, String pictureCoverType, String userID){
+        return Constant.URL_SMALL_PICTURE
+                .replace(Constant.URL_DUMMY_USER_ID, userID)
+                .replace(Constant.URL_DUMMY_FILE_NAME,
+                        this.generateFilename(pictureCoverID, pictureCoverType));
+    }
+
 
     public boolean isMessageSuccess(Message msg){
         if(msg.getType() == EnumMessageType.SUCCESS){
@@ -106,7 +183,6 @@ public class Parser {
         }
     }
 
-
     public boolean isStringEmpty(String val){
         if(val.trim().equals("") || val.trim().isEmpty()){
             return true;
@@ -115,8 +191,48 @@ public class Parser {
         }
     }
 
+    public boolean isBitmapEmpty(Bitmap bmp){
+        if(bmp == null){
+            return true;
+        }
+        return false;
+    }
+
+    public EnumPictureType getType(String value){
+        if(value.toLowerCase().trim().equals("png")){
+            return EnumPictureType.PNG;
+        }else if(value.toLowerCase().trim().equals("jpeg")){
+            return EnumPictureType.JPEG;
+        }else if(value.toLowerCase().trim().equals("jpg")){
+            return EnumPictureType.JPEG;
+        }else{
+            return EnumPictureType.NONE;
+        }
+    }
+
+    public String generateFilename(String name, String ext){
+        return name + "." + ext;
+    }
+
+
+
+
     public int convertStringToInteger(String val){
         return Integer.parseInt(val);
+    }
+
+    public boolean convertStringToBoolean(String val){
+        if(val.equals("false") || val.equals("0") ){
+            return false;
+        }else if (val.equals("true") || val.equals("1")){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public String convertBooleanToString(boolean val){
+        return String.valueOf(val);
     }
 
     private void initLogging(){

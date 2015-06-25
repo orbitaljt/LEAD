@@ -23,6 +23,7 @@ public class AsyncUserProfile extends AsyncTask<String, Void, String> {
         // params[0] - type
         // values = 300 / 301 / 302 (see constant)
         // params[1] - user ID
+        // params[2] - picture query quantity (only for type 900)
         this.initParser();
 
         try{
@@ -40,7 +41,6 @@ public class AsyncUserProfile extends AsyncTask<String, Void, String> {
                             return response;
 
                         case Constant.TYPE_UPDATE_USER_PROFILE:
-
 
                         case Constant.TYPE_CREATE_USER_PROFILE:
 
@@ -74,6 +74,8 @@ public class AsyncUserProfile extends AsyncTask<String, Void, String> {
         this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_GET_USER_PROFILE, params);
         return WebConnector.convertStreamToString(this.urlStream);
     }
+
+
 
     private String updateUserProfile(String userID) throws IOException{
        return "";

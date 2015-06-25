@@ -1,0 +1,89 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.orbital.lead.controller.Activity.SpecificJournalActivity">
+
+    <include layout="@layout/toolbar_specific_journal_layout" />
+
+    <ViewAnimator
+        android:id="@+id/animator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateFirstView="false" >
+
+        <com.orbital.lead.widget.WideImageView
+            android:id="@+id/image_journal_cover"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/black"
+            android:scaleType="fitCenter"/>
+
+        <include layout="@layout/progress_bar_layout" />
+
+        <com.orbital.lead.widget.WideImageView
+            android:id="@+id/image_fail_cover"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/black"
+            android:src="@drawable/image_blank_picture" />
+
+    </ViewAnimator>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin">
+
+        <!-- Date and time -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/text_day_digit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:text="01"
+                    style="@style/SpecificJournalPage_Date_Day_Digit_Style"/>
+
+                <TextView
+                    android:id="@+id/text_day_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/text_day_digit"
+                    android:layout_toRightOf="@+id/text_day_digit"
+                    android:text="Wednesday"
+                    style="@style/SpecificJournalPage_Date_Day_Name_Style"/>
+
+                <TextView
+                    android:id="@+id/text_month_year"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@+id/text_day_digit"
+                    android:layout_alignLeft="@+id/text_day_name"
+                    android:layout_below="@+id/text_day_name"
+                    android:text="December 2015"
+                    style="@style/SpecificJournalPage_Date_Month_Year_Style"/>
+
+
+
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+</LinearLayout>

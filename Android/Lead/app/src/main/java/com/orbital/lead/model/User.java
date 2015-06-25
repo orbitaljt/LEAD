@@ -1,13 +1,17 @@
 package com.orbital.lead.model;
 
+import com.orbital.lead.Parser.Parser;
+
 /**
  * Created by joseph on 14/6/2015.
  */
 public class User {
-
+    private Parser mParser;
     private String _facebookID;
     private String _userID;
     private String _profilePicID;
+    private String _profilePicUrl;
+    private EnumPictureType _profilePicType;
     private String _journalListID;
     private String _experienceListID;
     private String _firstName;
@@ -28,9 +32,12 @@ public class User {
     private String _lastLoginTime;
     private int _age;
 
-    public User(String fID, String ID, String ppID, String jID, String eID, String fName, String mName, String lName,
+    private JournalList mJournalList;
+
+    public User(String fID, String ID, String ppID, String ppType, String jID, String eID, String fName, String mName, String lName,
                 String birth, String addr, String city, String state, String country, String countryCode, String email,
                 String createdDate, String createdTime, String lastLoginDate, String lastLoginTime, int age){
+        this.initParser();
 
         this._facebookID = fID;
         this._userID = ID;
@@ -52,6 +59,8 @@ public class User {
         this._lastLoginDate = lastLoginDate;
         this._lastLoginTime = lastLoginTime;
         this._age = age;
+        this._profilePicType = getParser().getType(ppType);
+
     }
 
     // Get
@@ -65,6 +74,14 @@ public class User {
 
     public String getProfilePictureID(){
         return this._profilePicID;
+    }
+
+    public String getProfilePicUrl() {
+        return this._profilePicUrl;
+    }
+
+    public EnumPictureType getProfilePictureType(){
+        return  this._profilePicType;
     }
 
     public String getJournalListID(){
@@ -158,6 +175,10 @@ public class User {
         return this._age;
     }
 
+    public JournalList getJournalList(){
+        return this.mJournalList;
+    }
+
     // Set
     public void setFacebookID(String val){
         this._facebookID = val;
@@ -167,8 +188,16 @@ public class User {
         this._userID = val;
     }
 
-    public void setProfilePicID(String val){
+    public void setProfilePictureID(String val){
         this._profilePicID = val;
+    }
+
+    public void setProfilePicUrl(String val){
+        this._profilePicUrl = val;
+    }
+
+    public void setProfilePictureType(EnumPictureType val){
+        this._profilePicType = val;
     }
 
     public void setJournalListID(String val){
@@ -258,5 +287,30 @@ public class User {
         this._age = val;
     }
 
+    public void setJournalList(JournalList list){
+        this.mJournalList = list;
+    }
 
+    private void initParser(){
+        this.mParser = Parser.getInstance();
+    }
+
+    private Parser getParser(){
+        return this.mParser;
+    }
+
+    /*
+    private EnumPictureType findType(String type){
+        if(type.toLowerCase().trim().equals("png")){
+            return EnumPictureType.PNG;
+        }else if(type.toLowerCase().trim().equals("jpeg")){
+            return EnumPictureType.JPEG;
+        }else if(type.toLowerCase().trim().equals("jpg")){
+            return EnumPictureType.JPEG;
+        }else{
+            return EnumPictureType.NONE;
+        }
+
+    }
+    */
 }

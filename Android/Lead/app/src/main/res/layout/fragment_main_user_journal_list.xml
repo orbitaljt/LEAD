@@ -10,10 +10,31 @@
 </android.support.v7.widget.RecyclerView>
 -->
 
-<com.github.ksoichiro.android.observablescrollview.ObservableRecyclerView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scroll"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:scrollbars="vertical" />
+    android:layout_height="match_parent" >
 
+    <com.github.ksoichiro.android.observablescrollview.ObservableRecyclerView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        style="@style/RecyclerViewJournalListStyle"/>
+
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/fragment_journal_list_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        android:src="@mipmap/ic_fab_add"
+        fab:fab_colorNormal="@color/accent"
+        fab:fab_colorPressed="@color/accent_dark"
+        fab:fab_colorRipple="#FF80AB"
+        fab:fab_showAnimation="@anim/show_from_bottom"
+        fab:fab_hideAnimation="@anim/hide_to_bottom"/>
+
+</FrameLayout>
