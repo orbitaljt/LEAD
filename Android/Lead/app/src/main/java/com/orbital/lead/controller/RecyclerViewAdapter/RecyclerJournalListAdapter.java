@@ -1,6 +1,7 @@
 package com.orbital.lead.controller.RecyclerViewAdapter;
 
 import android.content.Context;
+import android.media.Image;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,8 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 
@@ -58,23 +61,20 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
 
     public class ListContentHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private CardView mCardParent;
+        private TableRow mTableRowContent;
         private TextView mTextTitle;
         private TextView mTextSubTitle;
-        private SelectableRoundedImageView mCardTopImage;
-        private SelectableRoundedImageView mCardFailedImage;
+        private ImageView mImagePicture;
         private ProgressBar mLoadingSpinner;
         private ViewAnimator mAnimator;
-        private String journalImageUrl = "";
 
 
         public ListContentHolder(View v){
             super(v);
-            this.initCardViewParent(v);
+            this.initTableRowContent(v);
             this.mTextTitle = (TextView) v.findViewById(R.id.text_view_title);
             this.mTextSubTitle = (TextView) v.findViewById(R.id.text_view_subtitle);
             this.initTopImageView(v);
-            this.mCardFailedImage = (SelectableRoundedImageView) v.findViewById(R.id.cardview_failed_image);
             this.mLoadingSpinner = (ProgressBar) v.findViewById(R.id.loading_spinner);
             this.initViewAnimator(v);
         }
@@ -89,13 +89,13 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
 
         public void setCardTopImage(Context context, String url){
             this.mAnimator.setDisplayedChild(1);
-            this.journalImageUrl = url;
             //.error(R.drawable.image_blank_picture)
             //.transform(new RoundedTransformation(10, 0))
             Picasso.with(context)
                     .load(url)
+                    .error(R.drawable.image_blank_picture_16_to_9)
                     .noFade()
-                    .into(this.mCardTopImage, new Callback() {
+                    .into(this.mImagePicture, new Callback() {
                         @Override
                         public void onSuccess() {
                             mLogging.debug(TAG, "Picasso onSuccess");
@@ -110,17 +110,16 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
                     });
         }
 
-        public CardView getCardViewParent(){
-            return this.mCardParent;
+        public TableRow getTableRowContent() {
+            return this.mTableRowContent;
         }
 
-        public String getJournalImageUrl(){
-            return this.journalImageUrl;
+        private ImageView getImagePicture() {
+            return this.mImagePicture;
         }
-
-        private SelectableRoundedImageView getTopImageView(){
-            return this.mCardTopImage;
-        }
+       // private SelectableRoundedImageView getTopImageView(){
+       //     return this.mCardTopImage;
+       // }
 
         @Override
         public void onClick(View v) {
@@ -129,32 +128,12 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
             }
         }
 
-
-        private void initCardViewParent(View v){
-            this.mCardParent = (CardView) v.findViewById(R.id.card_view_journal);
-            this.mCardParent.setPreventCornerOverlap(false);
-
+        private void initTableRowContent(View v){
+            this.mTableRowContent = (TableRow) v.findViewById(R.id.tableRow_content);
         }
 
         private void initTopImageView(View v){
-            this.mCardTopImage = (SelectableRoundedImageView) v.findViewById(R.id.cardview_top_image);
-
-            /*
-            this.mCardTopImage.addOnLayoutChangeListener(new View.OnLayoutChangeListener(){
-                @Override
-                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                    mLogging.debug(TAG, "right => " + right);
-                    mLogging.debug(TAG, "left => " + left);
-                    mLogging.debug(TAG, "top => " + top);
-                    mLogging.debug(TAG, "bottom => " + bottom);
-
-                    int width = right - left;
-                    int height = bottom - top;
-
-                    //resizeTopImageView(width, height);
-                }
-            });
-            */
+            this.mImagePicture = (ImageView) v.findViewById(R.id.image_picture);
         }
 
         private void initViewAnimator(View v){
@@ -174,7 +153,7 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
             mLogging.debug(TAG, "set imageview new width height => " + newWidth + ", " + newHeight);
 
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(newWidth, newHeight);
-            mCardTopImage.setLayoutParams(layoutParams);
+            //mCardTopImage.setLayoutParams(layoutParams);
 
         }
 
@@ -223,7 +202,8 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
                 ((ListContentHolder) holder).setCardTopImage(getMainActivity(), pictureUrl);
                 ((ListContentHolder) holder).setCardTextTitle(title);
                 ((ListContentHolder) holder).setCardTextSubTitle(journalDate + " at " + journalTime);
-                ((ListContentHolder) holder).getCardViewParent().setOnClickListener(new View.OnClickListener() {
+
+                ((ListContentHolder) holder).getTableRowContent().setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         mLogging.debug(TAG, "mCardParent clicked");
@@ -231,7 +211,7 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
                     }
                 });
 
-                ((ListContentHolder) holder).getTopImageView().setOnClickListener(new View.OnClickListener() {
+                ((ListContentHolder) holder).getImagePicture().setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         mLogging.debug(TAG, "mCardTopImage clicked");

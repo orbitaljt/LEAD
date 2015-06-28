@@ -1,29 +1,46 @@
 package com.orbital.lead.logic;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.Image;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ViewAnimator;
 
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.SnackbarManager;
 import com.nispok.snackbar.listeners.ActionClickListener;
 import com.orbital.lead.Parser.Parser;
+import com.orbital.lead.R;
+import com.orbital.lead.controller.Activity.PictureActivity;
 import com.orbital.lead.controller.Activity.SpecificJournalActivity;
+import com.orbital.lead.controller.Fragment.FragmentAlbum;
 import com.orbital.lead.controller.Fragment.FragmentLogin;
 import com.orbital.lead.controller.Activity.MainActivity;
 import com.orbital.lead.controller.Service.JournalService;
+import com.orbital.lead.controller.Service.PictureService;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfilePicture;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfile;
 import com.orbital.lead.logic.LocalStorage.LocalStorage;
+import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.EnumJournalServiceType;
+import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.JournalList;
+import com.orbital.lead.model.Picture;
 import com.orbital.lead.model.User;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 
 /**
  * Created by joseph on 14/6/2015.
@@ -120,13 +137,12 @@ public class Logic {
         }
     }
 
-    public void getUserSpecificJournal(Context context, String journalID){
-        if(this.getParser().isStringEmpty(journalID)){
-            // profile picture not exist for the user
-            this.getLogging().debug(TAG, "getUserSpecificJournal => Journal ID is empty.");
+    public void getUserSpecificAlbum(Context context, String albumID){
+        if(this.getParser().isStringEmpty(albumID)){
+            this.getLogging().debug(TAG, "getUserSpecificAlbum => Album ID is empty.");
         }else{
-            mLogging.debug(TAG, "getUserSpecificJournal => Get specific journal from web service");
-            this.executeJournalService(context, EnumJournalServiceType.GET_SPECIFIC_JOURNAL, null, journalID);
+            mLogging.debug(TAG, "getUserSpecificAlbum => Get specific album from web service with album ID => " + albumID);
+            this.executePictureService(context, EnumPictureServiceType.GET_ALBUM_PHOTO, albumID);
         }
     }
 
@@ -145,6 +161,40 @@ public class Logic {
         newIntent.putExtras(mBundle);
         context.startActivity(newIntent);
     }
+
+    public void displayPictureActivity(Context context, String type, Album album, ArrayList<Picture> picList){
+        mLogging.debug(TAG, "displayPictureActivity");
+        Intent newIntent = new Intent(context, PictureActivity.class);
+
+        Bundle mBundle = new Bundle();
+        mBundle.putString(Constant.BUNDLE_PARAM_OPEN_FRAGMENT_TYPE, type);
+        mBundle.putParcelable(Constant.BUNDLE_PARAM_ALBUM, album);
+        mBundle.putParcelableArrayList(Constant.BUNDLE_PARAM_PICTURE_LIST, picList);
+
+        newIntent.putExtras(mBundle);
+        context.startActivity(newIntent);
+    }
+
+
+    /*============= Display Dialogs =================*/
+    public void showDialogPicture(Context mContext, String pictureUrl){
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        if(mContext instanceof PictureActivity){ //may come from FragmentAlbum
+            LayoutInflater inflater = ((PictureActivity) mContext).getLayoutInflater();
+
+            final View dialogView = inflater.inflate(R.layout.dialog_picture, null);
+
+            ImageView imagePopup = (ImageView) dialogView.findViewById(R.id.image_popup);
+            ViewAnimator animator = (ViewAnimator) dialogView.findViewById(R.id.animator);
+            this.showPicture(mContext, animator, imagePopup, pictureUrl);
+
+            builder.setView(dialogView);
+            builder.create().setCanceledOnTouchOutside(true);
+            builder.create().show();
+        }
+
+    }
+
 
 
 
@@ -203,6 +253,28 @@ public class Logic {
     private void initLocalStorageLogic(){
         this.mStorageLogic = LocalStorage.getInstance();
     }
+
+    private void showPicture(Context context, final ViewAnimator animator, ImageView targetView, String url){
+        animator.setDisplayedChild(1);
+
+        Picasso.with(context)
+                .load(url)
+                .noFade()
+                .into(targetView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        //mLogging.debug(TAG, "Picasso onSuccess with URL => " + url);
+                        animator.setDisplayedChild(0); // show actual image
+                    }
+
+                    @Override
+                    public void onError() {
+                        //mLogging.debug(TAG, "Picasso onError with URL => " + url);
+                        animator.setDisplayedChild(2); // failed to load
+                    }
+                });
+    }
+
 
     private class HttpAsyncUserProfile extends AsyncUserProfile {
 
@@ -324,6 +396,23 @@ public class Logic {
         }else if(mContext instanceof SpecificJournalActivity){
             intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((SpecificJournalActivity) mContext).getJournalReceiver());
 
+        }
+
+        mContext.startService(intent);
+    }
+
+    private void executePictureService(Context mContext, EnumPictureServiceType serviceType, String albumID) {
+        Intent intent = new Intent(Intent.ACTION_SYNC, null, mContext, PictureService.class);
+        switch(serviceType){
+            case GET_ALBUM_PHOTO:
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG, albumID); // user ID
+                break;
+        }
+
+        intent.putExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG, serviceType);
+
+        if(mContext instanceof SpecificJournalActivity){
+            intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((SpecificJournalActivity) mContext).getJournalReceiver());
         }
 
         mContext.startService(intent);

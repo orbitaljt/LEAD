@@ -13,88 +13,105 @@
     style="@style/CardViewStyle">
 -->
 
-<RelativeLayout
+<TableLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="96dp"
+    android:stretchColumns="0"
+    android:shrinkColumns="0">
 
-    <ViewAnimator
-        android:id="@+id/animator"
+    <TableRow
+        android:id="@+id/tableRow_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:animateFirstView="false" >
+        android:layout_height="match_parent" >
 
-        <com.joooonho.SelectableRoundedImageView
-            xmlns:joooonho="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/cardview_top_image"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:adjustViewBounds="true"
-            joooonho:sriv_left_top_corner_radius="2dp"
-            joooonho:sriv_right_top_corner_radius="2dp"
-            joooonho:sriv_left_bottom_corner_radius="0dp"
-            joooonho:sriv_right_bottom_corner_radius="0dp"
-            joooonho:sriv_border_width="0dp"
-            joooonho:sriv_border_color="#000000"
-            joooonho:sriv_oval="false" />
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp">
 
-        <!--
-        <ProgressBar
-            android:id="@+id/loading_spinner"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:indeterminate="true"
-            style="?android:attr/progressBarStyle"/>
-        -->
+            <TextView
+                android:id="@+id/text_view_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                style="@style/RecyclerViewJournalListTitleStyle"/>
 
-        <include layout="@layout/progress_bar_layout" />
+            <TextView
+                android:id="@+id/text_view_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
 
-        <com.joooonho.SelectableRoundedImageView
-            xmlns:joooonho="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/cardview_failed_image"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:adjustViewBounds="true"
-            android:src="@drawable/image_blank_picture"
-            joooonho:sriv_left_top_corner_radius="2dp"
-            joooonho:sriv_right_top_corner_radius="2dp"
-            joooonho:sriv_left_bottom_corner_radius="0dp"
-            joooonho:sriv_right_bottom_corner_radius="0dp"
-            joooonho:sriv_border_width="0dp"
-            joooonho:sriv_border_color="#000000"
-            joooonho:sriv_oval="false" />
+                style="@style/RecyclerViewJournalListSubTitleStyle"/>
+
+        </RelativeLayout>
+
+        <ViewAnimator
+            android:id="@+id/animator"
+            android:layout_width="128dp"
+            android:layout_height="96dp"
+            android:animateFirstView="false" >
+
+            <!--
+            <com.joooonho.SelectableRoundedImageView
+                xmlns:joooonho="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/cardview_top_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                joooonho:sriv_left_top_corner_radius="2dp"
+                joooonho:sriv_right_top_corner_radius="2dp"
+                joooonho:sriv_left_bottom_corner_radius="0dp"
+                joooonho:sriv_right_bottom_corner_radius="0dp"
+                joooonho:sriv_border_width="0dp"
+                joooonho:sriv_border_color="#000000"
+                joooonho:sriv_oval="false" />
+            -->
+            <ImageView
+                android:id="@+id/image_picture"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="false"
+                android:scaleType="centerCrop"/>
+
+            <include layout="@layout/progress_bar_layout" />
+
+            <ImageView
+                android:id="@+id/image_failed"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="false"
+                android:scaleType="centerCrop"
+                android:src="@drawable/image_blank_picture_16_to_9"/>
+            <!--
+            <com.joooonho.SelectableRoundedImageView
+                xmlns:joooonho="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/cardview_failed_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:adjustViewBounds="true"
+                android:src="@drawable/image_blank_picture"
+                joooonho:sriv_left_top_corner_radius="2dp"
+                joooonho:sriv_right_top_corner_radius="2dp"
+                joooonho:sriv_left_bottom_corner_radius="0dp"
+                joooonho:sriv_right_bottom_corner_radius="0dp"
+                joooonho:sriv_border_width="0dp"
+                joooonho:sriv_border_color="#000000"
+                joooonho:sriv_oval="false" />
+            -->
+
+        </ViewAnimator>
 
 
-    </ViewAnimator>
-
-<!-- scaleType -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/animator"
-        android:orientation="vertical"
-        style="@style/CardViewContentStyle">
-
-        <TextView
-            android:id="@+id/text_view_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/CardViewTitleStyle"/>
-
-        <TextView
-            android:id="@+id/text_view_subtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/CardViewSubTitleStyle"/>
-
-    </LinearLayout>
-
-</RelativeLayout>
+    </TableRow>
+</TableLayout>
 
 
 <!--

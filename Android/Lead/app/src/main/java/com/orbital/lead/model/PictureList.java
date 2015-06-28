@@ -29,6 +29,13 @@ public class PictureList {
         return this._arrayPictures;
     }
 
+    public int size() {
+        if(this._arrayPictures == null){
+            return 0;
+        }
+        return this._arrayPictures.size();
+    }
+
     private void initArray(){
         this._arrayPictures = new ArrayList<Picture>();
     }

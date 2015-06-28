@@ -48,6 +48,7 @@ public class WebConnector {
         }
 
         String query = builder.build().getEncodedQuery();
+        //System.out.println("Webconnector query => " + query);
         OutputStream os = conn.getOutputStream();
         BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(os, "UTF-8"));

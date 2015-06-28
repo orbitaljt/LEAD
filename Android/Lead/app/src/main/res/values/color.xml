@@ -21,8 +21,11 @@
     <item name="purple" type="color">#512DA8</item>
     <item name="grey" type="color">#555555</item>
 
+    <color name="dialog_grey" type="color">#424242</color>
     <item name="retry_grey" type="color">#757575</item>
     <item name="transparent" type="color">#00000000</item>
+
+    <item name="transparent_grey" type="color">#66000000</item>
     <!-- -->
 
 

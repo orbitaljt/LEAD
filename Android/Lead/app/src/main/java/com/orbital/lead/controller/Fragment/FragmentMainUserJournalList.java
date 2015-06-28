@@ -16,6 +16,7 @@ import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCal
 import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.Activity.MainActivity;
+import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerDividerItemDecoration;
 import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerJournalListAdapter;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.Logic;
@@ -193,6 +194,7 @@ public class FragmentMainUserJournalList extends Fragment{
         this.mRecyclerView = (ObservableRecyclerView) v.findViewById(R.id.scroll);
         this.mRecyclerView.setLayoutManager(layoutManager);
         this.mRecyclerView.setHasFixedSize(false);
+        this.mRecyclerView.addItemDecoration(new RecyclerDividerItemDecoration(getMainActivity(), RecyclerDividerItemDecoration.VERTICAL_LIST));
         this.mRecyclerView.setAdapter(this.getListAdapter());
 
         if(getMainActivity() instanceof ObservableScrollViewCallbacks){

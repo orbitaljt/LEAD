@@ -9,7 +9,7 @@
         <item name="android:textColorSecondary">@color/secondary_text</item>
     </style>
 
-    <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+    <style name="ToolbarTheme" parent="Base.ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:windowNoTitle">true</item>
         <item name="displayOptions">useLogo</item>
         <item name="colorPrimary">@color/primary</item>
@@ -18,12 +18,10 @@
         <item name="android:textColorPrimary">@color/toolbar_primary_text</item>
         <item name="actionMenuTextColor">@color/white</item>
         <item name="drawerArrowStyle">@style/MyDrawerArrowToggle</item>
-        <item name="colorControlNormal">@color/white</item>
     </style>
 
-    <style name="MyDrawerArrowToggle" parent="Widget.AppCompat.DrawerArrowToggle">
-        <item name="spinBars">true</item>
-        <item name="color">@color/white</item>
+    <style name="MyDrawerArrowToggle" parent="Base.Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">@android:color/white</item>
     </style>
 
     <!-- Flat Button style -->
@@ -153,12 +151,29 @@
         <item name="android:paddingLeft">8dp</item>
         <item name="android:paddingRight">8dp</item>
         <item name="android:paddingBottom">8dp</item>
-        <!--
-        <item name="android:layout_marginLeft">8dp</item>
-        <item name="android:layout_marginRight">8dp</item>
-        <item name="android:layout_marginBottom">8dp</item>
-        -->
     </style>
+
+    <style name="RecyclerViewJournalListTitleStyle">
+        <item name="android:textSize">@dimen/text_card_view_title</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="RecyclerViewJournalListSubTitleStyle">
+        <item name="android:textSize">@dimen/text_secondary</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/secondary_text</item>
+    </style>
+
+    <style name="SpecificJournalPage_Photo_Count_Style">
+        <item name="android:textSize">@dimen/text_primary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:gravity">right|center_vertical</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:background">@color/transparent_grey</item>
+    </style>
+
 
     <style name="SpecificJournalPage_Date_Day_Digit_Style">
         <item name="android:textColor">@color/secondary_text</item>
@@ -179,6 +194,39 @@
         <item name="android:textStyle">normal</item>
         <item name="android:textAllCaps">true</item>
     </style>
+
+    <style name="SpecificJournalPage_Time_Style">
+        <item name="android:textColor">@color/secondary_text</item>
+        <item name="android:textSize">30dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="SpecificJournalPage_Title_Style">
+        <item name="android:textColor">@color/primary_dark</item>
+        <item name="android:textSize">@dimen/text_primary</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="SpecificJournalPage_Content_Style">
+        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:textSize">@dimen/text_secondary</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="SpecificJournalPage_Content_Tag_Project_Style">
+        <item name="android:textColor">@color/secondary_text</item>
+        <item name="android:textSize">@dimen/text_secondary</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="dialogPictureTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+    </style>
+
+
 
 
 </resources>

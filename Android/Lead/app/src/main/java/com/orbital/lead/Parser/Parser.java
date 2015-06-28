@@ -3,12 +3,15 @@ package com.orbital.lead.Parser;
 import android.graphics.Bitmap;
 
 import com.orbital.lead.logic.CustomLogging;
+import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.EnumMessageType;
 import com.orbital.lead.model.EnumPictureType;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.JournalList;
 import com.orbital.lead.model.Message;
+import com.orbital.lead.model.Picture;
+import com.orbital.lead.model.PictureList;
 import com.orbital.lead.model.User;
 
 import org.json.JSONArray;
@@ -167,11 +170,73 @@ public class Parser {
         }
     }
 
+    public Album parseJsonToAlbum(String json){
+        Album mAlbum = null;
+        PictureList pList = null;
+
+        try {
+            mLogging.debug(TAG, "parseJsonToJournalList");
+            JSONObject topObj = new JSONObject(json);
+            String code = topObj.getString(Constant.MESSAGE_JSON_CODE_TAG);
+            String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
+
+            Message mMessage = new Message(code, msg);
+            if(isMessageSuccess(mMessage)){
+
+                JSONObject detailObj = topObj.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
+                JSONArray listOfPictureArray = detailObj.getJSONArray(Constant.MESSAGE_JSON_LIST_OF_PICTURES_TAG);
+
+                pList = new PictureList();
+
+                for(int i=0; i < listOfPictureArray.length(); i++) {
+                    JSONObject picObj = listOfPictureArray.getJSONObject(i);
+
+                    Picture picElement = new Picture(picObj.getString(Constant.MESSAGE_JSON_USER_ID_TAG),
+                                        picObj.getString(Constant.MESSAGE_JSON_PICTURE_ID_TAG),
+                                        picObj.getString(Constant.MESSAGE_JSON_PICTURE_TYPE_TAG));
+                    picElement.setTitle(picObj.getString(Constant.MESSAGE_JSON_TITLE_TAG));
+                    picElement.setDescription(picObj.getString(Constant.MESSAGE_JSON_DESCRIPTION_TAG));
+                    picElement.setHashTag(picObj.getString(Constant.MESSAGE_JSON_HASH_TAG_TAG));
+                    picElement.setCreatedDate(picObj.getString(Constant.MESSAGE_JSON_CREATED_DATE_TAG));
+                    picElement.setCreatedTime(picObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG));
+
+                    pList.addPicture(picElement);
+                }
+
+                mAlbum = new Album(detailObj.getString(Constant.MESSAGE_JSON_USER_ID_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_PICTURE_ALBUM_ID_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_TITLE_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_DESCRIPTION_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_HASH_TAG_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_CREATED_DATE_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_DATE_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_TIME_TAG),
+                        pList);
+
+            }//end if
+
+            return mAlbum;
+
+        } catch (JSONException e){
+            mLogging.debug(TAG, "error => " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+
     public String createPictureCoverUrl(String pictureCoverID, String pictureCoverType, String userID){
-        return Constant.URL_SMALL_PICTURE
-                .replace(Constant.URL_DUMMY_USER_ID, userID)
-                .replace(Constant.URL_DUMMY_FILE_NAME,
-                        this.generateFilename(pictureCoverID, pictureCoverType));
+        return getSmallPictureUrl(pictureCoverID, pictureCoverType, userID);
+    }
+
+    public String createPictureThumbnailUrl(String pictureCoverID, String pictureCoverType, String userID){
+        return getSmallPictureUrl(pictureCoverID, pictureCoverType, userID);
+    }
+
+    public String createPictureNormalUrl(String pictureCoverID, String pictureCoverType, String userID) {
+        return getNormalPictureUrl(pictureCoverID, pictureCoverType, userID);
     }
 
 
@@ -221,6 +286,10 @@ public class Parser {
         return Integer.parseInt(val);
     }
 
+    public String convertIntegerToString(int val){
+        return String.valueOf(val);
+    }
+
     public boolean convertStringToBoolean(String val){
         if(val.equals("false") || val.equals("0") ){
             return false;
@@ -237,6 +306,20 @@ public class Parser {
 
     private void initLogging(){
         this.mLogging = CustomLogging.getInstance();
+    }
+
+    private String getSmallPictureUrl(String pictureID, String pictureCoverType, String userID){
+        return Constant.URL_SMALL_PICTURE
+                .replace(Constant.URL_DUMMY_USER_ID, userID)
+                .replace(Constant.URL_DUMMY_FILE_NAME,
+                        this.generateFilename(pictureID, pictureCoverType));
+    }
+
+    private String getNormalPictureUrl(String pictureID, String pictureCoverType, String userID) {
+        return Constant.URL_NORMAL_PICTURE
+                .replace(Constant.URL_DUMMY_USER_ID, userID)
+                .replace(Constant.URL_DUMMY_FILE_NAME,
+                        this.generateFilename(pictureID, pictureCoverType));
     }
 
 }

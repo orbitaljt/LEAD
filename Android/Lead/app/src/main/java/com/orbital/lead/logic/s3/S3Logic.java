@@ -60,9 +60,9 @@ public class S3Logic {
     }
 
     private  void initCredential(){
-        String getID = this.getContext().getResources().getString(R.string.aws_s3_id);
-        String getSecretKey = this.getContext().getResources().getString(R.string.aws_s3_secret_key);
-        this.mCredential = new BasicAWSCredentials(getID, getSecretKey);
+        //String getID = this.getContext().getResources().getString(R.string.aws_s3_id);
+        //String getSecretKey = this.getContext().getResources().getString(R.string.aws_s3_secret_key);
+        //this.mCredential = new BasicAWSCredentials(getID, getSecretKey);
     }
 
     private AWSCredentials getCredential(){

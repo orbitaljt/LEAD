@@ -29,6 +29,10 @@ public class Constant {
     public static final int DRAWER_LIST_SETTING_ICON = R.mipmap.ic_setting;
 
 
+    // Fragment name
+    public static final String FRAGMENT_ALBUM = "FragmentAlbum";
+
+
     // URLs
     public static final String URL_CLIENT_SERVER = "http://52.74.189.72/lead/client/client.php";
     public static final String URL_NORMAL_PICTURE = "https://s3-ap-southeast-1.amazonaws.com/leadimage/[user_id]/picture/[file_name]";
@@ -41,6 +45,7 @@ public class Constant {
     public static final String URL_POST_PARAMETER_TAG_USERNAME = "u";
     public static final String URL_POST_PARAMETER_TAG_PASSWORD = "pw";
     public static final String URL_POST_PARAMETER_TAG_USER_ID = "uid";
+    public static final String URL_POST_PARAMETER_TAG_USER_ALUBM_ID = "aid";
     public static final String URL_POST_PARAMETER_TAG_PICTURE_QUERY_QUANTITY = "pic_qq";
     public static final String URL_POST_PARAMETER_TAG_USER_JOURNAL_LIST_ID = "jlid";
     public static final String URL_POST_PARAMETER_TAG_USER_JOURNAL_ID = "jid";
@@ -54,6 +59,7 @@ public class Constant {
     public static final String TYPE_GET_USER_ALL_JOURNAL = "400";
     public static final String TYPE_GET_USER_SPECIFIC_JOURNAL = "401";
     public static final String TYPE_GET_USER_PICTURE = "900";
+    public static final String TYPE_GET_USER_SPECIFIC_ALBUM = "901";
 
     public static final String PICTURE_QUERY_QUANTITY_PROFILE = "profile";
     public static final String PICTURE_QUERY_QUANTITY_ALBUM = "album";
@@ -86,16 +92,23 @@ public class Constant {
     public static final String MESSAGE_JSON_LAST_LOGIN_DATE_TAG = "lastLoginDate";
     public static final String MESSAGE_JSON_LAST_LOGIN_TIME_TAG = "lastLoginTime";
     public static final String MESSAGE_JSON_JOURNAL_ID_TAG = "journalID";
+    public static final String MESSAGE_JSON_PICTURE_ID_TAG = "pictureID";
     public static final String MESSAGE_JSON_PICTURE_COVER_ID_TAG = "pictureCoverID";
     public static final String MESSAGE_JSON_PICTURE_COVER_TYPE_TAG = "pictureCoverType";
+    public static final String MESSAGE_JSON_PICTURE_TYPE_TAG = "pictureType";
     public static final String MESSAGE_JSON_PICTURE_ALBUM_ID_TAG = "pictureAlbumID";
     public static final String MESSAGE_JSON_TITLE_TAG = "title";
     public static final String MESSAGE_JSON_CONTENT_TAG = "content";
+    public static final String MESSAGE_JSON_DESCRIPTION_TAG = "description";
     public static final String MESSAGE_JSON_JOURNAL_DATE_TAG = "journalDate";
     public static final String MESSAGE_JSON_JOURNAL_TIME_TAG = "journalTime";
     public static final String MESSAGE_JSON_LAST_MODIFIED_DATE_TAG = "lastModifiedDate";
     public static final String MESSAGE_JSON_LAST_MODIFIED_TIME_TAG = "lastModifiedTime";
     public static final String MESSAGE_JSON_IS_PUBLISHED_TAG = "isPublished";
+    public static final String MESSAGE_JSON_HASH_TAG_TAG = "hashTag";
+    public static final String MESSAGE_JSON_LIST_OF_PICTURES_TAG = "listOfPictures";
+
+
     public static final String MESSAGE_JSON_JOURNAL_CONTENT_ID_TAG = "journalContentID";
     public static final String MESSAGE_JSON_JOURNAL_QUESTION_ID_TAG = "journalQuestionID";
     public static final String MESSAGE_JSON_JOURNAL_QUESTION_TAG = "contentQuestion";
@@ -123,7 +136,9 @@ public class Constant {
     public static final String BUNDLE_PARAM_JOURNAL_ID = "journal_id";
     public static final String BUNDLE_PARAM_JOURNAL_IMAGE_URL = "journal_image_url";
     public static final String BUNDLE_PARAM_JOURNAL = "journal";
-
+    public static final String BUNDLE_PARAM_OPEN_FRAGMENT_TYPE = "open_type";
+    public static final String BUNDLE_PARAM_ALBUM = "album";
+    public static final String BUNDLE_PARAM_PICTURE_LIST = "plist";
 
     // Intent Service Extra tag name
     public static final String INTENT_SERVICE_EXTRA_RECEIVER_TAG = "receiver";
@@ -133,6 +148,8 @@ public class Constant {
     public static final String INTENT_SERVICE_EXTRA_USER_PROFILE_PICTURE_ID_TAG = "u_profile_pic_id";
     public static final String INTENT_SERVICE_EXTRA_USER_PROFILE_PICTURE_FILENAME_TAG = "u_profile_pic_filename";
     public static final String INTENT_SERVICE_EXTRA_TYPE_TAG = "type";
+    public static final String INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG = "aid";
+
     // intent service return result to main UI
     public static final String INTENT_SERVICE_RESULT_DOWNLOAD_STATUS_TAG = "download_status";
     public static final String INTENT_SERVICE_RESULT_DOWNLOAD_SUCCESS_VALUE = "success";
@@ -156,4 +173,10 @@ public class Constant {
     public static final String STORAGE_DOT_EXTENSION = ".";
     public static final String STORAGE_APPLICATION_PROFILE_FOLDER_PATH = STORAGE_SLASH + STORAGE_APPLICATION_NAME + STORAGE_SLASH + STORAGE_MEDIA_NAME + STORAGE_SLASH + STORAGE_PROFILE_NAME + STORAGE_SLASH;
     public static final String STORAGE_APPLICATION_PICTURE_FOLDER_PATH = STORAGE_SLASH + STORAGE_APPLICATION_NAME + STORAGE_SLASH + STORAGE_MEDIA_NAME + STORAGE_SLASH + STORAGE_PICTURE_NAME + STORAGE_SLASH;
+
+
+    // Formatting Strings
+    public static final String DUMMY_NUMBER = "[num]";
+    public static final String STRING_NUMBER_OF_PICTURES_FORMAT = "All Photos ([num])";
+
 }

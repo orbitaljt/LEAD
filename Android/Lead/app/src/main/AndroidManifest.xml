@@ -44,13 +44,21 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <!-- Declaring Service -->
+        <service android:name=".controller.Service.PictureService" />
         <service android:name=".controller.Service.S3Service" />
         <service android:name=".controller.Service.JournalService" />
 
         <activity
             android:name=".controller.Activity.SpecificJournalActivity"
-            android:label="@string/title_activity_specific_journal" >
+            android:label="@string/title_activity_specific_journal"
+            android:parentActivityName=".controller.Activity.MainActivity">
         </activity>
+
+        <activity
+            android:name=".controller.Activity.PictureActivity"
+            android:label="@string/title_activity_picture" >
+        </activity>
+
     </application>
 
 </manifest>

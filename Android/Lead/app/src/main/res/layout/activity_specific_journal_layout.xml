@@ -6,84 +6,211 @@
 
     <include layout="@layout/toolbar_specific_journal_layout" />
 
-    <ViewAnimator
-        android:id="@+id/animator"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:animateFirstView="false" >
+        android:layout_height="match_parent">
 
-        <com.orbital.lead.widget.WideImageView
-            android:id="@+id/image_journal_cover"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/black"
-            android:scaleType="fitCenter"/>
-
-        <include layout="@layout/progress_bar_layout" />
-
-        <com.orbital.lead.widget.WideImageView
-            android:id="@+id/image_fail_cover"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/black"
-            android:src="@drawable/image_blank_picture" />
-
-    </ViewAnimator>
-
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin">
-
-        <!-- Date and time -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                
+                <ViewAnimator
+                    android:id="@+id/animator"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:animateFirstView="false" >
+
+                    <com.orbital.lead.widget.WideImageView
+                        android:id="@+id/image_journal_cover"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/black"
+                        android:scaleType="fitCenter"/>
+
+                    <include layout="@layout/progress_bar_layout" />
+
+                    <com.orbital.lead.widget.WideImageView
+                        android:id="@+id/image_fail_cover"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/black"
+                        android:src="@drawable/image_blank_picture_16_to_9" />
+
+                </ViewAnimator>
+                
+                <TextView
+                    android:id="@+id/text_photo_count"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_gravity="bottom"
+                    style="@style/SpecificJournalPage_Photo_Count_Style"
+                    android:text="All Photos (0)" />
+                
+            </FrameLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:paddingBottom="@dimen/activity_vertical_margin">
 
-                <TextView
-                    android:id="@+id/text_day_digit"
+                <!-- Date and time -->
+                <LinearLayout
+                    android:id="@+id/content_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentTop="true"
-                    android:text="01"
-                    style="@style/SpecificJournalPage_Date_Day_Digit_Style"/>
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/text_day_name"
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/text_day_digit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentTop="true"
+                            android:text="01"
+                            style="@style/SpecificJournalPage_Date_Day_Digit_Style"/>
+
+                        <TextView
+                            android:id="@+id/text_day_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignTop="@+id/text_day_digit"
+                            android:layout_toRightOf="@+id/text_day_digit"
+                            android:text="Wednesday"
+                            style="@style/SpecificJournalPage_Date_Day_Name_Style"/>
+
+                        <TextView
+                            android:id="@+id/text_month_year"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_toRightOf="@+id/text_day_digit"
+                            android:layout_alignLeft="@+id/text_day_name"
+                            android:layout_below="@+id/text_day_name"
+                            android:text="December 2015"
+                            style="@style/SpecificJournalPage_Date_Month_Year_Style"/>
+
+
+
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/content_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignTop="@+id/text_day_digit"
-                    android:layout_toRightOf="@+id/text_day_digit"
-                    android:text="Wednesday"
-                    style="@style/SpecificJournalPage_Date_Day_Name_Style"/>
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/text_month_year"
-                    android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/text_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="13:00"
+                        style="@style/SpecificJournalPage_Time_Style"/>
+
+                </LinearLayout>
+
+                <!-- Journal Content -->
+                <LinearLayout
+                    android:id="@+id/content_journal_text"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@+id/text_day_digit"
-                    android:layout_alignLeft="@+id/text_day_name"
-                    android:layout_below="@+id/text_day_name"
-                    android:text="December 2015"
-                    style="@style/SpecificJournalPage_Date_Month_Year_Style"/>
+                    android:layout_below="@+id/content_date"
+                    android:layout_alignLeft="@+id/content_date"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical">
 
+                    <TextView
+                        android:id="@+id/text_journal_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/SpecificJournalPage_Title_Style"/>
 
+                    <TextView
+                        android:id="@+id/text_journal_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        style="@style/SpecificJournalPage_Content_Style"/>
 
+                </LinearLayout>
 
-            </RelativeLayout>
+                <!-- Tags and Projects-->
+                <LinearLayout
+                    android:id="@+id/content_misc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/content_journal_text"
+                    android:layout_alignLeft="@+id/content_journal_text"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical">
+
+                    <!-- Tagging -->
+                    <TableLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TableRow>
+
+                            <ImageView
+                                android:id="@+id/icon_tag"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_tag"/>
+
+                            <TextView
+                                android:id="@+id/text_tag"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="8dp"
+                                style="@style/SpecificJournalPage_Content_Tag_Project_Style"
+                                android:text="Tag 1, Tag 2, Tag 3"/>
+
+                        </TableRow>
+
+                        <TableRow android:layout_marginTop="8dp">
+
+                            <ImageView
+                                android:id="@+id/icon_project"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_project"/>
+
+                            <TextView
+                                android:id="@+id/text_project"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="8dp"
+                                style="@style/SpecificJournalPage_Content_Tag_Project_Style"
+                                android:text="Project 1"/>
+
+                        </TableRow>
+
+                    </TableLayout>
+
+                </LinearLayout> <!-- End of Tags and Projects-->
+
+            </RelativeLayout> <!-- Content after viewanimator-->
 
         </LinearLayout>
-
-
-    </RelativeLayout>
+    </ScrollView>
 
 </LinearLayout>

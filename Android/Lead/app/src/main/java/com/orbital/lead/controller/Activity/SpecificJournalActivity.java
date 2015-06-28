@@ -1,40 +1,49 @@
 package com.orbital.lead.controller.Activity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 
+import com.orbital.lead.Parser.FormatDate;
+import com.orbital.lead.Parser.FormatTime;
 import com.orbital.lead.R;
-import com.orbital.lead.controller.Service.JournalReceiver;
 import com.orbital.lead.controller.Service.JournalService;
+import com.orbital.lead.controller.Service.PictureReceiver;
+import com.orbital.lead.controller.Service.PictureService;
+import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
-import com.orbital.lead.model.EnumJournalServiceType;
+import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.Journal;
-import com.orbital.lead.model.JournalList;
 import com.orbital.lead.widget.WideImageView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-public class SpecificJournalActivity extends BaseActivity implements JournalReceiver.Receiver {
+public class SpecificJournalActivity extends BaseActivity implements PictureReceiver.Receiver {
     private final String TAG = this.getClass().getSimpleName();
 
+    private Context mContext;
     private View mToolbarView;
     private WideImageView mImageJournalCover;
     private ViewAnimator mAnimator;
+    private TextView mTextPictureCount;
     private TextView mTextDayDigit; //01-31
     private TextView mTextDayName; // Monday - Sunday
     private TextView mTextMonthYear; // January 1990
+    private TextView mTextTime;
+    private TextView mTextTitle;
+    private TextView mTextContent;
 
-    private JournalReceiver mJournalReceiver;
+    private PictureReceiver mPictureReceiver;
 
-    private String journalID;
-    private String journalCoverUrl;
     private Journal mJournal;
-
+    private Album mAlbum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,30 +51,48 @@ public class SpecificJournalActivity extends BaseActivity implements JournalRece
 
         getLayoutInflater().inflate(R.layout.activity_specific_journal_layout, getBaseFrameLayout());
 
+        this.setContext(this);
         this.initToolbar();
         this.pushToolbarToActionbar();
-        this.restoreActionBar();
+        //this.restoreActionBar();
+this.restoreCustomActionbar();
         this.setToolbarTitle(Constant.TITLE_SPECIFIC_JOURNAL);
         this.restoreDrawerHeaderValues();
 
         this.initViewAnimator();
         this.initImageJournalCover();
+        this.initTextPictureCount();
         this.initTextDayDigit();
         this.initTextDayName();
         this.initTextMonthYear();
-
-        this.initJournalReceiver();
+        this.initTextTime();
+        this.initTextTitle();
+        this.initTextContent();
+        this.initPictureReceiver();
 
         Bundle getBundleExtra = getIntent().getExtras();
         if (getBundleExtra != null) {
-            //this.journalID = getBundleExtra.getString(Constant.BUNDLE_PARAM_JOURNAL_ID, "");
-            //this.journalCoverUrl = getBundleExtra.getString(Constant.BUNDLE_PARAM_JOURNAL_IMAGE_URL, "");
 
-            //this.getUserSpecificJournal(this.getJournalID());
             this.setJournal((Journal) getBundleExtra.getParcelable(Constant.BUNDLE_PARAM_JOURNAL));
             this.setImageJournalCover(this.getParser().createPictureCoverUrl(this.getJournal().getPictureCoverID(),
                                     this.getJournal().getPictureCoverType().toString(),
                                     CurrentLoginUser.getUser().getUserID()));
+
+
+
+            String time = FormatTime.parseTime(this.getJournal().getJournalTime(), FormatTime.DATABASE_TIME_TO_DISPLAY_TIME); // HH:mm
+            String date = FormatDate.parseDate(this.getJournal().getJournalDate(), FormatDate.DATABASE_DATE_TO_DISPLAY_DATE, FormatDate.DISPLAY_FULL_FORMAT); // dd MMMM yyyy cccc
+            String[] dates = date.split(" ");
+
+            this.setTextDayDigit(dates[0]);
+            this.setTextMonthYear(dates[1] + " " + dates[2]);
+            this.setTextDayName(dates[3]);
+            this.setTextTime(time);
+            this.setTextTitle(this.getJournal().getTitle());
+            this.setTextContent(this.getJournal().getContent());
+
+            // run picture service first
+            this.getLogic().getUserSpecificAlbum(this, this.getJournal().getPictureAlbumID());
 
         } else {
             getCustomLogging().debug(TAG, "No bundle extra from getIntent()");
@@ -75,8 +102,60 @@ public class SpecificJournalActivity extends BaseActivity implements JournalRece
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (!getNavigationDrawerFragment().isDrawerOpen()) {
+            // Only show items in the action bar relevant to this screen
+            // if the drawer is not showing. Otherwise, let the drawer
+            // decide what to show in the action bar.
+            getMenuInflater().inflate(R.menu.menu_specific_journal, menu);
+            this.restoreCustomActionbar();
+            //this.restoreActionBar();
+        }
+        return true;
+        //return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }else if(id == android.R.id.home){
+            getCustomLogging().debug(TAG, "onOptionsItemSelected");
+            onBackPressed();
+            return true;
+        }
+
+        return false;
+        //return super.onOptionsItemSelected(item);
+    }
+
+    private void restoreCustomActionbar(){
+        // disable the home button and onClick to open navigation drawer
+        // enable the back arrow button
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+    }
+
+
     public void initToolbar() {
         this.mToolbarView = findViewById(R.id.custom_specific_journal_toolbar);
+        ((Toolbar) this.mToolbarView).setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //onBackPressed();
+                getCustomLogging().debug(TAG, "mToolbarView setNavigationOnClickListener onClick");
+            }
+        });
     }
 
     public View getToolbar() {
@@ -88,16 +167,16 @@ public class SpecificJournalActivity extends BaseActivity implements JournalRece
     }
 
     /*===================== Journal Intent Service & Receiver ================================*/
-    public void initJournalReceiver(){
-        mJournalReceiver = new JournalReceiver(new Handler());
-        mJournalReceiver.setReceiver(this);
+    public void initPictureReceiver(){
+        mPictureReceiver = new PictureReceiver(new Handler());
+        mPictureReceiver.setReceiver(this);
     }
 
-    public JournalReceiver getJournalReceiver(){
-        if(this.mJournalReceiver == null){
-            this.initJournalReceiver();
+    public PictureReceiver getJournalReceiver(){
+        if(this.mPictureReceiver == null){
+            this.initPictureReceiver();
         }
-        return this.mJournalReceiver;
+        return this.mPictureReceiver;
     }
 
     /*
@@ -133,16 +212,45 @@ public class SpecificJournalActivity extends BaseActivity implements JournalRece
         this.mAnimator = (ViewAnimator) findViewById(R.id.animator);
     }
 
+    private void initTextPictureCount() {
+        this.mTextPictureCount = (TextView) findViewById(R.id.text_photo_count);
+        this.mTextPictureCount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getCustomLogging().debug(TAG, "mTextPictureCount onClick");
+                if(getAlbum() != null){
+                    getLogic().displayPictureActivity(getContext(), PictureActivity.OPEN_FRAGMENT_ALBUM, getAlbum(), getAlbum().getPictureList().getList());
+                }
+            }
+        });
+    }
+
     private void initTextDayDigit() {
         this.mTextDayDigit = (TextView) findViewById(R.id.text_day_digit);
     }
 
     private void initTextDayName() {
-        this.mTextDayDigit = (TextView) findViewById(R.id.text_day_name);
+        this.mTextDayName = (TextView) findViewById(R.id.text_day_name);
     }
 
     private void initTextMonthYear() {
-        this.mTextDayDigit = (TextView) findViewById(R.id.text_month_year);
+        this.mTextMonthYear = (TextView) findViewById(R.id.text_month_year);
+    }
+
+    private void initTextTime() {
+        this.mTextTime = (TextView) findViewById(R.id.text_time);
+    }
+
+    private void initTextTitle() {
+        this.mTextTitle = (TextView) findViewById(R.id.text_journal_title);
+    }
+
+    private void initTextContent(){
+        this.mTextContent = (TextView) findViewById(R.id.text_journal_content);
+    }
+
+    private void setContext(Context context) {
+        this.mContext = context;
     }
 
     private void setImageJournalCover(String url) {
@@ -172,6 +280,10 @@ public class SpecificJournalActivity extends BaseActivity implements JournalRece
         }
     }
 
+    private void setTextPictureCount(String numOfPictures) {
+        this.mTextPictureCount.setText(Constant.STRING_NUMBER_OF_PICTURES_FORMAT.replace(Constant.DUMMY_NUMBER, numOfPictures));
+    }
+
     private void setTextDayDigit(String val) {
         this.mTextDayDigit.setText(val);
     }
@@ -184,22 +296,38 @@ public class SpecificJournalActivity extends BaseActivity implements JournalRece
         this.mTextMonthYear.setText(val);
     }
 
+    private void setTextTime(String val) {
+        this.mTextTime.setText(val);
+    }
+
+    private void setTextTitle(String val) {
+        this.mTextTitle.setText(val);
+    }
+
+    private void setTextContent(String val) {
+        this.mTextContent.setText(val);
+    }
+
     private void setJournal(Journal j){
         this.mJournal = j;
+    }
+
+    private void setAlbum(Album a){
+        this.mAlbum = a;
+    }
+
+    private Context getContext() {
+        return this.mContext;
     }
 
     private Journal getJournal() {
         return this.mJournal;
     }
-    /*
-    private String getJournalID() {
-        return this.journalID;
+
+    private Album getAlbum() {
+        return this.mAlbum;
     }
 
-    private String getJournalCoverUrl() {
-        return this.journalCoverUrl;
-    }
-    */
     private ViewAnimator getViewAnimator() {
         return this.mAnimator;
     }
@@ -212,24 +340,27 @@ public class SpecificJournalActivity extends BaseActivity implements JournalRece
 
     @Override
     public void onReceiveResult(int resultCode, Bundle resultData) {
-        EnumJournalServiceType type = null;
+        EnumPictureServiceType type = null;
         String jsonResult = "";
 
         switch (resultCode) {
-            case JournalService.STATUS_RUNNING:
-                this.getCustomLogging().debug(TAG, "onReceiveResult -> JournalService.STATUS_RUNNING");
+            case PictureService.STATUS_RUNNING:
+                this.getCustomLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_RUNNING");
                 break;
 
-            case JournalService.STATUS_FINISHED:
-                this.getCustomLogging().debug(TAG, "onReceiveResult -> JournalService.STATUS_FINISHED");
-                type = (EnumJournalServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
+            case PictureService.STATUS_FINISHED:
+                this.getCustomLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_FINISHED");
+                type = (EnumPictureServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
 
                 switch(type){
-                    case GET_SPECIFIC_JOURNAL:
-                        //jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
-                        //this.getCustomLogging().debug(TAG, "onReceiveResult GET_SPECIFIC_JOURNAL -> jsonResult => " + jsonResult);
-                        //JournalList list = this.getJournalListFromJson(jsonResult);
+                    case GET_ALBUM_PHOTO:
+                        jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
+                        this.getCustomLogging().debug(TAG, "onReceiveResult GET_ALBUM_PHOTO -> jsonResult => " + jsonResult);
 
+                        this.setAlbum(this.getParser().parseJsonToAlbum(jsonResult));
+                        if(this.getAlbum() != null) {
+                            this.setTextPictureCount(this.getParser().convertIntegerToString(this.getAlbum().getPictureList().size()));
+                        }
                         break;
 
                 }
@@ -237,7 +368,7 @@ public class SpecificJournalActivity extends BaseActivity implements JournalRece
                 break;
 
             case JournalService.STATUS_ERROR:
-                this.getCustomLogging().debug(TAG, "JournalService.STATUS_ERROR");
+                this.getCustomLogging().debug(TAG, "PictureService.STATUS_ERROR");
                 break;
         }
     }

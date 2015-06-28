@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -26,19 +27,13 @@ public class BaseActivity extends AppCompatActivity
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
+    private ActionBarDrawerToggle mNavigationDrawerToggle;
 
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
-
-    private FragmentManager fragmentManager;
-    private FragmentTransaction fragmentTransaction;
-
-
     protected FrameLayout mBaseFrameLayout;
-
-
     private CustomLogging mLogging;
     private Parser mParser;
     private Logic mLogic;
@@ -64,9 +59,10 @@ public class BaseActivity extends AppCompatActivity
             mNavigationDrawerFragment.setUp(
                     R.id.navigation_drawer,
                     (DrawerLayout) findViewById(R.id.drawer_layout));
+
+            this.initNavigationDrawerToggle();
+
         }
-
-
 
         this.mLogging.debug(TAG, "onCreate");
     }
@@ -149,13 +145,13 @@ public class BaseActivity extends AppCompatActivity
     }
 
     protected void restoreActionBar() {
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowTitleEnabled(true);
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(true);
+        }
     }
-
-
 
     protected void setToolbarTitle(String title){
         getSupportActionBar().setTitle(title);
@@ -180,5 +176,17 @@ public class BaseActivity extends AppCompatActivity
     protected NavigationDrawerFragment getNavigationDrawerFragment(){
         return this.mNavigationDrawerFragment;
     }
+
+    protected void initNavigationDrawerToggle(){
+        if(mNavigationDrawerFragment != null){
+            this.mNavigationDrawerToggle = this.mNavigationDrawerFragment.getDrawerToggle();
+        }
+    }
+
+    protected ActionBarDrawerToggle getNavigationDrawerToggle(){
+        return this.mNavigationDrawerToggle;
+    }
+
+
 
 }

@@ -8,9 +8,11 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_example">Example action</string>
 
     <string name="action_settings">Settings</string>
+    <string name="action_edit_journal">Edit</string>
+    <string name="action_publish_journal">Publish</string>
+    <string name="action_delete">Delete</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
@@ -20,9 +22,6 @@
     <string name="facebook_app_id">1594135340854170</string>
     <string name="title_activity_login">LoginActivity</string>
 
-    <string name="aws_s3_id">AKIAJ43M27OAUVU2TI6Q</string>
-    <string name="aws_s3_secret_key">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</string>
-
     <string name="hello_world">Hello world!</string>
 
     <string name="test_string">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
@@ -31,4 +30,5 @@
         Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat. On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain. These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best, every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures have to be repudiated and annoyances accepted.
         The wise man therefore always holds in these matters to this principle of selection: he rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains.</string>
     <string name="title_activity_specific_journal">SpecificJournalActivity</string>
+    <string name="title_activity_picture">PictureActivity</string>
 </resources>
