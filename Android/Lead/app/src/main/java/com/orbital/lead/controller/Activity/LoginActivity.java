@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.Fragment.FragmentLogin;
 import com.orbital.lead.model.Constant;
@@ -145,6 +146,8 @@ public class LoginActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         if(this.exit){
+            ImageLoader.getInstance().clearDiskCache();
+            ImageLoader.getInstance().clearMemoryCache();
             this.finish();
         }else{
             Toast.makeText(this, "Press back again to exit program.",

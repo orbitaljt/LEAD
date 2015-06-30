@@ -37,29 +37,43 @@ public class Constant {
     public static final String URL_CLIENT_SERVER = "http://52.74.189.72/lead/client/client.php";
     public static final String URL_NORMAL_PICTURE = "https://s3-ap-southeast-1.amazonaws.com/leadimage/[user_id]/picture/[file_name]";
     public static final String URL_SMALL_PICTURE = "https://s3-ap-southeast-1.amazonaws.com/leadimage/[user_id]/picture/small/[file_name]";
+    public static final String URL_DUMMY_FACEBOOK_USER_ID = "[fb_user_id]";
     public static final String URL_DUMMY_USER_ID = "[user_id]";
     public static final String URL_DUMMY_FILE_NAME = "[file_name]";
+    public static final String URL_FACEBOOK_PROFILE_PICTURE = "https://graph.facebook.com/[fb_user_id]/picture?width=640&height=640";
+
 
     // URL post parameters
     public static final String URL_POST_PARAMETER_TAG_QUERY_TYPE = "type";
     public static final String URL_POST_PARAMETER_TAG_USERNAME = "u";
     public static final String URL_POST_PARAMETER_TAG_PASSWORD = "pw";
     public static final String URL_POST_PARAMETER_TAG_USER_ID = "uid";
+    public static final String URL_POST_PARAMETER_TAG_FACEBOOK_USER_ID = "fb_uid";
     public static final String URL_POST_PARAMETER_TAG_USER_ALUBM_ID = "aid";
     public static final String URL_POST_PARAMETER_TAG_PICTURE_QUERY_QUANTITY = "pic_qq";
     public static final String URL_POST_PARAMETER_TAG_USER_JOURNAL_LIST_ID = "jlid";
     public static final String URL_POST_PARAMETER_TAG_USER_JOURNAL_ID = "jid";
+    public static final String URL_POST_PARAMETER_TAG_DETAIL = "detail";
+    public static final String URL_POST_PARAMETER_TAG_URL = "url";
+    public static final String URL_POST_PARAMETER_TAG_FILE_NAME = "filename";
+    public static final String URL_POST_PARAMETER_TAG_FILE_TYPE = "filetype";
+    public static final String URL_POST_PARAMETER_TAG_FROM_FACEBOOK = "from_fb";
+    public static final String URL_POST_PARAMETER_TAG_FROM_LEAD = "from_lead";
 
     // default type values
     public static final String TYPE_LOGIN = "100";
     public static final String TYPE_LOGOUT = "101";
+    public static final String TYPE_LOGIN_WITH_FACEBOOK = "200";
     public static final String TYPE_GET_USER_PROFILE = "300";
-    public static final String TYPE_UPDATE_USER_PROFILE = "301";
-    public static final String TYPE_CREATE_USER_PROFILE = "302";
+    public static final String TYPE_GET_USER_PROFILE_USING_FACEBOOK = "301";
+    public static final String TYPE_UPDATE_USER_PROFILE = "302";
+    public static final String TYPE_CREATE_USER_PROFILE = "303";
     public static final String TYPE_GET_USER_ALL_JOURNAL = "400";
     public static final String TYPE_GET_USER_SPECIFIC_JOURNAL = "401";
     public static final String TYPE_GET_USER_PICTURE = "900";
     public static final String TYPE_GET_USER_SPECIFIC_ALBUM = "901";
+    public static final String TYPE_UPLOAD_IMAGE_URL = "2000";
+
 
     public static final String PICTURE_QUERY_QUANTITY_PROFILE = "profile";
     public static final String PICTURE_QUERY_QUANTITY_ALBUM = "album";
@@ -70,7 +84,7 @@ public class Constant {
     public static final String MESSAGE_JSON_MESSAGE_TAG = "message";
     public static final String MESSAGE_JSON_USER_ID_TAG = "userID"; //only appear if login successfully
     public static final String MESSAGE_JSON_DETAIL_TAG = "detail";
-    public static final String MESSAGE_JSON_FACEBOK_ID_TAG = "facebookID";
+    public static final String MESSAGE_JSON_FACEBOOK_ID_TAG = "facebookID";
     public static final String MESSAGE_JSON_LEAD_USER_ID_TAG = "leadUserID";
     public static final String MESSAGE_JSON_PICTURE_PROFILE_ID_TAG = "pictureProfileID";
     public static final String MESSAGE_JSON_PICTURE_PROFILE_TYPE_TAG = "pictureProfileType";
@@ -122,6 +136,16 @@ public class Constant {
     public static final String MESSAGE_JSON = "";
     public static final String MESSAGE_JSON = "";
     */
+    public static final String FACEBOOK_JSON_ID_TAG = "id";
+    public static final String FACEBOOK_JSON_PROFILE_PICTURE_TAG = "picture";
+    public static final String FACEBOOK_JSON_DATA_TAG = "data";
+    public static final String FACEBOOK_JSON_EMAIL_TAG = "email";
+    public static final String FACEBOOK_JSON_BIRTHDAY_TAG = "birthday";
+    public static final String FACEBOOK_JSON_LOCATION_TAG = "location";
+    public static final String FACEBOOK_JSON_URL_TAG = "url";
+    public static final String FACEBOOK_JSON_FIRST_NAME_TAG = "first_name";
+    public static final String FACEBOOK_JSON_MIDDLE_NAME_TAG = "middle_name";
+    public static final String FACEBOOK_JSON_LAST_NAME_TAG = "last_name";
 
     // Message code
     public static final String MESSAGE_SUCCESS_TYPE = ".1";
@@ -132,7 +156,9 @@ public class Constant {
     public static final String BUNDLE_PARAM_PASSWORD= "password";
     public static final String BUNDLE_PARAM_IS_FACEBOOK_LOGIN = "is_facebook_login";
     public static final String BUNDLE_PARAM_FACEBOOK_USER_ID = "fb_user_id";
+    public static final String BUNDLE_PARAM_FACEBOOK_RESPONSE = "fb_response";
     public static final String BUNDLE_PARAM_LEAD_USER_ID = "lead_user_id";
+    public static final String BUNDLE_PARAM_IS_REGISTERED = "is_registered";
     public static final String BUNDLE_PARAM_JOURNAL_ID = "journal_id";
     public static final String BUNDLE_PARAM_JOURNAL_IMAGE_URL = "journal_image_url";
     public static final String BUNDLE_PARAM_JOURNAL = "journal";

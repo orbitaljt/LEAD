@@ -7,34 +7,40 @@ import com.orbital.lead.Parser.Parser;
  */
 public class User {
     private Parser mParser;
-    private String _facebookID;
-    private String _userID;
-    private String _profilePicID;
-    private String _profilePicUrl;
+    private String _facebookID = "";
+    private String _userID = "";
+    private String _profilePicID = "";
+    private String _profilePicUrl = "";
     private EnumPictureType _profilePicType;
-    private String _journalListID;
-    private String _experienceListID;
-    private String _firstName;
-    private String _lastName;
-    private String _middleName;
-    private String _birthday;
-    private String _address;
-    private String _city;
-    private String _state;
-    private String _country;
-    private String _countryCode;
-    private String _username;
-    private String _password;
-    private String _email;
-    private String _createdDate;
-    private String _createdTime;
-    private String _lastLoginDate;
-    private String _lastLoginTime;
-    private int _age;
+    private String _journalListID = "";
+    private String _experienceListID = "";
+    private String _firstName = "";
+    private String _lastName = "";
+    private String _middleName = "";
+    private String _birthday = "";
+    private String _address = "";
+    private String _city = "";
+    private String _state = "";
+    private String _country = "";
+    private String _countryCode = "";
+    private String _username = "";
+    private String _password = "";
+    private String _email = "";
+    private String _createdDate = "";
+    private String _createdTime = "";
+    private String _lastLoginDate = "";
+    private String _lastLoginTime = "";
+    private int _age = 0;
+    private boolean isFacebook = false;
+    private boolean isLead = false;
 
     private JournalList mJournalList;
 
-    public User(String fID, String ID, String ppID, String ppType, String jID, String eID, String fName, String mName, String lName,
+    public User(){
+        this.initParser();
+    }
+
+    public User(String fID, String ID, String ppID, String ppType, String jID, String fName, String mName, String lName,
                 String birth, String addr, String city, String state, String country, String countryCode, String email,
                 String createdDate, String createdTime, String lastLoginDate, String lastLoginTime, int age){
         this.initParser();
@@ -43,7 +49,6 @@ public class User {
         this._userID = ID;
         this._profilePicID = ppID;
         this._journalListID = jID;
-        this._experienceListID = eID;
         this._firstName = fName;
         this._middleName = mName;
         this._lastName = lName;
@@ -60,7 +65,8 @@ public class User {
         this._lastLoginTime = lastLoginTime;
         this._age = age;
         this._profilePicType = getParser().getType(ppType);
-
+        this._profilePicUrl = getParser().createPictureNormalUrl(this._profilePicID,
+                                                this._profilePicType.toString(), this._userID);
     }
 
     // Get

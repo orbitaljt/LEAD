@@ -97,7 +97,8 @@ public class PictureActivity extends BaseActivity implements FragmentAlbum.OnFra
 
     private void displayFragmentAlbum(){
         this.getCustomLogging().debug(TAG, "displayFragmentAlbum");
-        this.mFragmentAlbum = FragmentAlbum.newInstance(this, this.getAlbum(), this.getPictureList());
+        //this,
+        this.mFragmentAlbum = FragmentAlbum.newInstance(this.getAlbum(), this.getPictureList());
         this.replaceFragment(this.mFragmentAlbum, Constant.FRAGMENT_ALBUM);
     }
 

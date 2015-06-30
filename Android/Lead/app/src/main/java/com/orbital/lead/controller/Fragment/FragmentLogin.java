@@ -27,14 +27,16 @@ import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.orbital.lead.Parser.Parser;
+import com.orbital.lead.Parser.ParserFacebook;
 import com.orbital.lead.R;
-import com.orbital.lead.controller.Activity.LoginActivity;
 import com.orbital.lead.controller.Activity.MainActivity;
 import com.orbital.lead.logic.Asynchronous.AsyncLogin;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.LocalStorage.LocalStorage;
 import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.Constant;
+import com.orbital.lead.model.EnumLoginType;
+import com.orbital.lead.model.EnumMessageType;
 import com.orbital.lead.model.Message;
 
 import org.json.JSONObject;
@@ -61,7 +63,7 @@ public class FragmentLogin extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private LoginActivity mLoginActivity;
+    //private LoginActivity mLoginActivity;
     private EditText mEditTextUsername;
     private EditText mEditTextPassword;
     private Button mBtnLogin;
@@ -82,11 +84,13 @@ public class FragmentLogin extends Fragment {
     private LocalStorage mLocalStorage;
     private Parser mParser;
 
-    private final String TAG_FRAGMENT_LOGIN = this.getClass().getSimpleName();
+    private final String TAG = this.getClass().getSimpleName();
     private boolean hasLogin;
     private boolean isFacebookLogin;
     private String leadUserID;
+    private String facebookUserID;
 
+    private String facebookResponse;
 
     /**
      * Use this factory method to create a new instance of
@@ -119,7 +123,7 @@ public class FragmentLogin extends Fragment {
         }
 
         this.initLogging();
-        this.mLogging.debug(TAG_FRAGMENT_LOGIN, "onCreate");
+        this.mLogging.debug(TAG, "onCreate");
 
         this.initFacebook();
         this.initFacebookCallbackManager();
@@ -136,7 +140,7 @@ public class FragmentLogin extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        this.mLogging.debug(TAG_FRAGMENT_LOGIN, "onCreateView");
+        this.mLogging.debug(TAG, "onCreateView");
 
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_login, container, false);
@@ -171,9 +175,11 @@ public class FragmentLogin extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        /*
         if(activity instanceof LoginActivity){
             this.initLoginActivity((LoginActivity) activity);
         }
+        */
 
         try {
             mListener = (OnFragmentInteractionListener) activity;
@@ -192,7 +198,7 @@ public class FragmentLogin extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        this.mLogging.debug(TAG_FRAGMENT_LOGIN, "onActivityResult");
+        this.mLogging.debug(TAG, "onActivityResult");
         this.callbackManager.onActivityResult(requestCode, resultCode, data);
 
     }
@@ -225,9 +231,9 @@ public class FragmentLogin extends Fragment {
         this.mBtnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mLogging.debug(TAG_FRAGMENT_LOGIN, "mBtnLogin onClick");
-                mLogging.debug(TAG_FRAGMENT_LOGIN, "getEditTextUsername() -> " + getEditTextUsername());
-                mLogging.debug(TAG_FRAGMENT_LOGIN, "getEditTextPassword() -> " + getEditTextPassword());
+                mLogging.debug(TAG, "mBtnLogin onClick");
+                mLogging.debug(TAG, "getEditTextUsername() -> " + getEditTextUsername());
+                mLogging.debug(TAG, "getEditTextPassword() -> " + getEditTextPassword());
                 //mLogic.login(getLoginActivity(), getEditTextUsername(), getEditTextPassword());
                 setIsNotFacebookLogin();
                 runLogin(getEditTextUsername(), getEditTextPassword());
@@ -237,7 +243,7 @@ public class FragmentLogin extends Fragment {
 
 
     public void initFacebook(){
-        FacebookSdk.sdkInitialize(getLoginActivity().getApplicationContext());
+        FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
     }
 
     public void initFacebookCallbackManager(){
@@ -251,6 +257,7 @@ public class FragmentLogin extends Fragment {
         mPermission.add("user_about_me");
         mPermission.add("user_photos");
         mPermission.add("user_birthday");
+        mPermission.add("user_location");
 
         this.mFacebookLoginButton = (LoginButton) v.findViewById(R.id.btnLoginWithFacebook);
         this.mFacebookLoginButton.setReadPermissions(mPermission);
@@ -260,19 +267,19 @@ public class FragmentLogin extends Fragment {
         this.mFacebookLoginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                mLogging.debug(TAG_FRAGMENT_LOGIN, "onSuccess");
-               // mLogging.debug(TAG_FRAGMENT_LOGIN, "access token -> " + loginResult.getAccessToken().getToken());
+                mLogging.debug(TAG, "onSuccess");
+               // mLogging.debug(TAG, "access token -> " + loginResult.getAccessToken().getToken());
             }
 
             @Override
             public void onCancel() {
-                mLogging.debug(TAG_FRAGMENT_LOGIN, "registerCallback onCancel");
+                mLogging.debug(TAG, "registerCallback onCancel");
                 setIsNotFacebookLogin();
             }
 
             @Override
             public void onError(FacebookException exception) {
-                mLogging.debug(TAG_FRAGMENT_LOGIN, "registerCallback onError -> " + exception.getMessage().toString());
+                mLogging.debug(TAG, "registerCallback onError -> " + exception.getMessage().toString());
                 setIsNotFacebookLogin();
             }
         });
@@ -283,7 +290,7 @@ public class FragmentLogin extends Fragment {
         this.profileTracker = new ProfileTracker() {
             @Override
             protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
-                mLogging.debug(TAG_FRAGMENT_LOGIN, "onCurrentProfileChanged");
+                mLogging.debug(TAG, "onCurrentProfileChanged");
                 setProfile(currentProfile);
             }
         };
@@ -297,12 +304,13 @@ public class FragmentLogin extends Fragment {
                     AccessToken currentAccessToken) {
                 // On AccessToken changes fetch the new profile which fires the event on
                 // the ProfileTracker if the profile is different
-                mLogging.debug(TAG_FRAGMENT_LOGIN, "onCurrentAccessTokenChanged currentAccessToken -> " + currentAccessToken );
+                mLogging.debug(TAG, "onCurrentAccessTokenChanged currentAccessToken -> " + currentAccessToken );
                 Profile.fetchProfileForCurrentAccessToken();
             }
         };
     }
 
+    /*
     public void initLoginActivity(LoginActivity activity){
         this.mLoginActivity = activity;
     }
@@ -310,6 +318,7 @@ public class FragmentLogin extends Fragment {
     public LoginActivity getLoginActivity(){
         return this.mLoginActivity;
     }
+    */
 
     public void initLogic(){
         this.mLogic = Logic.getInstance();
@@ -327,23 +336,39 @@ public class FragmentLogin extends Fragment {
 
 
     public void runLogin(String username, String password){
-        HttpAsyncLogin mAsyncLogin = new HttpAsyncLogin(getLoginActivity());
-        mAsyncLogin.execute(username, password);
+        HttpAsyncLogin mAsyncLogin = new HttpAsyncLogin(getActivity(), EnumLoginType.LOGIN_LEAD);
+        mAsyncLogin.execute(EnumLoginType.LOGIN_LEAD.getText(), username, password);
+    }
+
+    public void runLoginUsingFacebook(String facebookUserID){
+        HttpAsyncLogin mAsyncLogin = new HttpAsyncLogin(getActivity(), EnumLoginType.LOGIN_FACEBOOK);
+        mAsyncLogin.execute(EnumLoginType.LOGIN_FACEBOOK.getText(), facebookUserID);
     }
 
 
-    public void displayMainActivity(String facebookID, String leadUserID){
-        Intent newIntent = new Intent(getLoginActivity(), MainActivity.class);
+    public void displayMainActivity(String facebookID, String leadUserID, boolean isRegistered){
+        Intent newIntent = new Intent(getActivity(), MainActivity.class);
         Bundle mBundle = new Bundle();
 
+        //mLogging.debug(TAG, "isRegistered => " + isRegistered);
+
+        if(this.isFacebookLogin()){ // if login through facebook, just get ID
+            mBundle.putString(Constant.BUNDLE_PARAM_FACEBOOK_USER_ID, facebookID); // "" or value
+            mBundle.putString(Constant.BUNDLE_PARAM_FACEBOOK_RESPONSE, this.getFacebookResponse()); // get response usually contain id, name, email etc
+        }else{
+            mBundle.putString(Constant.BUNDLE_PARAM_USERNAME, getEditTextUsername());
+            mBundle.putString(Constant.BUNDLE_PARAM_PASSWORD, getEditTextPassword());
+        }
+
+        if(isRegistered){ //if registered, pass lead user ID
+            mBundle.putString(Constant.BUNDLE_PARAM_LEAD_USER_ID, leadUserID); // "" or value
+        }
+
+        mBundle.putBoolean(Constant.BUNDLE_PARAM_IS_REGISTERED, isRegistered); //true or false
         mBundle.putBoolean(Constant.BUNDLE_PARAM_IS_FACEBOOK_LOGIN, this.isFacebookLogin()); // true or false
-        mBundle.putString(Constant.BUNDLE_PARAM_LEAD_USER_ID, leadUserID); // "" or value
-        mBundle.putString(Constant.BUNDLE_PARAM_FACEBOOK_USER_ID, facebookID); // "" or value
-        mBundle.putString(Constant.BUNDLE_PARAM_USERNAME, getEditTextUsername());
-        mBundle.putString(Constant.BUNDLE_PARAM_PASSWORD, getEditTextPassword());
 
         newIntent.putExtras(mBundle);
-        getLoginActivity().startActivity(newIntent);
+        getActivity().startActivity(newIntent);
     }
 
     public void checkLeadFolder(){
@@ -353,9 +378,11 @@ public class FragmentLogin extends Fragment {
     public class HttpAsyncLogin extends AsyncLogin {
 
         private Context mContext;
+        private EnumLoginType loginType;
 
-        public HttpAsyncLogin(Context c){
+        public HttpAsyncLogin(Context c, EnumLoginType type){
             this.mContext = c;
+            this.loginType = type;
         }
 
         @Override
@@ -371,19 +398,51 @@ public class FragmentLogin extends Fragment {
                 prog.dismiss();
             }//end if
 
-            getLoginActivity().runOnUiThread(new Runnable() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     Message msg = mParser.parseJsonToMessage(result);
 
-                    mLogging.debug(TAG_FRAGMENT_LOGIN, "msg.getMessage() => " + msg.getMessage());
+                    mLogging.debug(TAG, "msg.getMessage() => " + msg.getMessage());
 
-                    if (mParser.isMessageSuccess(msg)){ // success login
-                        setLeadUserID(mParser.parseUserIDFromJson(result));
-                        mLogging.debug(TAG_FRAGMENT_LOGIN, "current login user ID => " + getLeadUserID());
-                        // open main activity
-                        // pass in current lead user ID
-                        displayMainActivity("", getLeadUserID());
+                    if (mParser.getMessageType(msg) == EnumMessageType.SUCCESS){ // success login
+
+                        switch (loginType){
+                            case LOGIN_LEAD:
+                                setLeadUserID(mParser.parseUserIDFromJson(result));
+                                mLogging.debug(TAG, "current login user ID => " + getLeadUserID());
+                                // open main activity
+                                // pass in current lead user ID
+                                displayMainActivity("", getLeadUserID(), true);
+                                break;
+                            case LOGIN_FACEBOOK:
+                                setLeadUserID(mParser.parseUserIDFromJson(result));
+                                mLogging.debug(TAG, "current facebook user ID => " + getLeadUserID());
+                                // open main activity
+                                // pass in current lead user ID
+                                setIsFacebookLogin(true);
+                                displayMainActivity(getFacebookUserID(), getLeadUserID(), true);
+                                break;
+                        }
+
+
+                    }else{ // no such user in database
+                        mLogging.debug(TAG, "user is not registered!");
+
+                        switch (loginType) {
+                            case LOGIN_LEAD:
+                                // confirm cannot go in.. show error
+                                break;
+
+                            case LOGIN_FACEBOOK:
+                                // go to main activity
+                                // create new user profile
+                                // set is registered = false
+                                setIsFacebookLogin(true);
+                                displayMainActivity(getFacebookUserID(), "", false);
+                                break;
+                        }
+
                     }
                 }
 
@@ -417,7 +476,7 @@ public class FragmentLogin extends Fragment {
     }
 
     private void restructureFacebookLoginButton(){
-        this.mLogging.debug(this.TAG_FRAGMENT_LOGIN, "restructureFacebookLoginButton");
+        this.mLogging.debug(this.TAG, "restructureFacebookLoginButton");
 
         float fbIconScale = 1.45F;
         Drawable drawable = getResources().getDrawable(
@@ -439,7 +498,7 @@ public class FragmentLogin extends Fragment {
 
 
     private void setProfile(Profile profile) {
-        this.mLogging.debug(this.TAG_FRAGMENT_LOGIN, "setProfile");
+        this.mLogging.debug(this.TAG, "setProfile");
         if(!isAdded()){
         //if (userNameView == null || profilePictureView == null || !isAdded()) {
             // Fragment not yet added to the view. So let's store which user was intended
@@ -454,15 +513,15 @@ public class FragmentLogin extends Fragment {
         } else {
 
             AccessToken at = AccessToken.getCurrentAccessToken();
-            this.mLogging.debug(this.TAG_FRAGMENT_LOGIN, "Current Access Token => " + at.getToken());
+            this.mLogging.debug(this.TAG, "Current Access Token => " + at.getToken());
             this.accessUserGraph(at);
 
 
 
-            //this.mLogging.debug(this.TAG_FRAGMENT_LOGIN, "profile.getId() -> " + profile.getId());
-            //this.mLogging.debug(this.TAG_FRAGMENT_LOGIN, "profile.getFirstName() -> " + profile.getFirstName());
-            //this.mLogging.debug(this.TAG_FRAGMENT_LOGIN, "profile.getLastName() -> " + profile.getLastName());
-            //this.mLogging.debug(this.TAG_FRAGMENT_LOGIN, "profile.getName() -> " + profile.getName());
+            //this.mLogging.debug(this.TAG, "profile.getId() -> " + profile.getId());
+            //this.mLogging.debug(this.TAG, "profile.getFirstName() -> " + profile.getFirstName());
+            //this.mLogging.debug(this.TAG, "profile.getLastName() -> " + profile.getLastName());
+            //this.mLogging.debug(this.TAG, "profile.getName() -> " + profile.getName());
 
             //profilePictureView.setProfileId(profile.getId());
             //userNameView.setText(String.format(getString(R.string.greeting_format),
@@ -478,16 +537,34 @@ public class FragmentLogin extends Fragment {
                     public void onCompleted(
                             JSONObject object,
                             GraphResponse response) {
-                        mLogging.debug(TAG_FRAGMENT_LOGIN, "response -> " + response.toString());
+                        mLogging.debug(TAG, "response getRawResponse -> " + response.getRawResponse());
+
                         //set that user is login using facebook
-                        setIsFacebookLogin();
+                        String data = response.getRawResponse();
+                        if(!mParser.isStringEmpty(data)){
+                            //setIsFacebookLogin(true);
+
+
+                            // set current facebook user id
+                            setFacebookUserID(ParserFacebook.getFacebookID(data));
+                            setFacebookResponse(data);
+                            runLoginUsingFacebook(getFacebookUserID()); //try login to server
+
+                            //mLogging.debug(TAG, "facebookUserID -> " + facebookUserID);
+
+                            //displayMainActivity(facebookUserID, "");
+                        }else{
+                            //show error, cannot login to facebook
+                            setIsFacebookLogin(false);
+                            mLogging.debug(TAG, "unable to get respose data. get error -> " + response.getError().toString());
+                        }
 
                     }
 
                 });
 
         Bundle parameters = new Bundle();
-        parameters.putString("fields", "id,name,picture.type(large){url},address,birthday,email,link");
+        parameters.putString("fields", "id,first_name,middle_name,last_name,picture.type(large){url},address,birthday,email,link,location");
         request.setParameters(parameters);
         request.executeAsync();
 
@@ -525,8 +602,20 @@ public class FragmentLogin extends Fragment {
         this.hasLogin = false;
     }
 
-    private void setIsFacebookLogin(){
-        this.isFacebookLogin = true;
+    private void setIsFacebookLogin(boolean value){
+        this.isFacebookLogin = value;
+    }
+
+    private void setLeadUserID(String id){
+        this.leadUserID = id;
+    }
+
+    private void setFacebookUserID(String id){
+        this.facebookUserID = id;
+    }
+
+    private void setFacebookResponse(String value){
+        this.facebookResponse = value;
     }
 
     private void setIsNotFacebookLogin(){
@@ -537,8 +626,13 @@ public class FragmentLogin extends Fragment {
         return this.leadUserID;
     }
 
-    private void setLeadUserID(String id){
-        this.leadUserID = id;
+    private String getFacebookUserID() {
+        return this.facebookUserID;
     }
+
+    private String getFacebookResponse() {
+        return this.facebookResponse;
+    }
+
 
 }

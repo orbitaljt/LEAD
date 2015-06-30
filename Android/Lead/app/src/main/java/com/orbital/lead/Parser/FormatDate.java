@@ -13,14 +13,16 @@ import java.util.Date;
 public class FormatDate {
     public static final int DATABASE_DATE_TO_DISPLAY_DATE = 0;
     public static final int DISPLAY_DATE_TO_DATABASE_DATE = 1;
+    public static final int FACEBOOK_DATE_TO_DATABASE_DATE = 2;
 
+    public static final String FACEBOOK_FORMAT = "MM/dd/yyyy";
     public static final String DATABASE_FORMAT = "yyyy-MM-dd";
     public static final String DISPLAY_FORMAT = "dd MMM yyyy";
     public static final String DISPLAY_FULL_FORMAT = "dd MMMM yyyy cccc";
 
     private static final String TAG = "FormatDate";
 
-    private static CustomLogging mLogging = CustomLogging.getInstance();
+    private static final CustomLogging mLogging = CustomLogging.getInstance();
 
     public static String parseDate(String rawDate, int formatType, String format){
         // database date format -> yyyy-mm-dd
@@ -32,6 +34,10 @@ public class FormatDate {
 
             case DISPLAY_DATE_TO_DATABASE_DATE:
                 return "";
+
+            case FACEBOOK_DATE_TO_DATABASE_DATE:
+                mLogging.debug(TAG, "Convert facebook date to database date");
+                return facebookToDatabaseDate(rawDate);
             default:
                 return "";
         }
@@ -55,6 +61,27 @@ public class FormatDate {
         }
 
     }
+
+    private static String facebookToDatabaseDate(String rawDate){
+        DateFormat inputFormat = new SimpleDateFormat(FACEBOOK_FORMAT);
+        DateFormat outputFormat = new SimpleDateFormat(DATABASE_FORMAT);
+        Date parsed = new Date();
+        try
+        {
+            parsed = inputFormat.parse(rawDate);
+            String outputText = outputFormat.format(parsed);
+            mLogging.debug(TAG, "facebookToDatabaseDate outputText => " + outputText);
+            return outputText;
+        }
+        catch (ParseException e)
+        {
+            mLogging.debug(TAG, "ParseException => " + e.getMessage());
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+
 
 
 }

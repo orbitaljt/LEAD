@@ -1,6 +1,7 @@
 package com.orbital.lead.controller.Activity;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.Toolbar;
@@ -10,6 +11,11 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.orbital.lead.Parser.FormatDate;
 import com.orbital.lead.Parser.FormatTime;
 import com.orbital.lead.R;
@@ -55,7 +61,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         this.initToolbar();
         this.pushToolbarToActionbar();
         //this.restoreActionBar();
-this.restoreCustomActionbar();
+        this.restoreCustomActionbar();
         this.setToolbarTitle(Constant.TITLE_SPECIFIC_JOURNAL);
         this.restoreDrawerHeaderValues();
 
@@ -166,6 +172,7 @@ this.restoreCustomActionbar();
         setSupportActionBar((Toolbar) this.getToolbar());
     }
 
+
     /*===================== Journal Intent Service & Receiver ================================*/
     public void initPictureReceiver(){
         mPictureReceiver = new PictureReceiver(new Handler());
@@ -195,17 +202,6 @@ this.restoreCustomActionbar();
 
     private void initImageJournalCover() {
         this.mImageJournalCover = (WideImageView) findViewById(R.id.image_journal_cover);
-        /*
-        this.mImageJournalCover.addOnLayoutChangeListener(new View.OnLayoutChangeListener(){
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                getCustomLogging().debug(TAG, "right => " + right);
-                getCustomLogging().debug(TAG, "left => " + left);
-                getCustomLogging().debug(TAG, "top => " + top);
-                getCustomLogging().debug(TAG, "bottom => " + bottom);
-            }
-        });
-        */
     }
 
     private void initViewAnimator() {
@@ -258,6 +254,7 @@ this.restoreCustomActionbar();
         //.error(R.drawable.image_blank_picture)
         //.transform(new RoundedTransformation(10, 0))
         if(!this.getParser().isStringEmpty(url)){
+            /*
             Picasso.with(this)
                     .load(url)
                     .noFade()
@@ -274,6 +271,39 @@ this.restoreCustomActionbar();
                             mAnimator.setDisplayedChild(2);
                         }
                     });
+            */
+            ImageLoader.getInstance()
+                    .displayImage(url, this.getImageJournalCover(), this.getCustomApplication().getDisplayImageOptions(),
+                            new SimpleImageLoadingListener(){
+                                @Override
+                                public void onLoadingStarted(String imageUri, View view) {
+                                    //holder.progressBar.setProgress(0);
+                                    //holder.progressBar.setVisibility(View.VISIBLE);
+                                    getCustomLogging().debug(TAG, "onLoadingStarted");
+                                }
+
+                                @Override
+                                public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                                    //holder.progressBar.setVisibility(View.GONE);
+                                    getCustomLogging().debug(TAG, "onLoadingFailed");
+                                    mAnimator.setDisplayedChild(2);
+                                }
+
+                                @Override
+                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                    //holder.progressBar.setVisibility(View.GONE);
+                                    getCustomLogging().debug(TAG, "onLoadingComplete");
+                                    mAnimator.setDisplayedChild(0);
+                                }
+                            },
+                            new ImageLoadingProgressListener() {
+                                @Override
+                                public void onProgressUpdate(String imageUri, View view, int current, int total) {
+                                    getCustomLogging().debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
+                                    //holder.progressBar.setProgress(Math.round(100.0f * current / total));
+                                }
+                            });
+
         }else{
             getCustomLogging().debug(TAG, "setImageJournalCover -> Picture URL is empty");
             mAnimator.setDisplayedChild(2);
@@ -335,7 +365,6 @@ this.restoreCustomActionbar();
     private WideImageView getImageJournalCover() {
         return this.mImageJournalCover;
     }
-
 
 
     @Override

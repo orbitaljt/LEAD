@@ -15,6 +15,8 @@ import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCal
 import com.github.ksoichiro.android.observablescrollview.ScrollState;
 import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
 import com.github.ksoichiro.android.observablescrollview.Scrollable;
+import com.orbital.lead.Parser.FormatDate;
+import com.orbital.lead.Parser.ParserFacebook;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.CustomFragmentStatePagerAdapter;
 import com.orbital.lead.controller.Fragment.FragmentDetail;
@@ -30,6 +32,7 @@ import com.nineoldandroids.view.ViewHelper;
 import com.nineoldandroids.view.ViewPropertyAnimator;
 import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumJournalServiceType;
+import com.orbital.lead.model.FacebookUserObject;
 import com.orbital.lead.model.JournalList;
 import com.orbital.lead.model.User;
 
@@ -52,15 +55,18 @@ public class MainActivity extends BaseActivity
 
     private JournalReceiver mJournalReceiver;
 
+    private String currentFacebookUserID;
     private String currentLeadUserID;
     private String currentLoginUsername;
     private String currentLoginPassword;
-
+    private String currentFacebookResponse;
+    private boolean currentIsFacebookLogin = false;
+    private boolean isRegistered = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main);
+
         getLayoutInflater().inflate(R.layout.activity_main, getBaseFrameLayout());
 
         this.initToolbar();
@@ -75,23 +81,45 @@ public class MainActivity extends BaseActivity
 
         this.initJournalReceiver();
 
-
         Bundle getBundleExtra = getIntent().getExtras();
 
         if(getBundleExtra != null){
-            String bundleLeadUserID = getBundleExtra.getString(Constant.BUNDLE_PARAM_LEAD_USER_ID, "");
-            String bundleFacebookUserID = getBundleExtra.getString(Constant.BUNDLE_PARAM_FACEBOOK_USER_ID, "");
-            String bundleUsername = getBundleExtra.getString(Constant.BUNDLE_PARAM_USERNAME, "");
-            String bundlePassword = getBundleExtra.getString(Constant.BUNDLE_PARAM_PASSWORD, "");
-            boolean bundleIsFacebookLogin = getBundleExtra.getBoolean(Constant.BUNDLE_PARAM_IS_FACEBOOK_LOGIN, false);
+            this.isRegistered = getBundleExtra.getBoolean(Constant.BUNDLE_PARAM_IS_REGISTERED, false);
+            this.currentIsFacebookLogin = getBundleExtra.getBoolean(Constant.BUNDLE_PARAM_IS_FACEBOOK_LOGIN, false);
+            this.currentLeadUserID = getBundleExtra.getString(Constant.BUNDLE_PARAM_LEAD_USER_ID, ""); // if lead user is null, will return empty
 
-            this.currentLeadUserID = bundleLeadUserID;
-            this.currentLoginUsername = bundleUsername;
-            this.currentLoginPassword = bundlePassword;
+            if(this.currentIsFacebookLogin) { // login using facebook
+                this.currentFacebookUserID = getBundleExtra.getString(Constant.BUNDLE_PARAM_FACEBOOK_USER_ID, "");
+                this.currentFacebookResponse = getBundleExtra.getString(Constant.BUNDLE_PARAM_FACEBOOK_RESPONSE, "");
 
-            if(bundleLeadUserID != ""){
-                this.getUserProfile(bundleLeadUserID);
+                getCustomLogging().debug(TAG, "currentFacebookResponse => " + currentFacebookResponse);
             }
+
+
+            if(this.isRegistered){ // is registered with lead
+                getCustomLogging().debug(TAG, "OnCreate Current user is registered");
+                //getCustomLogging().debug(TAG, "getUserProfile from this.currentLeadUserID => " + currentLeadUserID);
+                this.getUserProfile(this.currentLeadUserID);
+                // update user profile from facebook will be done after getUserProfile onPostExecute
+                // update user profile picture from facebook will be done after getUserProfile onPostExecute
+
+                if(!this.currentIsFacebookLogin){ // login with lead account
+                    this.currentLoginUsername = getBundleExtra.getString(Constant.BUNDLE_PARAM_USERNAME, "");
+                    this.currentLoginPassword = getBundleExtra.getString(Constant.BUNDLE_PARAM_PASSWORD, "");
+                }
+
+            }else { // not registered with lead
+                getCustomLogging().debug(TAG, "OnCreate Current user is not registered!");
+                this.setNewCurrentUser();
+                this.updateCurrentUserProfileFromFacebook();
+                this.createNewUserProfileToDatabase();
+            }
+
+
+
+
+
+
         }else{
             getCustomLogging().debug(TAG, "No bundle extra from getIntent()");
         }
@@ -319,49 +347,107 @@ public class MainActivity extends BaseActivity
     public void setCurrentUser(User user){
         getCustomLogging().debug(TAG, "setCurrentUser");
         CurrentLoginUser.setUser(user);
-        CurrentLoginUser.getUser().setUsername(this.currentLoginUsername);
-        CurrentLoginUser.getUser().setPassword(this.currentLoginPassword);
+
+        if(!this.currentIsFacebookLogin){ //not login using facebook
+            CurrentLoginUser.getUser().setUsername(this.currentLoginUsername);
+            CurrentLoginUser.getUser().setPassword(this.currentLoginPassword);
+        }
     }
+
+    public void setNewCurrentUser(){
+        getCustomLogging().debug(TAG, "setNewCurrentUser");
+        User user = new User();
+        CurrentLoginUser.setUser(user);
+    }
+
+    public void setNewCurrentUserID(String newUserID){
+        this.getCurrentUser().setUserID(newUserID);
+    }
+
+    public void updateCurrentUserProfileFromFacebook(){
+        getCustomLogging().debug(TAG, "updateCurrentUserProfileFromFacebook");
+        if(this.currentIsFacebookLogin){ // is login from facebook
+            // update all info that can be found from facebook
+            // plus profile picture
+            FacebookUserObject fbObj = this.getFacebookUserObject(this.currentFacebookResponse);
+
+            if(fbObj != null){
+                CurrentLoginUser.getUser().setFacebookID(fbObj.getFacebookID());
+                CurrentLoginUser.getUser().setProfilePicUrl(fbObj.getModifiedProfilePictureUrl()); // profile picture will be facebook url
+                CurrentLoginUser.getUser().setProfilePictureID(fbObj.getProfilePictureID()); // update profile picture ID
+                CurrentLoginUser.getUser().setProfilePictureType(fbObj.getProfilePictureType()); //update profile picture type
+                getCustomLogging().debug(TAG, "updateCurrentUserProfileFromFacebook fbObj.getProfilePictureType() => " + fbObj.getProfilePictureType());
+
+
+                CurrentLoginUser.getUser().setBirthday(FormatDate.parseDate(fbObj.getBirthday(), FormatDate.FACEBOOK_DATE_TO_DATABASE_DATE, null));
+                CurrentLoginUser.getUser().setFirstName(fbObj.getFirstName()); // update names
+                CurrentLoginUser.getUser().setMiddleName(fbObj.getMiddleName());
+                CurrentLoginUser.getUser().setLastName(fbObj.getLastName());
+                CurrentLoginUser.getUser().setEmail(fbObj.getEmail()); // update email
+
+            }else{
+                getCustomLogging().debug(TAG, "updateCurrentUserProfileFromFacebook FacebookUserObject is null!");
+            }
+        }
+    }
+
+    public void updateCurrentUserProfileToDatabase(){
+        String detail = getParser().userObjectToJson(getCurrentUser());
+        getCustomLogging().debug(TAG, "updateCurrentUserProfileToDatabase detail => " + detail);
+        getLogic().updateUserProfileDatabase(this, this.getCurrentUser().getUserID(), detail);
+    }
+
+
+    public void createNewUserProfileToDatabase(){
+        String detail = getParser().userObjectToJson(getCurrentUser());
+        getCustomLogging().debug(TAG, "createNewUserProfileToDatabase detail => " + detail);
+        // new user does not have lead user ID
+        getLogic().insertUserProfileDatabase(this, detail);
+    }
+
+
 
     public void getUserProfile(String userID){
         this.getLogic().getUserProfile(this, userID);
     }
 
+    /*
     public void getUserProfilePicture(String userID){
         this.getLogic().getUserProfilePicture(this, userID);
     }
+    */
 
-    public void setUserProfilePicture(String url){
-        this.setNavigationDrawerUserProfilePicture(url);
+
+    public void setUserProfilePicture(){
+        this.setNavigationDrawerUserProfilePicture(this.getCurrentUser().getProfilePicUrl());
     }
+
+
+    public void uploadUserProfilePictureUrl(){
+        getCustomLogging().debug(TAG, "uploadUserProfilePictureUrl");
+
+        String userID = this.getCurrentUser().getUserID();
+        String imageUrl = this.getCurrentUser().getProfilePicUrl();
+        String fileType = this.getCurrentUser().getProfilePictureType().toString();
+        String fileName = getParser().generateFilename(this.getCurrentUser().getProfilePictureID(), fileType);
+
+        this.getLogic().uploadProfilePictureFromFacebook(this, userID, imageUrl, fileName, fileType, true, false);
+    }
+
+
+
 
     public void setUserJournalList(JournalList list){
         this.getCurrentUser().setJournalList(list);
     }
 
 
-
-    public void setUserProfilePicture(){
-        /*
-        Bitmap result = this.mLogic.getUserProfilePicture(this, this.getCurrentUser());
-        if(result == null){
-            //set default empty user profile icon
-            mLogging.debug(TAG, "setUserProfilePicture => bitmap null");
-            this.setNavigationDrawerUserProfilePicture(getResources().getDrawable(R.drawable.ic_default_user), "");
-        }else{
-            // there's image in local storage (not image from S3)
-            mLogging.debug(TAG, "setUserProfilePicture => bitmap from local storage");
-            String fileName = this.getCurrentUser().getProfilePictureID() + Constant.STORAGE_DOT_EXTENSION + this.getCurrentUser().getProfilePictureType().toString();
-            this.setNavigationDrawerUserProfilePicture(result, this.mLogic.getLocalStorageProfileDirectory() + fileName);
-        }
-        */
-    }
-
     public void setNavigationDrawerUserProfilePicture(String url){
         getCustomLogging().debug(TAG, "setNavigationDrawerUserProfilePicture using url => " + url);
         this.getNavigationDrawerFragment().setImageUserProfile(url);
     }
 
+    /*
     public void setNavigationDrawerUserProfilePicture(Drawable drawable, String fileName){
         getCustomLogging().debug(TAG, "setNavigationDrawerUserProfilePicture using drawable");
 
@@ -374,6 +460,7 @@ public class MainActivity extends BaseActivity
         this.getNavigationDrawerFragment().setImageUserProfile(bmp);
         //this.getNavigationDrawerFragment().setCurrentUserProfilePictureFilePath(fileName);
     }
+    */
 
     public void setNavigationDrawerUserName(){
         this.getNavigationDrawerFragment().setTextUserName(this.getCurrentUser().getFirstName(), this.getCurrentUser().getMiddleName(), this.getCurrentUser().getLastName());
@@ -392,20 +479,7 @@ public class MainActivity extends BaseActivity
         return this.mFragmentMainUserJournalList;
     }
 
-    /*===================== S3 Intent Service & Receiver ================================*/
-/*
-    public S3Receiver getS3Receiver(){
-        if(this.mReceiver == null){
-            this.initS3Receiver();
-        }
-        return this.mReceiver;
-    }
 
-    public void initS3Receiver(){
-        mReceiver = new S3Receiver(new Handler());
-        //mReceiver.setReceiver(this);
-    }
-*/
 
     /*===================== Journal Intent Service & Receiver ================================*/
     public void initJournalReceiver(){
@@ -464,60 +538,17 @@ public class MainActivity extends BaseActivity
                 break;
         }
 
-
-        /*
-        EnumS3ServiceType type = null;
-        String downloadStatus = "";
-
-
-        switch (resultCode) {
-            case S3Service.STATUS_RUNNING:
-                this.mLogging.debug(TAG, "onReceiveResult -> S3Service.STATUS_RUNNING");
-                // here can call progressbar
-
-                break;
-
-            case S3Service.STATUS_FINISHED:
-                this.mLogging.debug(TAG, "onReceiveResult -> S3Service.STATUS_FINISHED");
-
-                type = (EnumS3ServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
-                switch(type){
-
-                    case QUERY_PHOTOS:
-
-                        break;
-                    case QUERY_PROFILE_PICTURE:
-                        downloadStatus = resultData.getString(Constant.INTENT_SERVICE_RESULT_DOWNLOAD_STATUS_TAG);
-                        if(downloadStatus.equals(Constant.INTENT_SERVICE_RESULT_DOWNLOAD_SUCCESS_VALUE)){ //success
-                            String profilePicFilePath = resultData.getString(Constant.INTENT_SERVICE_RESULT_DOWNLOAD_PROFILE_PICTURE_FILENAME_TAG);
-
-                            this.mLogging.debug(TAG, "onReceiveResult -> profilePicFilePath => " + profilePicFilePath);
-
-                            Bitmap bmp = this.mLogic.getLocalStorageLoadProfilePicture(profilePicFilePath);
-                            this.setNavigationDrawerUserProfilePicture(bmp, this.mLogic.getLocalStorageProfileDirectory() + profilePicFilePath);
-
-                        }else{ //failure
-                            this.mLogging.debug(TAG, "onReceiveResult -> Failed to download image from S3");
-                        }
-                        break;
-                }
-
-
-                //this.mLogging.debug(TAG, "Return value from S3Service -> " + result);
-                break;
-
-            case S3Service.STATUS_ERROR:
-                this.mLogging.debug(TAG, "S3Service.STATUS_ERROR");
-                break;
-
-        }
-
-        */
     }
 
     public JournalList getJournalListFromJson(String json){
         return getParser().parseJsonToJournalList(json);
     }
+
+    private FacebookUserObject getFacebookUserObject(String json) {
+        return ParserFacebook.getFacebookUserObject(json);
+    }
+
+
 
 
     @Override

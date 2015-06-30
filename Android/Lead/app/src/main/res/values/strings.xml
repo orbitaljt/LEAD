@@ -31,4 +31,5 @@
         The wise man therefore always holds in these matters to this principle of selection: he rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains.</string>
     <string name="title_activity_specific_journal">SpecificJournalActivity</string>
     <string name="title_activity_picture">PictureActivity</string>
+    <string name="title_activity_edit_specific_journal">EditSpecificJournalActivity</string>
 </resources>

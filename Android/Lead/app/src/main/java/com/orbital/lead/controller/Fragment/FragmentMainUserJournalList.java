@@ -214,7 +214,8 @@ public class FragmentMainUserJournalList extends Fragment{
     private void initRecyclerAdapter(JournalList list){
         this.mLogging.debug(TAG, "initRecyclerAdapter");
         View headerView = LayoutInflater.from(getMainActivity()).inflate(R.layout.blank_view_header, null);
-        this.mRecyclerAdapter = new RecyclerJournalListAdapter(getMainActivity(), headerView, list, getMainActivity().getCurrentUser());
+        //getMainActivity(),
+        this.mRecyclerAdapter = new RecyclerJournalListAdapter(headerView, list, getMainActivity().getCurrentUser());
         ((RecyclerJournalListAdapter) mRecyclerAdapter).setOnItemClickListener(new RecyclerJournalListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {

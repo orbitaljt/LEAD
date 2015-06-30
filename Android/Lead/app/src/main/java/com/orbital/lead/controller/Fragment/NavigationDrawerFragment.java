@@ -320,7 +320,7 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     public void setImageUserProfile(String url){
-        if(this.mDrawerUserProfileImage != null){
+        if(this.mDrawerUserProfileImage != null && url != ""){
             Picasso.with(getBaseActivity()).load(url).error(R.drawable.ic_default_user).into(this.mDrawerUserProfileImage);
         }
     }

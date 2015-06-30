@@ -73,29 +73,32 @@ public class Parser {
             String code = topObj.getString(Constant.MESSAGE_JSON_CODE_TAG);
             String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
 
-            JSONObject detailObj = topObj.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
+            Message mMessage = new Message(code, msg);
+            if(this.getMessageType(mMessage) == EnumMessageType.SUCCESS){
 
-            mUser = new User(detailObj.getString(Constant.MESSAGE_JSON_FACEBOK_ID_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_LEAD_USER_ID_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_PICTURE_PROFILE_ID_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_PICTURE_PROFILE_TYPE_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_EXPERIENCE_LIST_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_FIRST_NAME_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_MIDDLE_NAME_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_lAST_NAME_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_BIRTHDAY_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_ADDRESS_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_CITY_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_STATE_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_COUNTRY_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_EMAIL_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_CREATED_DATE_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_LAST_LOGIN_DATE_TAG),
-                    detailObj.getString(Constant.MESSAGE_JSON_LAST_LOGIN_TIME_TAG),
-                    this.convertStringToInteger(detailObj.getString(Constant.MESSAGE_JSON_AGE_TAG)));
+                JSONObject detailObj = topObj.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
+
+                mUser = new User(detailObj.getString(Constant.MESSAGE_JSON_FACEBOOK_ID_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_LEAD_USER_ID_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_PICTURE_PROFILE_ID_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_PICTURE_PROFILE_TYPE_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_FIRST_NAME_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_MIDDLE_NAME_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_lAST_NAME_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_BIRTHDAY_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_ADDRESS_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_CITY_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_STATE_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_COUNTRY_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_EMAIL_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_CREATED_DATE_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_LAST_LOGIN_DATE_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_LAST_LOGIN_TIME_TAG),
+                        this.convertStringToInteger(detailObj.getString(Constant.MESSAGE_JSON_AGE_TAG)));
+            }
 
             return mUser;
         }catch (JSONException e){
@@ -111,11 +114,18 @@ public class Parser {
         try{
             mLogging.debug(TAG, "parseJsonToProfilePictureLink");
             JSONObject topObj = new JSONObject(json);
-            //String code = topObj.getString(Constant.MESSAGE_JSON_CODE_TAG);
-            //String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
-            String link = topObj.getString(Constant.MESSAGE_JSON_DETAIL_TAG);
+            String code = topObj.getString(Constant.MESSAGE_JSON_CODE_TAG);
+            String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
 
-            return link;
+            Message mMessage = new Message(code, msg);
+            if(this.getMessageType(mMessage) == EnumMessageType.SUCCESS){
+                String link = topObj.getString(Constant.MESSAGE_JSON_DETAIL_TAG);
+                return link;
+            }
+            mLogging.debug(TAG, "parseJsonToProfilePictureLink no details found");
+
+            return "";
+
         }catch (JSONException e){
             mLogging.debug(TAG, "error => " + e.getMessage());
             e.printStackTrace();
@@ -132,7 +142,7 @@ public class Parser {
             String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
 
             Message mMessage = new Message(code, msg);
-            if(isMessageSuccess(mMessage)){
+            if(this.getMessageType(mMessage) == EnumMessageType.SUCCESS){
                 list = new JournalList();
 
                 JSONArray detailArray = topObj.getJSONArray(Constant.MESSAGE_JSON_DETAIL_TAG);
@@ -181,7 +191,7 @@ public class Parser {
             String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
 
             Message mMessage = new Message(code, msg);
-            if(isMessageSuccess(mMessage)){
+            if(this.getMessageType(mMessage) == EnumMessageType.SUCCESS){
 
                 JSONObject detailObj = topObj.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
                 JSONArray listOfPictureArray = detailObj.getJSONArray(Constant.MESSAGE_JSON_LIST_OF_PICTURES_TAG);
@@ -225,6 +235,37 @@ public class Parser {
         }
     }
 
+    public String userObjectToJson(User user){
+        JSONObject obj = new JSONObject();
+        try{
+            obj.put(Constant.MESSAGE_JSON_FACEBOOK_ID_TAG, user.getFacebookID());
+            obj.put(Constant.MESSAGE_JSON_PICTURE_PROFILE_ID_TAG, user.getProfilePictureID());
+            obj.put(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG, user.getJournalListID());
+            obj.put(Constant.MESSAGE_JSON_FIRST_NAME_TAG, user.getFirstName());
+            obj.put(Constant.MESSAGE_JSON_MIDDLE_NAME_TAG, user.getMiddleName());
+            obj.put(Constant.MESSAGE_JSON_lAST_NAME_TAG, user.getLastName());
+            obj.put(Constant.MESSAGE_JSON_BIRTHDAY_TAG, user.getBirthday());
+            obj.put(Constant.MESSAGE_JSON_AGE_TAG, user.getAge());
+            obj.put(Constant.MESSAGE_JSON_ADDRESS_TAG, user.getAddress());
+            obj.put(Constant.MESSAGE_JSON_CITY_TAG, user.getCity());
+            obj.put(Constant.MESSAGE_JSON_STATE_TAG, user.getState());
+            obj.put(Constant.MESSAGE_JSON_COUNTRY_TAG, user.getCountry());
+            obj.put(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG, user.getCountryCode());
+            obj.put(Constant.MESSAGE_JSON_EMAIL_TAG, user.getEmail());
+
+            mLogging.debug(TAG, "user.getLastName() => " + user.getLastName());
+            mLogging.debug(TAG, "user.getEmail() => " + user.getEmail());
+
+            return obj.toString();
+
+        } catch (JSONException e){
+            mLogging.debug(TAG, "userObjectToJson error => " + e.getMessage());
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+
 
 
     public String createPictureCoverUrl(String pictureCoverID, String pictureCoverType, String userID){
@@ -240,12 +281,8 @@ public class Parser {
     }
 
 
-    public boolean isMessageSuccess(Message msg){
-        if(msg.getType() == EnumMessageType.SUCCESS){
-            return true;
-        }else{
-            return false;
-        }
+    public EnumMessageType getMessageType(Message msg){
+       return msg.getType();
     }
 
     public boolean isStringEmpty(String val){

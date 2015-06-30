@@ -37,7 +37,7 @@ public class FragmentAlbum extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_ALBUM = "album";
     private static final String ARG_PICTURE_LIST = "picturelist";
-    private static Context mContext;
+    //private static Context mContext;
 
     // TODO: Rename and change types of parameters
     private Album mParamAlbum;
@@ -47,7 +47,7 @@ public class FragmentAlbum extends Fragment {
     private CustomLogging mLogging;
     private Logic mLogic;
 
-    private PictureActivity mPictureActivity;
+    //private PictureActivity mPictureActivity;
     private GridView mGridView;
 
     /**
@@ -59,14 +59,16 @@ public class FragmentAlbum extends Fragment {
      * @return A new instance of fragment FragmentAlbum.
      */
     // TODO: Rename and change types and number of parameters
-    public static FragmentAlbum newInstance(Context context, Album album, ArrayList<Picture> picList) {
+    //Context context,
+    public static FragmentAlbum newInstance(Album album, ArrayList<Picture> picList) {
         FragmentAlbum fragment = new FragmentAlbum();
 
-        mContext = context;
+        //mContext = context;
+        ArrayList<Picture> list = new ArrayList<Picture>(picList);
 
         Bundle args = new Bundle();
         args.putParcelable(ARG_ALBUM, album);
-        args.putParcelableArrayList(ARG_PICTURE_LIST, picList);
+        args.putParcelableArrayList(ARG_PICTURE_LIST, list);
         fragment.setArguments(args);
         return fragment;
     }
@@ -103,7 +105,7 @@ public class FragmentAlbum extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        this.initActivity(activity);
+        //this.initActivity(activity);
         try {
             mListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -118,10 +120,11 @@ public class FragmentAlbum extends Fragment {
         mListener = null;
     }
 
+    /*
     public PictureActivity getPictureActivity(){
         return this.mPictureActivity;
     }
-
+    */
 
     private void initLogging(){
         this.mLogging = CustomLogging.getInstance();
@@ -131,16 +134,19 @@ public class FragmentAlbum extends Fragment {
         this.mLogic = Logic.getInstance();
     }
 
+    /*
     private void initActivity(Activity activity){
         if(activity instanceof PictureActivity){
             this.mPictureActivity = (PictureActivity) activity;
         }
     }
+    */
 
     private void initGridView(View v){
         this.mLogging.debug(TAG, "initGridView");
         this.mGridView = (GridView) v.findViewById(R.id.grid_album_picture);
-        this.mGridView.setAdapter(new GridImageAdapter(getContext(), this.mGridView, this.getParamPictureList()));
+        //getActivity(),
+        this.mGridView.setAdapter(new GridImageAdapter(this.mGridView, this.getParamPictureList()));
         this.mGridView.setChoiceMode(GridView.CHOICE_MODE_MULTIPLE_MODAL);
         this.mGridView.setMultiChoiceModeListener(new MultiChoiceModeListener(this.getGridView()));
         this.mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -149,7 +155,7 @@ public class FragmentAlbum extends Fragment {
                 mLogging.debug(TAG, "onItemSelected -> " + position);
                 String url = getParamPictureList().get(position).getThumbnailUrl();
                 mLogging.debug(TAG, "getThumbnailUrl -> " + url);
-                getLogic().showDialogPicture(getPictureActivity(), url);
+                getLogic().showDialogPicture(getActivity(), url);
             }
         });
 
@@ -167,9 +173,11 @@ public class FragmentAlbum extends Fragment {
         return this.mGridView;
     }
 
+    /*
     private Context getContext() {
         return mContext;
     }
+    */
 
     private Logic getLogic() {
         return this.mLogic;

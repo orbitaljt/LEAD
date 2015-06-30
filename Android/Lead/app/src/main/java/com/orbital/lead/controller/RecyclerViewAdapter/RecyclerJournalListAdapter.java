@@ -1,12 +1,14 @@
 package com.orbital.lead.controller.RecyclerViewAdapter;
 
+import android.app.Application;
 import android.content.Context;
-import android.media.Image;
-import android.support.v7.widget.CardView;
+import android.graphics.Bitmap;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -16,17 +18,23 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 
-import com.joooonho.SelectableRoundedImageView;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.orbital.lead.Parser.FormatDate;
 import com.orbital.lead.Parser.FormatTime;
 import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.Activity.MainActivity;
+import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.logic.CustomLogging;
-import com.orbital.lead.model.Constant;
+import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.JournalList;
 import com.orbital.lead.model.User;
+import com.orbital.lead.widget.FourThreeImageView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -43,7 +51,9 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
     private OnItemClickListener mItemClickListener;
     private Parser mParser;
     private CustomLogging mLogging;
-    private MainActivity activity;
+    private Logic mLogic;
+    private Context mContext;
+    //private MainActivity activity;
 
     private JournalList mJournalList;
     private User mCurrentUser;
@@ -52,6 +62,7 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
     private Animation inAnim;
     private Animation outAnim;
 
+    private DisplayImageOptions mOptions;
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
         public HeaderViewHolder(View v) {
@@ -64,33 +75,69 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
         private TableRow mTableRowContent;
         private TextView mTextTitle;
         private TextView mTextSubTitle;
-        private ImageView mImagePicture;
+        private FourThreeImageView mImagePicture;
         private ProgressBar mLoadingSpinner;
         private ViewAnimator mAnimator;
 
+        private int imageWidth = 0;
 
         public ListContentHolder(View v){
             super(v);
             this.initTableRowContent(v);
             this.mTextTitle = (TextView) v.findViewById(R.id.text_view_title);
             this.mTextSubTitle = (TextView) v.findViewById(R.id.text_view_subtitle);
-            this.initTopImageView(v);
+            this.initThumbnailImageView(v);
             this.mLoadingSpinner = (ProgressBar) v.findViewById(R.id.loading_spinner);
             this.initViewAnimator(v);
         }
 
-        public void setCardTextTitle(String val){
+        public void setTextTitle(String val){
             this.mTextTitle.setText(val);
         }
 
-        public void setCardTextSubTitle(String val){
+        public void setTextSubTitle(String val){
             this.mTextSubTitle.setText(val);
         }
 
-        public void setCardTopImage(Context context, String url){
+        public void setThumbnailImage(Context context, String url){
+            mLogging.debug(TAG, "setThumbnailImage");
             this.mAnimator.setDisplayedChild(1);
-            //.error(R.drawable.image_blank_picture)
-            //.transform(new RoundedTransformation(10, 0))
+
+            ImageLoader.getInstance()
+                    .displayImage(url, this.mImagePicture, mOptions,
+                            new SimpleImageLoadingListener(){
+                                @Override
+                                public void onLoadingStarted(String imageUri, View view) {
+                                    //holder.progressBar.setProgress(0);
+                                    //holder.progressBar.setVisibility(View.VISIBLE);
+                                    mLogging.debug(TAG, "onLoadingStarted");
+                                }
+
+                                @Override
+                                public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                                    //holder.progressBar.setVisibility(View.GONE);
+                                    mLogging.debug(TAG, "onLoadingFailed");
+                                    mAnimator.setDisplayedChild(2);
+                                }
+
+                                @Override
+                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                    //holder.progressBar.setVisibility(View.GONE);
+                                    mLogging.debug(TAG, "onLoadingComplete");
+                                    mAnimator.setDisplayedChild(0);
+                                }
+                            },
+                            new ImageLoadingProgressListener() {
+                                @Override
+                                public void onProgressUpdate(String imageUri, View view, int current, int total) {
+                                    mLogging.debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
+                                    //holder.progressBar.setProgress(Math.round(100.0f * current / total));
+                                }
+                    });
+
+
+
+            /*
             Picasso.with(context)
                     .load(url)
                     .error(R.drawable.image_blank_picture_16_to_9)
@@ -108,6 +155,9 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
                             mAnimator.setDisplayedChild(2);
                         }
                     });
+
+                    */
+
         }
 
         public TableRow getTableRowContent() {
@@ -132,8 +182,29 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
             this.mTableRowContent = (TableRow) v.findViewById(R.id.tableRow_content);
         }
 
-        private void initTopImageView(View v){
-            this.mImagePicture = (ImageView) v.findViewById(R.id.image_picture);
+        private void initThumbnailImageView(View v){
+            this.mImagePicture = (FourThreeImageView) v.findViewById(R.id.image_picture);
+
+            /*
+            this.mImagePicture.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    mLogging.debug(TAG, "mImagePicture.getWidth() =>" + mImagePicture.getWidth());
+                    mLogging.debug(TAG, "mImagePicture.getMeasuredWidth() =>" + mImagePicture.getMeasuredWidth());
+                    imageWidth = mImagePicture.getMeasuredWidth();
+
+
+                }
+            });
+            */
+ /*
+                    if (Build.VERSION.SDK_INT< Build.VERSION_CODES.JELLY_BEAN) {
+                        mImagePicture.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    } else {
+                        mImagePicture.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    }
+                    */
+
         }
 
         private void initViewAnimator(View v){
@@ -142,38 +213,26 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
             this.mAnimator.setOutAnimation(outAnim);
         }
 
-
-
-
-
-        private void resizeTopImageView(int currentWidth, int currentHeight){
-            int newWidth = currentWidth;
-            //int newHeight = (width * 9)/16;
-            int newHeight = 100;
-            mLogging.debug(TAG, "set imageview new width height => " + newWidth + ", " + newHeight);
-
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(newWidth, newHeight);
-            //mCardTopImage.setLayoutParams(layoutParams);
-
-        }
-
-
-
-
     }
 
-    public RecyclerJournalListAdapter(MainActivity activity, View headerView, JournalList list, User currentUser){
+    //MainActivity activity,
+    public RecyclerJournalListAdapter(View headerView, JournalList list, User currentUser){
         this.initLogging();
+        this.initLogic();
         this.initParser();
         this.setHeaderView(headerView);
-        this.setMainActivity(activity);
+        //this.setMainActivity(activity);
         this.setJournalList(list);
         this.setCurrentUser(currentUser);
-        this.initAnimation();
+        this.initDisplayImageOptions();
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        this.mContext = parent.getContext();
+        this.initAnimation();
+
         if(viewType == VIEW_TYPE_HEADER){
             return new HeaderViewHolder(mHeaderView);
         }else{
@@ -199,15 +258,16 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
                 String userID = this.getCurrentUser().getUserID();
                 String pictureUrl = mParser.createPictureCoverUrl(pictureCoverID, pictureCoverType, userID);
 
-                ((ListContentHolder) holder).setCardTopImage(getMainActivity(), pictureUrl);
-                ((ListContentHolder) holder).setCardTextTitle(title);
-                ((ListContentHolder) holder).setCardTextSubTitle(journalDate + " at " + journalTime);
+                ((ListContentHolder) holder).setThumbnailImage(getContext(), pictureUrl);
+                ((ListContentHolder) holder).setTextTitle(title);
+                ((ListContentHolder) holder).setTextSubTitle(journalDate + " at " + journalTime);
 
                 ((ListContentHolder) holder).getTableRowContent().setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         mLogging.debug(TAG, "mCardParent clicked");
-                        getMainActivity().getFragmentMainUserJournalList().displaySpecificJournalActivity(j);
+                        mLogic.displaySpecificJournalActivity(getContext(), j);
+                        //getContext().getFragmentMainUserJournalList().displaySpecificJournalActivity(j);
                     }
                 });
 
@@ -215,7 +275,8 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
                     @Override
                     public void onClick(View v) {
                         mLogging.debug(TAG, "mCardTopImage clicked");
-                        getMainActivity().getFragmentMainUserJournalList().displaySpecificJournalActivity(j);
+                        mLogic.displaySpecificJournalActivity(getContext(), j);
+                        //getContext().getFragmentMainUserJournalList().displaySpecificJournalActivity(j);
                     }
                 });
 
@@ -260,9 +321,16 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
         this.mLogging = CustomLogging.getInstance();
     }
 
+    private void initLogic() {
+        this.mLogic = Logic.getInstance();
+    }
+
+
+    /*
     private void setMainActivity(MainActivity activity){
         this.activity = activity;
     }
+    */
 
     private void setHeaderView(View v){
         this.mHeaderView = v;
@@ -280,8 +348,13 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
         return this.mParser;
     }
 
+    /*
     private MainActivity getMainActivity(){
         return this.activity;
+    }
+*/
+    private Context getContext(){
+        return this.mContext;
     }
 
     private JournalList getJournalList(){
@@ -293,7 +366,12 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
     }
 
     private void initAnimation(){
-        this.inAnim = AnimationUtils.loadAnimation(getMainActivity(), android.R.anim.fade_in);
-        this.outAnim = AnimationUtils.loadAnimation(getMainActivity(),android.R.anim.fade_out);
+        this.inAnim = AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in);
+        this.outAnim = AnimationUtils.loadAnimation(getContext(),android.R.anim.fade_out);
     }
+
+    private void initDisplayImageOptions() {
+        this.mOptions = CustomApplication.getDisplayImageOptions();
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.orbital.lead.controller.GridAdapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +14,14 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ViewAnimator;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.orbital.lead.R;
+import com.orbital.lead.controller.Activity.PictureActivity;
+import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.model.Picture;
 import com.squareup.picasso.Callback;
@@ -27,6 +35,7 @@ import java.util.ArrayList;
 public class GridImageAdapter extends BaseAdapter{
     private final String TAG = this.getClass().getSimpleName();
 
+    //private PictureActivity mPictureActivity;
     private Context mContext;
     private ArrayList<Picture> mPictureList;
     private GridView mGrid;
@@ -34,14 +43,23 @@ public class GridImageAdapter extends BaseAdapter{
 
     private Animation inAnim;
     private Animation outAnim;
+    private DisplayImageOptions mOptions;
 
-    public GridImageAdapter(Context context, GridView grid, ArrayList<Picture> picList){
+    public GridImageAdapter(GridView grid, ArrayList<Picture> picList){
         this.initLogging();
         mLogging.debug(TAG, "GridImageAdapter");
+
+        /*
         this.mContext = context;
+        if(context instanceof PictureActivity){
+            this.mPictureActivity = (PictureActivity) context;
+        }
+        */
+
         this.mGrid = grid;
         this.mPictureList = picList;
-        this.initAnimation();
+        this.initDisplayImageOptions();
+
     }
 
     @Override
@@ -62,9 +80,11 @@ public class GridImageAdapter extends BaseAdapter{
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         mLogging.debug(TAG, "getView");
-        CheckableLayout checkLayout;
-        ImageView checkableImage;
+        //CheckableLayout checkLayout;
+        //ImageView checkableImage;
 
+        this.mContext = parent.getContext();
+        this.initAnimation();
         /*
         View v = null;
 
@@ -119,34 +139,56 @@ public class GridImageAdapter extends BaseAdapter{
             this._image = (ImageView) v.findViewById(R.id.grid_image);
         }
 
-        /*
-        public void setListTextName(String value){
-
-            this._listTextName.setText(value);
-        }
-        */
         public void setImage(final String url){
             this.mAnimator.setDisplayedChild(1);
 
-            //System.out.println("mAnimator.getMeasuredWidth() => "+ mAnimator.getMeasuredWidth());
+            /*
             Picasso.with(getContext())
                     .load(url)
                     .noFade()
                     .into(this._image, new Callback() {
                         @Override
                         public void onSuccess() {
-                            //mLogging.debug(TAG, "Picasso onSuccess with URL => " + url);
                             mAnimator.setDisplayedChild(0); // show actual image
                         }
 
                         @Override
                         public void onError() {
-                            //mLogging.debug(TAG, "Picasso onError with URL => " + url);
                             mAnimator.setDisplayedChild(2); // failed to load
                         }
                     });
+                    */
+            ImageLoader.getInstance()
+                    .displayImage(url, this.getImage(), mOptions,
+                            new SimpleImageLoadingListener(){
+                                @Override
+                                public void onLoadingStarted(String imageUri, View view) {
+                                    //holder.progressBar.setProgress(0);
+                                    //holder.progressBar.setVisibility(View.VISIBLE);
+                                    mLogging.debug(TAG, "onLoadingStarted");
+                                }
 
-            //.error(R.drawable.image_blank_picture_4_to_3)
+                                @Override
+                                public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                                    //holder.progressBar.setVisibility(View.GONE);
+                                    mLogging.debug(TAG, "onLoadingFailed");
+                                    mAnimator.setDisplayedChild(2);
+                                }
+
+                                @Override
+                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                    //holder.progressBar.setVisibility(View.GONE);
+                                    mLogging.debug(TAG, "onLoadingComplete");
+                                    mAnimator.setDisplayedChild(0);
+                                }
+                            },
+                            new ImageLoadingProgressListener() {
+                                @Override
+                                public void onProgressUpdate(String imageUri, View view, int current, int total) {
+                                    mLogging.debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
+                                    //holder.progressBar.setProgress(Math.round(100.0f * current / total));
+                                }
+                            });
         }
 
         public ImageView getImage(){
@@ -162,12 +204,23 @@ public class GridImageAdapter extends BaseAdapter{
 
     }//end ViewHolder
 
+
     private Context getContext() {
         return this.mContext;
     }
+/*
+    private PictureActivity getPictureActivity() {
+        return this.mPictureActivity;
+    }
+
+*/
 
     private ArrayList<Picture> getPictureList() {
         return this.mPictureList;
+    }
+
+    private void initDisplayImageOptions() {
+        this.mOptions = CustomApplication.getDisplayImageOptions();
     }
 
     private void initLogging(){

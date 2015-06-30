@@ -9,6 +9,9 @@ import android.widget.ImageView;
  */
 public class FourThreeImageView extends ImageView {
 
+    int newWidth = 0;
+    int newHeight = 0;
+
     public FourThreeImageView(Context context) {
         super(context);
     }
@@ -30,6 +33,10 @@ public class FourThreeImageView extends ImageView {
 
         //int height = width * getDrawable().getIntrinsicHeight() / getDrawable().getIntrinsicWidth();
         setMeasuredDimension(newWidth, newHeight);
+    }
+
+    public int getNewWidth(){
+        return newWidth;
     }
 
 

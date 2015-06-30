@@ -226,6 +226,27 @@
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>
 
+    <style name="editTextWithoutBackgroundStyle">
+        <item name="android:background">#00000000</item>
+        <item name="android:textSize">@dimen/text_secondary</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:layout_marginTop">@dimen/edit_text_margin_top</item>
+    </style>
+
+    <style name="editTextTitleStyle" parent="editTextWithoutBackgroundStyle">
+        <item name="android:textColor">@color/primary_dark</item>
+    </style>
+
+    <style name="editTextContentStyle" parent="editTextWithoutBackgroundStyle">
+        <item name="android:textColor">@color/primary_text</item>
+    </style>
+
+    <style name="lineStyle">
+        <item name="android:layout_marginTop">@dimen/edit_text_margin_top</item>
+        <item name="android:layout_marginBottom">@dimen/edit_text_margin_bottom </item>
+
+    </style>
+
 
 
 

@@ -13,6 +13,17 @@ public enum EnumPictureType {
         ext = s;
     }
 
+    public static EnumPictureType fromString(String text) {
+        if (text != null) {
+            for (EnumPictureType b : EnumPictureType.values()) {
+                if (text.equalsIgnoreCase(b.ext)) {
+                    return b;
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString(){
         return ext;

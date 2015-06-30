@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 
 import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.R;
+import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.controller.Fragment.NavigationDrawerFragment;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.Logic;
@@ -32,6 +33,7 @@ public class BaseActivity extends AppCompatActivity
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
+    private CustomApplication mApp;
     private CharSequence mTitle;
     protected FrameLayout mBaseFrameLayout;
     private CustomLogging mLogging;
@@ -42,7 +44,7 @@ public class BaseActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base_layout);
-
+        this.initApplication();
         this.initLogging(); // initialize logging first
         this.initParser();
         this.initLogic();
@@ -76,7 +78,6 @@ public class BaseActivity extends AppCompatActivity
     protected void onPause() {
         super.onPause();
     }
-
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
@@ -185,6 +186,14 @@ public class BaseActivity extends AppCompatActivity
 
     protected ActionBarDrawerToggle getNavigationDrawerToggle(){
         return this.mNavigationDrawerToggle;
+    }
+
+    public CustomApplication getCustomApplication(){
+        return this.mApp;
+    }
+
+    private void initApplication(){
+        this.mApp = (CustomApplication) getApplicationContext();
     }
 
 

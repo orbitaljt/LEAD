@@ -21,33 +21,48 @@ public class AsyncUserProfile extends AsyncTask<String, Void, String> {
     @Override
     final protected String doInBackground(String... params) {
         // params[0] - type
-        // values = 300 / 301 / 302 (see constant)
+        // type values = 300 / 302 / 303 (see constant)
         // params[1] - user ID
-        // params[2] - picture query quantity (only for type 900)
+        // params[2] - details (for 302 and 303)
         this.initParser();
+
+        String userID = "";
+        String response = "";
+        String detail = "";
 
         try{
             if(params.length > 1){
-                String userID = params[1];
+                userID = params[1];
 
-                if(!mParser.isStringEmpty(userID)){
-
-                    String response = "";
-
-                    switch(params[0]){
-                        case Constant.TYPE_GET_USER_PROFILE:
+                switch(params[0]){
+                    case Constant.TYPE_GET_USER_PROFILE:
+                        if(!mParser.isStringEmpty(userID)){
                             response = this.getUserProfile(userID);
-                            System.out.println("AsyncUserProfile response => " + response);
+                            System.out.println("AsyncUserProfile TYPE_GET_USER_PROFILE response => " + response);
                             return response;
+                        }
+                        return "";
 
-                        case Constant.TYPE_UPDATE_USER_PROFILE:
+                    case Constant.TYPE_UPDATE_USER_PROFILE:
+                        if(!mParser.isStringEmpty(userID)){
+                            detail = params[2];
+                            response = this.updateUserProfile(userID, detail);
+                            System.out.println("AsyncUserProfile TYPE_UPDATE_USER_PROFILE response => " + response);
+                            return response;
+                        }
+                        return "";
 
-                        case Constant.TYPE_CREATE_USER_PROFILE:
+                    case Constant.TYPE_CREATE_USER_PROFILE:
+                        // does not need user ID
+                        detail = params[2];
+                        response = this.insertUserProfile(detail);
+                        System.out.println("AsyncUserProfile TYPE_CREATE_USER_PROFILE response => " + response);
+                        return response;
 
-                        default:
-                            return "";
-                    }
+                    default:
+                        return "";
                 }
+
 
             }
 
@@ -75,13 +90,23 @@ public class AsyncUserProfile extends AsyncTask<String, Void, String> {
         return WebConnector.convertStreamToString(this.urlStream);
     }
 
+    private String updateUserProfile(String userID, String detail) throws IOException{
+        String url = Constant.URL_CLIENT_SERVER;
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, userID);
+        params.put(Constant.URL_POST_PARAMETER_TAG_DETAIL, detail);
 
-
-    private String updateUserProfile(String userID) throws IOException{
-       return "";
+        this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_UPDATE_USER_PROFILE, params);
+        return WebConnector.convertStreamToString(this.urlStream);
     }
 
-    private String createUserProfile() throws IOException{
-        return "";
+    private String insertUserProfile(String detail) throws IOException{
+        String url = Constant.URL_CLIENT_SERVER;
+        HashMap<String, String> params = new HashMap<String, String>();
+        //params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, userID);
+        params.put(Constant.URL_POST_PARAMETER_TAG_DETAIL, detail);
+
+        this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_CREATE_USER_PROFILE, params);
+        return WebConnector.convertStreamToString(this.urlStream);
     }
 }

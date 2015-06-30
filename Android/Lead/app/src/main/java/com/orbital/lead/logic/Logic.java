@@ -26,6 +26,7 @@ import com.orbital.lead.controller.Fragment.FragmentLogin;
 import com.orbital.lead.controller.Activity.MainActivity;
 import com.orbital.lead.controller.Service.JournalService;
 import com.orbital.lead.controller.Service.PictureService;
+import com.orbital.lead.logic.Asynchronous.AsyncUploadImage;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfilePicture;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfile;
 import com.orbital.lead.logic.LocalStorage.LocalStorage;
@@ -79,7 +80,7 @@ public class Logic {
     }
 
     public void getUserProfile(Activity activity, String leadUserID){
-        HttpAsyncUserProfile mAsync = new HttpAsyncUserProfile(activity);
+        HttpAsyncUserProfile mAsync = new HttpAsyncUserProfile(activity, Constant.TYPE_GET_USER_PROFILE);
         mAsync.execute(Constant.TYPE_GET_USER_PROFILE, leadUserID);
     }
 
@@ -144,6 +145,26 @@ public class Logic {
             mLogging.debug(TAG, "getUserSpecificAlbum => Get specific album from web service with album ID => " + albumID);
             this.executePictureService(context, EnumPictureServiceType.GET_ALBUM_PHOTO, albumID);
         }
+    }
+
+    public void updateUserProfileDatabase(Context context, String userID, String detail){
+        // detail in json string
+        HttpAsyncUserProfile mAsync = new HttpAsyncUserProfile(context, Constant.TYPE_UPDATE_USER_PROFILE);
+        mAsync.execute(Constant.TYPE_UPDATE_USER_PROFILE, userID, detail);
+    }
+
+    public void uploadProfilePictureFromFacebook(Context context, String userID, String imageUrl, String fileName, String fileType,
+                                                 boolean fromFacebook, boolean fromLead){
+        HttpAsyncUploadImageUrl mAsync = new HttpAsyncUploadImageUrl(context);
+        mAsync.execute(Constant.TYPE_UPLOAD_IMAGE_URL, userID, imageUrl, fileName, fileType,
+                        mParser.convertBooleanToString(fromFacebook),
+                        mParser.convertBooleanToString(fromLead));
+    }
+
+    public void insertUserProfileDatabase(Context context, String detail) {
+        // detail in json string
+        HttpAsyncUserProfile mAsync = new HttpAsyncUserProfile(context, Constant.TYPE_CREATE_USER_PROFILE);
+        mAsync.execute(Constant.TYPE_CREATE_USER_PROFILE, "", detail);
     }
 
 
@@ -279,9 +300,11 @@ public class Logic {
     private class HttpAsyncUserProfile extends AsyncUserProfile {
 
         private Context mContext;
+        private String type = "";
 
-        public HttpAsyncUserProfile(Context c){
+        public HttpAsyncUserProfile(Context c, String type){
             this.mContext = c;
+            this.type = type;
         }
 
         @Override
@@ -296,15 +319,51 @@ public class Logic {
            // if (prog != null && prog.isShowing()) {
            //     prog.dismiss();
            // }//end if
-            if(mContext instanceof MainActivity){ // calling from mainactivity
-                // update current login user in mainactivity
-                User user = mParser.parseJsonToUser(result);
-                ((MainActivity) mContext).setCurrentUser(user);
-                ((MainActivity) mContext).getUserProfilePicture(user.getUserID());
-                ((MainActivity) mContext).setNavigationDrawerUserName();
-                ((MainActivity) mContext).setNavigationDrawerUserEmail();
-                ((MainActivity) mContext).getUserJournalList();
+            switch(type){
+                case Constant.TYPE_GET_USER_PROFILE:
+                    if(mContext instanceof MainActivity){ // calling from mainactivity
+                        // update current login user in mainactivity
+                        User user = mParser.parseJsonToUser(result);
+                        ((MainActivity) mContext).setCurrentUser(user);
+                        ((MainActivity) mContext).updateCurrentUserProfileFromFacebook();
+                        ((MainActivity) mContext).updateCurrentUserProfileToDatabase();
+                        ((MainActivity) mContext).uploadUserProfilePictureUrl();
+                        //((MainActivity) mContext).getUserProfilePicture(user.getUserID());
+                        ((MainActivity) mContext).setUserProfilePicture();
+                        ((MainActivity) mContext).setNavigationDrawerUserName();
+                        ((MainActivity) mContext).setNavigationDrawerUserEmail();
+                        ((MainActivity) mContext).getUserJournalList();
+                    }
+                    break;
+
+                case Constant.TYPE_UPDATE_USER_PROFILE:
+                    if(mContext instanceof MainActivity) { // calling from mainactivity
+                        mLogging.debug(TAG, "HttpAsyncUserProfile onPostExecute result => " + result);
+                    }
+                    break;
+
+                case Constant.TYPE_CREATE_USER_PROFILE:
+
+                    String newUserID = mParser.parseUserIDFromJson(result);
+
+                    if(mContext instanceof MainActivity) { // calling from mainactivity
+                        if(!mParser.isStringEmpty(newUserID)){ // user id is not empty
+                            mLogging.debug(TAG, "HttpAsyncUserProfile TYPE_CREATE_USER_PROFILE onPostExecute newUserID => " + newUserID);
+
+                            ((MainActivity) mContext).setNewCurrentUserID(newUserID);
+                            ((MainActivity) mContext).uploadUserProfilePictureUrl();
+                            ((MainActivity) mContext).setUserProfilePicture();
+                            ((MainActivity) mContext).setNavigationDrawerUserName();
+                            ((MainActivity) mContext).setNavigationDrawerUserEmail();
+                        }else{
+                            mLogging.debug(TAG, "Unable to get new lead user ID");
+                        }
+                    }
+
+
+                    break;
             }
+
 
         }
     }
@@ -333,7 +392,7 @@ public class Logic {
                         String getImageLink = mParser.parseJsonToProfilePictureLink(result);
 
                         user.setProfilePicUrl(getImageLink);
-                        ((MainActivity) mContext).setUserProfilePicture(getImageLink);
+                        //((MainActivity) mContext).setUserProfilePicture(getImageLink);
 
                         break;
                     case Constant.PICTURE_QUERY_QUANTITY_ALBUM:
@@ -348,6 +407,41 @@ public class Logic {
         }//end onPostExecute
 
     }//end HttpAsyncUserProfilePicture
+
+
+    private class HttpAsyncUploadImageUrl extends AsyncUploadImage {
+        private Context mContext;
+
+        public HttpAsyncUploadImageUrl(Context c){
+            this.mContext = c;
+        }
+
+        @Override
+        protected void onPreExecute() {
+        }
+
+        @Override
+        protected void onPostExecute(final String result) {
+            mLogging.debug(TAG, "HttpAsyncUploadImageUrl onPostExecute result => " + result);
+
+            //if(mContext instanceof MainActivity){ // calling from mainactivity
+
+
+                //User user = ((MainActivity) mContext).getCurrentUser();
+                //String getImageLink = mParser.parseJsonToProfilePictureLink(result);
+
+                //user.setProfilePicUrl(getImageLink);
+                //((MainActivity) mContext).setUserProfilePicture(getImageLink);
+
+
+            //}//end if
+
+        }//end onPostExecute
+
+
+
+
+    }
 
 
 
