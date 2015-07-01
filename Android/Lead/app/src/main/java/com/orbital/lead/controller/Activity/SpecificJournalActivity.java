@@ -130,11 +130,14 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }else if(id == android.R.id.home){
+        if(id == android.R.id.home) {
             getCustomLogging().debug(TAG, "onOptionsItemSelected");
             onBackPressed();
+            return true;
+        }else if (id == R.id.action_edit_journal){
+            this.displayEditSpecificJournal();
+
+        }else if (id == R.id.action_settings) {
             return true;
         }
 
@@ -366,6 +369,9 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         return this.mImageJournalCover;
     }
 
+    private void displayEditSpecificJournal() {
+        this.getLogic().displayEditSpecificJournalActivity(this, this.getJournal());
+    }
 
     @Override
     public void onReceiveResult(int resultCode, Bundle resultData) {

@@ -18,16 +18,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.siyamed.shapeimageview.CircularImageView;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.Activity.BaseActivity;
 import com.orbital.lead.controller.Activity.MainActivity;
 import com.orbital.lead.controller.ListAdapter.DrawerListAdapter;
+import com.orbital.lead.logic.CustomLogging;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -48,6 +54,7 @@ public class NavigationDrawerFragment extends Fragment {
      */
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
 
+    private final String TAG = this.getClass().getSimpleName();
     /**
      * A pointer to the current callbacks instance (the Activity).
      */
@@ -68,6 +75,8 @@ public class NavigationDrawerFragment extends Fragment {
     private DrawerListAdapter mDrawerListAdapter;
     private ListView mDrawerListView;
 
+    private CustomLogging mLogging;
+
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
@@ -75,6 +84,16 @@ public class NavigationDrawerFragment extends Fragment {
     private View.OnClickListener mOriginalListener;
 
     public NavigationDrawerFragment() {
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mCallbacks = (NavigationDrawerCallbacks) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
+        }
     }
 
     @Override
@@ -96,18 +115,12 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        // Indicate that this fragment would like to influence the set of actions in the action bar.
-        setHasOptionsMenu(true);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
 
+        this.initLogging();
         this.initDrawerListAdapter();
         this.initDrawerList(rootView);
         this.initImageHeader(rootView);
@@ -115,30 +128,20 @@ public class NavigationDrawerFragment extends Fragment {
         this.initTextUserName(rootView);
         this.initTextUserEmail(rootView);
 
-        /*
-        mDrawerListView = (ListView) inflater.inflate(
-                R.layout.fragment_navigation_drawer, container, false);
-        mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectItem(position);
-            }
-        });
-
-
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                getActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_1,
-                android.R.id.text1,
-                new String[]{
-                        getString(R.string.title_section1),
-                        getString(R.string.title_section2),
-                        getString(R.string.title_section3),
-                }));
-        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-        */
-
         return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        // Indicate that this fragment would like to influence the set of actions in the action bar.
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        this.mLogging.debug(TAG, "onResume");
     }
 
     public boolean isDrawerOpen() {
@@ -244,21 +247,20 @@ public class NavigationDrawerFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mCallbacks = (NavigationDrawerCallbacks) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
-        }
-    }
+
 
     @Override
     public void onDetach() {
         super.onDetach();
         mCallbacks = null;
     }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        this.mLogging.debug(TAG, "onPause");
+    }
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -321,7 +323,40 @@ public class NavigationDrawerFragment extends Fragment {
 
     public void setImageUserProfile(String url){
         if(this.mDrawerUserProfileImage != null && url != ""){
-            Picasso.with(getBaseActivity()).load(url).error(R.drawable.ic_default_user).into(this.mDrawerUserProfileImage);
+            //Picasso.with(getBaseActivity()).load(url).error(R.drawable.ic_default_user).into(this.);
+            ImageLoader.getInstance()
+                    .displayImage(url, this.mDrawerUserProfileImage, this.getBaseActivity().getCustomApplication().getDisplayImageOptions(),
+                            new SimpleImageLoadingListener(){
+                                @Override
+                                public void onLoadingStarted(String imageUri, View view) {
+                                    //holder.progressBar.setProgress(0);
+                                    //holder.progressBar.setVisibility(View.VISIBLE);
+                                    //().debug(TAG, "onLoadingStarted");
+                                    ((ImageView) view).setImageDrawable(getResources().getDrawable(R.drawable.ic_default_user));
+
+                                }
+
+                                @Override
+                                public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                                    //holder.progressBar.setVisibility(View.GONE);
+                                    //getCustomLogging().debug(TAG, "onLoadingFailed");
+                                    //mAnimator.setDisplayedChild(2);
+                                }
+
+                                @Override
+                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                    //holder.progressBar.setVisibility(View.GONE);
+                                    //getCustomLogging().debug(TAG, "onLoadingComplete");
+                                   // mAnimator.setDisplayedChild(0);
+                                }
+                            },
+                            new ImageLoadingProgressListener() {
+                                @Override
+                                public void onProgressUpdate(String imageUri, View view, int current, int total) {
+                                    //getCustomLogging().debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
+                                    //holder.progressBar.setProgress(Math.round(100.0f * current / total));
+                                }
+                            });
         }
     }
 
@@ -332,6 +367,10 @@ public class NavigationDrawerFragment extends Fragment {
 
     public void setmTextUserEmail(String email){
         this.mTextUserEmail.setText(email);
+    }
+
+    private void initLogging(){
+        this.mLogging = CustomLogging.getInstance();
     }
 
     private void initDrawerListAdapter(){
@@ -355,7 +394,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     private void initImageHeader(View v){
         this.mDrawerImageHeader = (RelativeLayout) v.findViewById(R.id.drawer_image_header);
-        this.mDrawerImageHeader.setBackgroundResource(R.drawable.image_drawer_header_2);
+        this.mDrawerImageHeader.setBackgroundResource(R.drawable.image_drawer_header);
     }
 
     private void initImageUserProfile(View v){

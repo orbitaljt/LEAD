@@ -1,6 +1,7 @@
 package com.orbital.lead.controller.Fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,12 +14,14 @@ import android.widget.GridView;
 
 import com.orbital.lead.R;
 import com.orbital.lead.controller.Activity.PictureActivity;
+import com.orbital.lead.controller.Activity.ViewPagerAdapter.PagerImageAdapter;
 import com.orbital.lead.controller.GridAdapter.GridImageAdapter;
 import com.orbital.lead.controller.GridAdapter.MultiChoiceModeListener;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Picture;
+import com.orbital.lead.widget.WrapContentHeightViewPager;
 
 import java.util.ArrayList;
 
@@ -155,7 +158,7 @@ public class FragmentAlbum extends Fragment {
                 mLogging.debug(TAG, "onItemSelected -> " + position);
                 String url = getParamPictureList().get(position).getThumbnailUrl();
                 mLogging.debug(TAG, "getThumbnailUrl -> " + url);
-                getLogic().showDialogPicture(getActivity(), url);
+                showDialogPicture(getActivity(), getParamPictureList(), position);
             }
         });
 
@@ -173,6 +176,24 @@ public class FragmentAlbum extends Fragment {
         return this.mGridView;
     }
 
+    /*============= Display Dialogs =================*/
+    public void showDialogPicture(Context mContext, ArrayList<Picture> list, int currentPosition){
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        if(mContext instanceof PictureActivity){ //may come from FragmentAlbum
+            LayoutInflater inflater = ((PictureActivity) mContext).getLayoutInflater();
+
+            final View dialogView = inflater.inflate(R.layout.dialog_picture_view_pager, null);
+
+            WrapContentHeightViewPager pager = (WrapContentHeightViewPager) dialogView.findViewById(R.id.pager_picture);
+            pager.setAdapter(new PagerImageAdapter(mContext, list));
+            pager.setCurrentItem(currentPosition);
+
+            builder.setView(dialogView);
+            builder.create().setCanceledOnTouchOutside(true);
+            builder.create().show();
+        }
+
+    }
     /*
     private Context getContext() {
         return mContext;
@@ -203,5 +224,8 @@ public class FragmentAlbum extends Fragment {
             mListener.onFragmentAlbumInteraction(uri);
         }
     }
+
+
+
 
 }

@@ -146,7 +146,7 @@ public class FragmentLogin extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_login, container, false);
 
         this.initLogic();
-        this.initLocalStorage();
+        //this.initLocalStorage();
         this.initParser();
 
         this.initFacebookLoginButton(rootView);
@@ -155,7 +155,7 @@ public class FragmentLogin extends Fragment {
         this.initButtonLogin(rootView);
 
         // check if lead folder in external storage exist or not
-        this.checkLeadFolder();
+        //this.checkLeadFolder();
 
         if (this.pendingUpdateForUser != null) {
             setProfile(this.pendingUpdateForUser);

@@ -7,8 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.media.Image;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -17,11 +17,17 @@ import android.widget.ViewAnimator;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.SnackbarManager;
 import com.nispok.snackbar.listeners.ActionClickListener;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.R;
+import com.orbital.lead.controller.Activity.EditSpecificJournalActivity;
 import com.orbital.lead.controller.Activity.PictureActivity;
 import com.orbital.lead.controller.Activity.SpecificJournalActivity;
-import com.orbital.lead.controller.Fragment.FragmentAlbum;
+import com.orbital.lead.controller.Activity.ViewPagerAdapter.PagerImageAdapter;
+import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.controller.Fragment.FragmentLogin;
 import com.orbital.lead.controller.Activity.MainActivity;
 import com.orbital.lead.controller.Service.JournalService;
@@ -35,11 +41,9 @@ import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.EnumJournalServiceType;
 import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.Journal;
-import com.orbital.lead.model.JournalList;
 import com.orbital.lead.model.Picture;
 import com.orbital.lead.model.User;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
+import com.orbital.lead.widget.WrapContentHeightViewPager;
 
 import java.util.ArrayList;
 
@@ -196,25 +200,20 @@ public class Logic {
         context.startActivity(newIntent);
     }
 
+    public void displayEditSpecificJournalActivity(Context context, Journal journal){
+        Intent newIntent = new Intent(context, EditSpecificJournalActivity.class);
+        Bundle mBundle = new Bundle();
+        //mBundle.putString(Constant.BUNDLE_PARAM_JOURNAL_ID, journal.getJournalID());
+        //mBundle.putString(Constant.BUNDLE_PARAM_JOURNAL_IMAGE_URL, journal.getPictureCoverUrl());
+        mBundle.putParcelable(Constant.BUNDLE_PARAM_JOURNAL, journal);
 
-    /*============= Display Dialogs =================*/
-    public void showDialogPicture(Context mContext, String pictureUrl){
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        if(mContext instanceof PictureActivity){ //may come from FragmentAlbum
-            LayoutInflater inflater = ((PictureActivity) mContext).getLayoutInflater();
-
-            final View dialogView = inflater.inflate(R.layout.dialog_picture, null);
-
-            ImageView imagePopup = (ImageView) dialogView.findViewById(R.id.image_popup);
-            ViewAnimator animator = (ViewAnimator) dialogView.findViewById(R.id.animator);
-            this.showPicture(mContext, animator, imagePopup, pictureUrl);
-
-            builder.setView(dialogView);
-            builder.create().setCanceledOnTouchOutside(true);
-            builder.create().show();
-        }
-
+        newIntent.putExtras(mBundle);
+        context.startActivity(newIntent);
     }
+
+
+
+
 
 
 
@@ -278,6 +277,7 @@ public class Logic {
     private void showPicture(Context context, final ViewAnimator animator, ImageView targetView, String url){
         animator.setDisplayedChild(1);
 
+        /*
         Picasso.with(context)
                 .load(url)
                 .noFade()
@@ -294,6 +294,39 @@ public class Logic {
                         animator.setDisplayedChild(2); // failed to load
                     }
                 });
+        */
+        ImageLoader.getInstance()
+                .displayImage(url, targetView, CustomApplication.getDisplayImageOptions(),
+                        new SimpleImageLoadingListener(){
+                            @Override
+                            public void onLoadingStarted(String imageUri, View view) {
+                                //holder.progressBar.setProgress(0);
+                                //holder.progressBar.setVisibility(View.VISIBLE);
+                                mLogging.debug(TAG, "onLoadingStarted");
+                            }
+
+                            @Override
+                            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                                //holder.progressBar.setVisibility(View.GONE);
+                                mLogging.debug(TAG, "onLoadingFailed");
+                                animator.setDisplayedChild(2);
+                            }
+
+                            @Override
+                            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                //holder.progressBar.setVisibility(View.GONE);
+                                mLogging.debug(TAG, "onLoadingComplete");
+                                animator.setDisplayedChild(0);
+                            }
+                        },
+                        new ImageLoadingProgressListener() {
+                            @Override
+                            public void onProgressUpdate(String imageUri, View view, int current, int total) {
+                                mLogging.debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
+                                //holder.progressBar.setProgress(Math.round(100.0f * current / total));
+                            }
+                        });
+
     }
 
 

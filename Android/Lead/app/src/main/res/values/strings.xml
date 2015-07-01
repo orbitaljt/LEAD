@@ -12,7 +12,10 @@
     <string name="action_settings">Settings</string>
     <string name="action_edit_journal">Edit</string>
     <string name="action_publish_journal">Publish</string>
+    <string name="action_image">Select Image</string>
     <string name="action_delete">Delete</string>
+    <string name="action_done">Done</string>
+    <string name="action_detail">Detail</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
@@ -32,4 +35,11 @@
     <string name="title_activity_specific_journal">SpecificJournalActivity</string>
     <string name="title_activity_picture">PictureActivity</string>
     <string name="title_activity_edit_specific_journal">EditSpecificJournalActivity</string>
+
+    <string name="dialog_set">Set</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_ok">Ok</string>
+
+    <string name="button_set_as_album_cover">Set Cover</string>
+
 </resources>

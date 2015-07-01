@@ -23,6 +23,7 @@ public class FormatDate {
     private static final String TAG = "FormatDate";
 
     private static final CustomLogging mLogging = CustomLogging.getInstance();
+    private static final Parser mParser = Parser.getInstance();
 
     public static String parseDate(String rawDate, int formatType, String format){
         // database date format -> yyyy-mm-dd
@@ -40,6 +41,57 @@ public class FormatDate {
                 return facebookToDatabaseDate(rawDate);
             default:
                 return "";
+        }
+    }
+
+    public static int getYear(String date, String format){
+        String[] strs = null;
+
+        switch (format){
+            case DATABASE_FORMAT: // yyyy-MM-dd
+                strs = date.split("-");
+                return mParser.convertStringToInteger(strs[0]);
+
+            case FACEBOOK_FORMAT: // MM/dd/yyyy
+                strs = date.split("/");
+                return mParser.convertStringToInteger(strs[2]);
+
+            default:
+                return 0;
+        }
+    }
+
+    public static int getMonth(String date, String format){
+        String[] strs = null;
+        // month in java calendar is in index, starting from 0
+        switch (format){
+            case DATABASE_FORMAT: // yyyy-MM-dd
+                strs = date.split("-");
+                return mParser.convertStringToInteger(strs[1]) - 1;
+
+            case FACEBOOK_FORMAT: // MM/dd/yyyy
+                strs = date.split("/");
+                return mParser.convertStringToInteger(strs[0]) - 1;
+
+            default:
+                return 0;
+        }
+    }
+
+    public static int getDay(String date, String format){
+        String[] strs = null;
+        // month in java calendar is in index, starting from 0
+        switch (format){
+            case DATABASE_FORMAT: // yyyy-MM-dd
+                strs = date.split("-");
+                return mParser.convertStringToInteger(strs[2]);
+
+            case FACEBOOK_FORMAT: // MM/dd/yyyy
+                strs = date.split("/");
+                return mParser.convertStringToInteger(strs[1]);
+
+            default:
+                return 0;
         }
     }
 
@@ -80,6 +132,7 @@ public class FormatDate {
             return "";
         }
     }
+
 
 
 

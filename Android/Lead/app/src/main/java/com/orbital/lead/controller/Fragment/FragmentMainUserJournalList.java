@@ -20,6 +20,7 @@ import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerDividerItemDecora
 import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerJournalListAdapter;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.Logic;
+import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.JournalList;
 
@@ -43,8 +44,8 @@ public class FragmentMainUserJournalList extends Fragment{
 
     private OnFragmentInteractionListener mListener;
 
-
-    private ObservableRecyclerView mRecyclerView;
+   // private ObservableRecyclerView mRecyclerView;
+    private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mRecyclerAdapter;
     private FloatingActionButton mFab;
 
@@ -97,6 +98,7 @@ public class FragmentMainUserJournalList extends Fragment{
         this.initRecyclerView(rootView);
         this.initFloatingActionButton(rootView);
 
+        /*
         if(getMainActivity() instanceof ObservableScrollViewCallbacks){
             Bundle args = getArguments();
             if (args != null && args.containsKey(ARG_INITIAL_POSITION)) {
@@ -114,7 +116,7 @@ public class FragmentMainUserJournalList extends Fragment{
            // getRecyclerView().setTouchInterceptionViewGroup((ViewGroup) getMainActivity().findViewById(R.id.root));
 
         getRecyclerView().setScrollViewCallbacks((ObservableScrollViewCallbacks) getMainActivity());
-
+        */
 
 
         return rootView;
@@ -132,7 +134,7 @@ public class FragmentMainUserJournalList extends Fragment{
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        this.initMainActivity(activity);
+        //.initMainActivity(activity);
         try {
             mListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -167,10 +169,6 @@ public class FragmentMainUserJournalList extends Fragment{
         this.refreshRecyclerView();
     }
 
-    public void displaySpecificJournalActivity(Journal journal){
-        this.mLogic.displaySpecificJournalActivity(getMainActivity(), journal);
-    }
-
     private void initLogging(){
         this.mLogging = CustomLogging.getInstance();
     }
@@ -179,6 +177,7 @@ public class FragmentMainUserJournalList extends Fragment{
         this.mLogic = Logic.getInstance();
     }
 
+    /*
     private void initMainActivity(Activity activity){
         if(activity instanceof MainActivity){
             this.mMainActivity = (MainActivity) activity;
@@ -188,21 +187,25 @@ public class FragmentMainUserJournalList extends Fragment{
     private MainActivity getMainActivity(){
         return this.mMainActivity;
     }
+*/
 
     private void initRecyclerView(View v){
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getMainActivity());
-        this.mRecyclerView = (ObservableRecyclerView) v.findViewById(R.id.scroll);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        this.mRecyclerView = (RecyclerView) v.findViewById(R.id.recycler_journal_list);
         this.mRecyclerView.setLayoutManager(layoutManager);
         this.mRecyclerView.setHasFixedSize(false);
-        this.mRecyclerView.addItemDecoration(new RecyclerDividerItemDecoration(getMainActivity(), RecyclerDividerItemDecoration.VERTICAL_LIST));
+        this.mRecyclerView.addItemDecoration(new RecyclerDividerItemDecoration(getActivity(), RecyclerDividerItemDecoration.VERTICAL_LIST));
         this.mRecyclerView.setAdapter(this.getListAdapter());
 
+        /*
         if(getMainActivity() instanceof ObservableScrollViewCallbacks){
             this.mRecyclerView.setScrollViewCallbacks((ObservableScrollViewCallbacks) getMainActivity());
         }
+        */
     }
 
-    private ObservableRecyclerView getRecyclerView(){
+    //ObservableRecyclerView
+    private RecyclerView getRecyclerView(){
         return this.mRecyclerView;
     }
 
@@ -213,9 +216,10 @@ public class FragmentMainUserJournalList extends Fragment{
 
     private void initRecyclerAdapter(JournalList list){
         this.mLogging.debug(TAG, "initRecyclerAdapter");
-        View headerView = LayoutInflater.from(getMainActivity()).inflate(R.layout.blank_view_header, null);
+        //View headerView = LayoutInflater.from(getActivity()).inflate(R.layout.blank_view_header, null);
         //getMainActivity(),
-        this.mRecyclerAdapter = new RecyclerJournalListAdapter(headerView, list, getMainActivity().getCurrentUser());
+        //this.mRecyclerAdapter = new RecyclerJournalListAdapter(headerView, list, CurrentLoginUser.getUser());
+        this.mRecyclerAdapter = new RecyclerJournalListAdapter(list, CurrentLoginUser.getUser());
         ((RecyclerJournalListAdapter) mRecyclerAdapter).setOnItemClickListener(new RecyclerJournalListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -231,7 +235,6 @@ public class FragmentMainUserJournalList extends Fragment{
     private void initFloatingActionButton(View v){
         this.mFab = (FloatingActionButton) v.findViewById(R.id.fragment_journal_list_fab);
         this.mFab.setOnClickListener(new View.OnClickListener(){
-
             @Override
             public void onClick(View v) {
                 mLogging.debug(TAG, "FAB is clicked");

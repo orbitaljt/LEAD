@@ -49,10 +49,11 @@ public class CustomApplication extends Application{
 
     public static DisplayImageOptions getDisplayImageOptions(){
         DisplayImageOptions mOptions = new DisplayImageOptions.Builder()
-                .showImageOnFail(R.drawable.image_blank_picture_4_to_3)
+                .showImageOnFail(R.drawable.ic_image_blank)
                 .cacheInMemory(false)
                 .cacheOnDisk(true)
                 .considerExifParams(true)
+                .resetViewBeforeLoading(true)
                 .bitmapConfig(Bitmap.Config.RGB_565)
                 .build();
 

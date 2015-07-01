@@ -72,6 +72,8 @@
                 joooonho:sriv_border_color="#000000"
                 joooonho:sriv_oval="false" />
             -->
+
+
             <com.orbital.lead.widget.FourThreeImageView
                 android:id="@+id/image_picture"
                 android:layout_width="match_parent"
@@ -86,8 +88,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:adjustViewBounds="false"
-                android:scaleType="centerCrop"
-                android:src="@drawable/image_blank_picture_16_to_9"/>
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_image_blank"/>
             <!--
             <com.joooonho.SelectableRoundedImageView
                 xmlns:joooonho="http://schemas.android.com/apk/res-auto"

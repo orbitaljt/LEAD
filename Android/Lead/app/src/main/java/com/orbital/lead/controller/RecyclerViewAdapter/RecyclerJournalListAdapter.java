@@ -43,8 +43,8 @@ import com.squareup.picasso.Picasso;
  * Created by joseph on 16/6/2015.
  */
 public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
-    private static final int VIEW_TYPE_HEADER = 0;
-    private static final int VIEW_TYPE_ITEM = 1;
+    //private static final int VIEW_TYPE_HEADER = 0;
+    //private static final int VIEW_TYPE_ITEM = 1;
 
     private final String TAG = this.getClass().getSimpleName();
 
@@ -57,7 +57,7 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
 
     private JournalList mJournalList;
     private User mCurrentUser;
-    private View mHeaderView;
+    //private View mHeaderView;
 
     private Animation inAnim;
     private Animation outAnim;
@@ -91,6 +91,10 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
             this.initViewAnimator(v);
         }
 
+        public String getTextTitle() {
+            return this.mTextTitle.getText().toString();
+        }
+
         public void setTextTitle(String val){
             this.mTextTitle.setText(val);
         }
@@ -99,7 +103,7 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
             this.mTextSubTitle.setText(val);
         }
 
-        public void setThumbnailImage(Context context, String url){
+        public void setThumbnailImage(String url){
             mLogging.debug(TAG, "setThumbnailImage");
             this.mAnimator.setDisplayedChild(1);
 
@@ -184,27 +188,6 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
 
         private void initThumbnailImageView(View v){
             this.mImagePicture = (FourThreeImageView) v.findViewById(R.id.image_picture);
-
-            /*
-            this.mImagePicture.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    mLogging.debug(TAG, "mImagePicture.getWidth() =>" + mImagePicture.getWidth());
-                    mLogging.debug(TAG, "mImagePicture.getMeasuredWidth() =>" + mImagePicture.getMeasuredWidth());
-                    imageWidth = mImagePicture.getMeasuredWidth();
-
-
-                }
-            });
-            */
- /*
-                    if (Build.VERSION.SDK_INT< Build.VERSION_CODES.JELLY_BEAN) {
-                        mImagePicture.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                    } else {
-                        mImagePicture.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    }
-                    */
-
         }
 
         private void initViewAnimator(View v){
@@ -215,13 +198,12 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
 
     }
 
-    //MainActivity activity,
-    public RecyclerJournalListAdapter(View headerView, JournalList list, User currentUser){
+    //MainActivity activity, View headerView,
+    public RecyclerJournalListAdapter(JournalList list, User currentUser){
         this.initLogging();
         this.initLogic();
         this.initParser();
-        this.setHeaderView(headerView);
-        //this.setMainActivity(activity);
+        //this.setHeaderView(headerView);
         this.setJournalList(list);
         this.setCurrentUser(currentUser);
         this.initDisplayImageOptions();
@@ -233,21 +215,21 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
         this.mContext = parent.getContext();
         this.initAnimation();
 
-        if(viewType == VIEW_TYPE_HEADER){
-            return new HeaderViewHolder(mHeaderView);
-        }else{
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_list_row_user_journal_list_layout, parent, false);
-            // set the view's size, margins, paddings and layout parameters
-            ListContentHolder vh = new ListContentHolder(v);
-            return vh;
-        }
+        //if(viewType == VIEW_TYPE_HEADER){
+        //    return new HeaderViewHolder(mHeaderView);
+        //}else{
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_list_row_user_journal_list_layout, parent, false);
+        // set the view's size, margins, paddings and layout parameters
+        ListContentHolder vh = new ListContentHolder(v);
+        return vh;
+        //}
 
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(holder instanceof ListContentHolder){
-            position = position - 1;
+            //position = position - 1;
             if(getJournalList() != null && getCurrentUser() != null){
                 final Journal j = this.getJournalList().get(position);
                 String title = j.getTitle();
@@ -258,7 +240,7 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
                 String userID = this.getCurrentUser().getUserID();
                 String pictureUrl = mParser.createPictureCoverUrl(pictureCoverID, pictureCoverType, userID);
 
-                ((ListContentHolder) holder).setThumbnailImage(getContext(), pictureUrl);
+                ((ListContentHolder) holder).setThumbnailImage(pictureUrl);
                 ((ListContentHolder) holder).setTextTitle(title);
                 ((ListContentHolder) holder).setTextSubTitle(journalDate + " at " + journalTime);
 
@@ -288,6 +270,7 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
 
     @Override
     public int getItemCount() {
+        /*
         int count = 0;
         if(mHeaderView != null){
             count++;
@@ -298,12 +281,20 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
         }
 
         return count;
+        */
+        if(this.getJournalList() != null){
+            return this.getJournalList().size();
+        }
+        return 0;
     }
 
     @Override
     public int getItemViewType(int position) {
-        return (position == 0) ? VIEW_TYPE_HEADER : VIEW_TYPE_ITEM;
+        //return (position == 0) ? VIEW_TYPE_HEADER : VIEW_TYPE_ITEM;
+        return 0;
     }
+
+
 
     public interface OnItemClickListener {
         public void onItemClick(View view, int position);
@@ -332,9 +323,11 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
     }
     */
 
+    /*
     private void setHeaderView(View v){
         this.mHeaderView = v;
     }
+    */
 
     private void setJournalList(JournalList list){
         this.mJournalList = list;

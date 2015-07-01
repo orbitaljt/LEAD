@@ -12,9 +12,10 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fab="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
+    <!--
     <com.github.ksoichiro.android.observablescrollview.ObservableRecyclerView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/scroll"
@@ -22,6 +23,13 @@
         android:layout_height="match_parent"
         android:scrollbars="vertical"
         style="@style/RecyclerViewJournalListStyle"/>
+    -->
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_journal_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        style="@style/RecyclerViewJournalListStyle" />
 
     <com.github.clans.fab.FloatingActionButton
         android:id="@+id/fragment_journal_list_fab"

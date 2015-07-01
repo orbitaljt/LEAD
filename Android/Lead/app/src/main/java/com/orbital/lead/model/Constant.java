@@ -30,6 +30,7 @@ public class Constant {
 
 
     // Fragment name
+    public static final String FRAGMENT_JOURNAL_LIST = "FragmentJournalList";
     public static final String FRAGMENT_ALBUM = "FragmentAlbum";
 
 

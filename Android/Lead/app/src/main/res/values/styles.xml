@@ -150,6 +150,7 @@
     <style name="RecyclerViewJournalListStyle">
         <item name="android:paddingLeft">8dp</item>
         <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingTop">8dp</item>
         <item name="android:paddingBottom">8dp</item>
     </style>
 
@@ -234,6 +235,7 @@
     </style>
 
     <style name="editTextTitleStyle" parent="editTextWithoutBackgroundStyle">
+        <item name="android:textSize">@dimen/text_primary</item>
         <item name="android:textColor">@color/primary_dark</item>
     </style>
 
@@ -247,6 +249,13 @@
 
     </style>
 
+
+    <style name="CustomDialogButtonArea">
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
 
 
 

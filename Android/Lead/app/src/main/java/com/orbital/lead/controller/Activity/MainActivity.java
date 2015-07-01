@@ -1,35 +1,24 @@
 package com.orbital.lead.controller.Activity;
 
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.view.ViewCompat;
-import android.support.v4.view.ViewPager;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
-import com.github.ksoichiro.android.observablescrollview.ScrollState;
-import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
-import com.github.ksoichiro.android.observablescrollview.Scrollable;
 import com.orbital.lead.Parser.FormatDate;
 import com.orbital.lead.Parser.ParserFacebook;
 import com.orbital.lead.R;
-import com.orbital.lead.controller.CustomFragmentStatePagerAdapter;
 import com.orbital.lead.controller.Fragment.FragmentDetail;
 import com.orbital.lead.controller.Fragment.FragmentMainUserJournalList;
 import com.orbital.lead.controller.Service.JournalReceiver;
 import com.orbital.lead.controller.Service.JournalService;
-import com.orbital.lead.controller.Service.S3Receiver;
-import com.orbital.lead.controller.iosched.SlidingTabLayout;
 import com.orbital.lead.model.Constant;
 
 
-import com.nineoldandroids.view.ViewHelper;
-import com.nineoldandroids.view.ViewPropertyAnimator;
 import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumJournalServiceType;
 import com.orbital.lead.model.FacebookUserObject;
@@ -41,17 +30,16 @@ public class MainActivity extends BaseActivity
         implements
         FragmentMainUserJournalList.OnFragmentInteractionListener,
         FragmentDetail.OnFragmentInteractionListener,
-        JournalReceiver.Receiver,
-        ObservableScrollViewCallbacks {
-
+        JournalReceiver.Receiver {
+//,ObservableScrollViewCallbacks
     private final String TAG = this.getClass().getSimpleName();
 
     private View mToolbarView;
-    private View mHeaderView;
-    private int mBaseTranslationY;
-    private ViewPager mPager;
-    private CustomFragmentStatePagerAdapter mPagerAdapter;
-    private FragmentMainUserJournalList mFragmentMainUserJournalList;
+    //private View mHeaderView;
+    //private int mBaseTranslationY;
+    //private ViewPager mPager;
+    //private CustomFragmentStatePagerAdapter mPagerAdapter;
+    //private FragmentMainUserJournalList mFragmentMainUserJournalList;
 
     private JournalReceiver mJournalReceiver;
 
@@ -63,6 +51,10 @@ public class MainActivity extends BaseActivity
     private boolean currentIsFacebookLogin = false;
     private boolean isRegistered = false;
 
+    private FragmentTransaction mFragmentTranscation;
+    private FragmentManager mFragmentManager;
+    private FragmentMainUserJournalList mFragmentJournalList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,11 +65,15 @@ public class MainActivity extends BaseActivity
         this.pushToolbarToActionbar();
         this.restoreActionBar();
         this.setToolbarTitle(Constant.TITLE_LEAD);
+        this.initFragmentManager();
+        this.displayFragmentJournalList();
 
+        /*
         this.initHeader();
         this.initPagerAdapter();
         this.initViewPager();
         this.initSlidingTabLayout();
+        */
 
         this.initJournalReceiver();
 
@@ -117,9 +113,6 @@ public class MainActivity extends BaseActivity
 
 
 
-
-
-
         }else{
             getCustomLogging().debug(TAG, "No bundle extra from getIntent()");
         }
@@ -148,6 +141,35 @@ public class MainActivity extends BaseActivity
         setSupportActionBar((Toolbar) this.getToolbar());
     }
 
+    public void initFragmentManager() {
+        this.mFragmentManager = getSupportFragmentManager();
+    }
+
+
+    private void displayFragmentJournalList(){
+        this.getCustomLogging().debug(TAG, "displayFragmentAlbum");
+        //this,
+        this.mFragmentJournalList = FragmentMainUserJournalList.newInstance("", "");
+        this.replaceFragment(this.mFragmentJournalList, Constant.FRAGMENT_JOURNAL_LIST);
+    }
+
+    private void replaceFragment(Fragment newFrag, String name){
+        if(newFrag != null){
+            this.mFragmentTranscation = this.mFragmentManager.beginTransaction();
+            this.mFragmentTranscation
+                    .replace(R.id.container, newFrag, name)
+                    .commitAllowingStateLoss();
+        }
+    }
+
+    private FragmentMainUserJournalList getFragmentJournalList(){
+        return this.mFragmentJournalList;
+    }
+
+    private void updateFragmentMainUserJournalList(JournalList list){
+        this.getFragmentJournalList().updateJournalList(list);
+    }
+    /*
     public void initHeader(){
         this.mHeaderView = findViewById(R.id.header);
         ViewCompat.setElevation(mHeaderView, getResources().getDimension(R.dimen.toolbar_elevation));
@@ -338,6 +360,10 @@ public class MainActivity extends BaseActivity
         }
         propagateToolbarState(false);
     }
+    */
+
+
+
 
     /*===================== User profile ================================*/
     public User getCurrentUser(){
@@ -406,17 +432,9 @@ public class MainActivity extends BaseActivity
     }
 
 
-
     public void getUserProfile(String userID){
         this.getLogic().getUserProfile(this, userID);
     }
-
-    /*
-    public void getUserProfilePicture(String userID){
-        this.getLogic().getUserProfilePicture(this, userID);
-    }
-    */
-
 
     public void setUserProfilePicture(){
         this.setNavigationDrawerUserProfilePicture(this.getCurrentUser().getProfilePicUrl());
@@ -470,6 +488,7 @@ public class MainActivity extends BaseActivity
         this.getNavigationDrawerFragment().setmTextUserEmail(this.getCurrentUser().getEmail());
     }
 
+    /*
     public void updateFragmentMainUserJournalList(JournalList list){
         getFragmentMainUserJournalList().updateJournalList(list);
     }
@@ -478,7 +497,7 @@ public class MainActivity extends BaseActivity
         this.mFragmentMainUserJournalList = this.mPagerAdapter.getFragmentMainUserJournalList();
         return this.mFragmentMainUserJournalList;
     }
-
+    */
 
 
     /*===================== Journal Intent Service & Receiver ================================*/
@@ -547,6 +566,8 @@ public class MainActivity extends BaseActivity
     private FacebookUserObject getFacebookUserObject(String json) {
         return ParserFacebook.getFacebookUserObject(json);
     }
+
+
 
 
 

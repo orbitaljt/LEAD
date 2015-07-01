@@ -28,8 +28,8 @@
             android:id="@+id/image_failed"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/image_blank_picture_4_to_3"/>
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_image_blank"/>
 
 
     </ViewAnimator>
