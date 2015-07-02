@@ -20,12 +20,9 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.orbital.lead.R;
-import com.orbital.lead.controller.Activity.PictureActivity;
 import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.model.Picture;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -96,7 +93,7 @@ public class GridImageAdapter extends BaseAdapter{
 
             if(v == null){
                 LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = inflater.inflate(R.layout.grid_element_layout, null); // inflate custom list view row layout
+                v = inflater.inflate(R.layout.grid_picture_item_layout, null); // inflate custom list view row layout
             }
 
             checkLayout.addView(v);
@@ -116,7 +113,7 @@ public class GridImageAdapter extends BaseAdapter{
         final View root;
         if(convertView == null){
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            root = inflater.inflate(R.layout.grid_element_layout, null); // inflate cust
+            root = inflater.inflate(R.layout.grid_picture_item_layout, null); // inflate cust
         }else{
             root = convertView;
         }

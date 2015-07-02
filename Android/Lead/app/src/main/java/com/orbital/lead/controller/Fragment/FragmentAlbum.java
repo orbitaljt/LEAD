@@ -182,7 +182,7 @@ public class FragmentAlbum extends Fragment {
         if(mContext instanceof PictureActivity){ //may come from FragmentAlbum
             LayoutInflater inflater = ((PictureActivity) mContext).getLayoutInflater();
 
-            final View dialogView = inflater.inflate(R.layout.dialog_picture_view_pager, null);
+            final View dialogView = inflater.inflate(R.layout.dialog_viewpager_picture, null);
 
             WrapContentHeightViewPager pager = (WrapContentHeightViewPager) dialogView.findViewById(R.id.pager_picture);
             pager.setAdapter(new PagerImageAdapter(mContext, list));

@@ -18,7 +18,6 @@ import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.orbital.lead.R;
-import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.model.Picture;
 
 import java.util.ArrayList;
@@ -62,7 +61,7 @@ public class PagerImageAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup view, int position) {
-        View imageLayout = inflater.inflate(R.layout.dialog_picture_item_layout, view, false);
+        View imageLayout = inflater.inflate(R.layout.dialog_viewpager_picture_item_layout, view, false);
 
         ImageView imagePopup = (ImageView) imageLayout.findViewById(R.id.image_popup);
         final ViewAnimator animator = (ViewAnimator) imageLayout.findViewById(R.id.animator);

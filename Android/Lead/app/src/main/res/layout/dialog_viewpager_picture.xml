@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.orbital.lead.widget.WrapContentHeightViewPager
+        android:id="@+id/pager_picture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/CustomDialogButtonArea">
+
+        <Button
+            android:id="@+id/btnAlbumCover"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="@string/button_set_as_album_cover"
+            style="@style/AppCompat.Button.Flat"/>
+
+    </RelativeLayout>
+    
+</LinearLayout>
+

@@ -1,15 +1,15 @@
 package com.orbital.lead.logic;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
+import android.support.v7.internal.view.menu.MenuBuilder;
+import android.support.v7.widget.PopupMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ViewAnimator;
@@ -26,7 +26,6 @@ import com.orbital.lead.R;
 import com.orbital.lead.controller.Activity.EditSpecificJournalActivity;
 import com.orbital.lead.controller.Activity.PictureActivity;
 import com.orbital.lead.controller.Activity.SpecificJournalActivity;
-import com.orbital.lead.controller.Activity.ViewPagerAdapter.PagerImageAdapter;
 import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.controller.Fragment.FragmentLogin;
 import com.orbital.lead.controller.Activity.MainActivity;
@@ -38,12 +37,12 @@ import com.orbital.lead.logic.Asynchronous.AsyncUserProfile;
 import com.orbital.lead.logic.LocalStorage.LocalStorage;
 import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Constant;
+import com.orbital.lead.model.EnumDialogEditJournalType;
 import com.orbital.lead.model.EnumJournalServiceType;
 import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.Picture;
 import com.orbital.lead.model.User;
-import com.orbital.lead.widget.WrapContentHeightViewPager;
 
 import java.util.ArrayList;
 
@@ -545,6 +544,40 @@ public class Logic {
         mContext.startService(intent);
     }
 
+
+    /*=========== POPUP MENU ===========*/
+    public void showPopUpMenu(Context context, View v, final EnumDialogEditJournalType type){
+        PopupMenu menu = new PopupMenu(context, v){
+            @Override
+            public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.dialog_overflow_edit_journal_edit: // Edit the current row
+                        switch(type){
+                            case TAG:
+                                break;
+                            case PROJECT:
+                                break;
+                        }
+                        return true;
+
+                    case R.id.dialog_overflow_edit_journal_delete: // Delete the current row
+                        switch(type){
+                            case TAG:
+                                break;
+                            case PROJECT:
+                                break;
+                        }
+                        return true;
+
+                    default:
+                        return super.onMenuItemSelected(menu, item);
+                }
+            }
+        };
+
+        menu.inflate(R.menu.menu_overflow_dialog_journal_edit);
+        menu.show();
+    }
 
 
 

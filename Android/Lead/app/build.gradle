@@ -41,5 +41,6 @@ dependencies {
     compile 'com.amazonaws:aws-android-sdk-ddb:2.2.1'
     compile 'com.joooonho:selectableroundedimageview:1.0.1'
     compile 'com.github.clans:fab:1.5.2'
+    compile 'com.github.navasmdc:MaterialDesign:1.5@aar'
 
 }

@@ -36,6 +36,12 @@
     <string name="title_activity_picture">PictureActivity</string>
     <string name="title_activity_edit_specific_journal">EditSpecificJournalActivity</string>
 
+    <string name="dialog_toolbar_tag_title">Select Tags</string>
+    <string name="dialog_toolbar_project_title">Select A Project</string>
+
+    <string name="dialog_overflow_menu_edit">Edit</string>
+    <string name="dialog_overflow_menu_delete">Delete</string>
+
     <string name="dialog_set">Set</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_ok">Ok</string>

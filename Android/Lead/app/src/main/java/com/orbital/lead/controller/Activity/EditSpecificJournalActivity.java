@@ -2,11 +2,11 @@ package com.orbital.lead.controller.Activity;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,15 +18,25 @@ import android.widget.TextView;
 
 import com.orbital.lead.Parser.FormatDate;
 import com.orbital.lead.R;
+import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerDividerItemDecoration;
+import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerProjectListAdapter;
+import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerTagListAdapter;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.Journal;
+import com.orbital.lead.model.Project;
+import com.orbital.lead.model.ProjectList;
+import com.orbital.lead.model.Tag;
+import com.orbital.lead.model.TagList;
 
-import org.w3c.dom.Text;
+import java.util.ArrayList;
 
 public class EditSpecificJournalActivity extends BaseActivity {
 
     private final String TAG = this.getClass().getSimpleName();
+
+    private final int EDIT_TAG = 0;
+    private final int EDIT_PROJECT = 1;
 
     private Context mContext;
     private View mToolbarView;
@@ -39,6 +49,10 @@ public class EditSpecificJournalActivity extends BaseActivity {
     private Journal mJournal;
     private DatePickerDialog datePickerDialog;
     private DatePickerDialog.OnDateSetListener datePickerListener;
+    private RecyclerView mRecyclerViewTagList;
+    private RecyclerView mRecyclerViewProjectList;
+    private RecyclerView.Adapter mRecyclerDialogTagAdapter;
+    private RecyclerView.Adapter mRecyclerDialogProjectAdapter;
 
     private int mYear;
     private int mMonth;
@@ -63,6 +77,7 @@ public class EditSpecificJournalActivity extends BaseActivity {
         this.initTextHashTag();
         this.initTextProject();
         this.initOnDateSetListener();
+
 
         Bundle getBundleExtra = getIntent().getExtras();
         if (getBundleExtra != null) {
@@ -212,6 +227,60 @@ public class EditSpecificJournalActivity extends BaseActivity {
         });
     }
 
+    private void initDialogTagRecyclerView(View v){
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        this.mRecyclerViewTagList = (RecyclerView) v.findViewById(R.id.recycler_edit_tag);
+        this.mRecyclerViewTagList.setLayoutManager(layoutManager);
+        this.mRecyclerViewTagList.setHasFixedSize(false);
+        this.mRecyclerViewTagList.addItemDecoration(new RecyclerDividerItemDecoration(this, RecyclerDividerItemDecoration.VERTICAL_LIST));
+        this.mRecyclerViewTagList.setAdapter(this.getRecyclerDialogTagAdapter());
+    }
+
+    private void initDialogProjectRecyclerView(View v){
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        this.mRecyclerViewProjectList = (RecyclerView) v.findViewById(R.id.recycler_edit_project);
+        this.mRecyclerViewProjectList.setLayoutManager(layoutManager);
+        this.mRecyclerViewProjectList.setHasFixedSize(false);
+        this.mRecyclerViewProjectList.addItemDecoration(new RecyclerDividerItemDecoration(this, RecyclerDividerItemDecoration.VERTICAL_LIST));
+        this.mRecyclerViewProjectList.setAdapter(this.getRecyclerDialogProjectAdapter());
+    }
+
+    private void initRecyclerDialogTagAdapter(TagList list){
+        getCustomLogging().debug(TAG, "initRecyclerDialogTagAdapter");
+        //this.mRecyclerDialogTagAdapter = new RecyclerJournalListAdapter(headerView, list, CurrentLoginUser.getUser());
+        this.mRecyclerDialogTagAdapter = new RecyclerTagListAdapter(list);
+        /*
+        ((RecyclerTagListAdapter) mRecyclerDialogTagAdapter).setOnItemClickListener(new RecyclerTagListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                getCustomLogging().debug(TAG, "initRecyclerDialogTagAdapter onItemClick position -> " + position);
+            }
+        });
+        */
+    }
+
+    private void initRecyclerProjectAdapter(ProjectList list){
+        getCustomLogging().debug(TAG, "initRecyclerProjectAdapter");
+        //this.mRecyclerDialogTagAdapter = new RecyclerJournalListAdapter(headerView, list, CurrentLoginUser.getUser());
+        this.mRecyclerDialogProjectAdapter = new RecyclerProjectListAdapter(list);
+        /*
+        ((RecyclerTagListAdapter) mRecyclerDialogTagAdapter).setOnItemClickListener(new RecyclerTagListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                getCustomLogging().debug(TAG, "initRecyclerDialogTagAdapter onItemClick position -> " + position);
+            }
+        });
+        */
+    }
+
+
+    private RecyclerView.Adapter getRecyclerDialogTagAdapter(){
+        return this.mRecyclerDialogTagAdapter;
+    }
+
+    private RecyclerView.Adapter getRecyclerDialogProjectAdapter(){
+        return this.mRecyclerDialogProjectAdapter;
+    }
 
     private Journal getJournal() {
         return this.mJournal;
@@ -234,6 +303,7 @@ public class EditSpecificJournalActivity extends BaseActivity {
     }
 
 
+    /*=============== DIALOGS ==========*/
     private void showDatePickerDialog(){
         this.datePickerDialog = new DatePickerDialog(this,
                 this.getDatePickerListener(),
@@ -251,7 +321,10 @@ public class EditSpecificJournalActivity extends BaseActivity {
        AlertDialog.Builder builder = new AlertDialog.Builder(this);
        LayoutInflater inflater = this.getLayoutInflater();
 
-       final View dialogView = inflater.inflate(R.layout.dialog_hash_tag, null);
+       final View dialogView = inflater.inflate(R.layout.dialog_tag, null);
+
+       this.initRecyclerDialogTagAdapter(createDummyTagList());
+       this.initDialogTagRecyclerView(dialogView);
 
        builder.setView(dialogView)
                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
@@ -270,6 +343,9 @@ public class EditSpecificJournalActivity extends BaseActivity {
 
         final View dialogView = inflater.inflate(R.layout.dialog_project, null);
 
+        this.initRecyclerProjectAdapter(createDummyProjectList());
+        this.initDialogProjectRecyclerView(dialogView);
+
         builder.setView(dialogView)
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     @Override
@@ -279,6 +355,40 @@ public class EditSpecificJournalActivity extends BaseActivity {
                 });
 
         builder.create().show();
+    }
+
+    private TagList createDummyTagList(){
+        TagList mTagList = new TagList();
+        ArrayList<Tag> list = new ArrayList<Tag>();
+        Tag mTag = new Tag("Demo", true);
+        list.add(mTag);
+        mTag = new Tag("MiddleEast", false);
+        list.add(mTag);
+        mTag = new Tag("Richest", false);
+        list.add(mTag);
+        mTag = new Tag("AbuDhabi", true);
+        list.add(mTag);
+
+        mTagList.setList(list);
+
+        return mTagList;
+    }
+
+    private ProjectList createDummyProjectList(){
+        ProjectList mProjectList = new ProjectList();
+        ArrayList<Project> list = new ArrayList<Project>();
+        Project p = new Project("Project Alpha", true);
+        list.add(p);
+        p = new Project("Project Beta", false);
+        list.add(p);
+        p = new Project("Project Delta", false);
+        list.add(p);
+        p = new Project("Project XYZ", false);
+        list.add(p);
+
+        mProjectList.setList(list);
+
+        return mProjectList;
     }
 
 }

@@ -147,7 +147,7 @@
         <item name="android:textStyle">normal</item>
     </style>
 
-    <style name="RecyclerViewJournalListStyle">
+    <style name="RecyclerViewStyle">
         <item name="android:paddingLeft">8dp</item>
         <item name="android:paddingRight">8dp</item>
         <item name="android:paddingTop">8dp</item>

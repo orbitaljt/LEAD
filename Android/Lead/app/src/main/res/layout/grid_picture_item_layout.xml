@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/grid_element_frame_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:foreground="@drawable/framelayout_border_selector">
+<!-- ?android:attr/activatedBackgroundIndicator -->
+
+    <ViewAnimator
+        android:id="@+id/animator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateFirstView="false" >
+
+        <com.orbital.lead.widget.FourThreeImageView
+            android:id="@+id/grid_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:scaleType="centerCrop"
+            />
+
+        <include layout="@layout/progress_bar_layout" />
+
+        <com.orbital.lead.widget.FourThreeImageView
+            android:id="@+id/image_failed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_image_blank"/>
+
+
+    </ViewAnimator>
+</FrameLayout>

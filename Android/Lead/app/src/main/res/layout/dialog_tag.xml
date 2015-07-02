@@ -3,13 +3,12 @@
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/dialog_toolbar_project" />
+    <include layout="@layout/dialog_toolbar_tag" />
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_edit_project"
+        android:id="@+id/recycler_edit_tag"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="vertical"
-        style="@style/RecyclerViewStyle" />
+        android:scrollbars="vertical" />
 
 </LinearLayout>
