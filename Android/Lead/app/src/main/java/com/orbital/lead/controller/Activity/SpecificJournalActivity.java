@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
@@ -28,8 +27,6 @@ import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.widget.WideImageView;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 public class SpecificJournalActivity extends BaseActivity implements PictureReceiver.Receiver {
     private final String TAG = this.getClass().getSimpleName();
@@ -98,7 +95,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
             this.setTextContent(this.getJournal().getContent());
 
             // run picture service first
-            this.getLogic().getUserSpecificAlbum(this, this.getJournal().getPictureAlbumID());
+            this.getLogic().getUserSpecificAlbum(this, this.getJournal().getAlbumID());
 
         } else {
             getCustomLogging().debug(TAG, "No bundle extra from getIntent()");

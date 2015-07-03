@@ -559,9 +559,11 @@ public class MainActivity extends BaseActivity
 
     }
 
+
     public JournalList getJournalListFromJson(String json){
         return getParser().parseJsonToJournalList(json);
     }
+
 
     private FacebookUserObject getFacebookUserObject(String json) {
         return ParserFacebook.getFacebookUserObject(json);

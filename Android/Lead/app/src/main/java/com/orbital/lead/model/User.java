@@ -12,8 +12,6 @@ public class User {
     private String _profilePicID = "";
     private String _profilePicUrl = "";
     private EnumPictureType _profilePicType;
-    private String _journalListID = "";
-    private String _experienceListID = "";
     private String _firstName = "";
     private String _lastName = "";
     private String _middleName = "";
@@ -40,7 +38,7 @@ public class User {
         this.initParser();
     }
 
-    public User(String fID, String ID, String ppID, String ppType, String jID, String fName, String mName, String lName,
+    public User(String fID, String ID, String ppID, String ppType, String fName, String mName, String lName,
                 String birth, String addr, String city, String state, String country, String countryCode, String email,
                 String createdDate, String createdTime, String lastLoginDate, String lastLoginTime, int age){
         this.initParser();
@@ -48,7 +46,6 @@ public class User {
         this._facebookID = fID;
         this._userID = ID;
         this._profilePicID = ppID;
-        this._journalListID = jID;
         this._firstName = fName;
         this._middleName = mName;
         this._lastName = lName;
@@ -88,14 +85,6 @@ public class User {
 
     public EnumPictureType getProfilePictureType(){
         return  this._profilePicType;
-    }
-
-    public String getJournalListID(){
-        return this._journalListID;
-    }
-
-    public String getExperienceListID(){
-        return this._experienceListID;
     }
 
     public String getFirstName(){
@@ -204,14 +193,6 @@ public class User {
 
     public void setProfilePictureType(EnumPictureType val){
         this._profilePicType = val;
-    }
-
-    public void setJournalListID(String val){
-        this._journalListID = val;
-    }
-
-    public void setExperienceListID(String val){
-        this._experienceListID = val;
     }
 
     public void setFirstName(String val){

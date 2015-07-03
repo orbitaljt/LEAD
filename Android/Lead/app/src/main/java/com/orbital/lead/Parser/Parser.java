@@ -78,11 +78,11 @@ public class Parser {
 
                 JSONObject detailObj = topObj.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
 
+                //detailObj.getString(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG),
                 mUser = new User(detailObj.getString(Constant.MESSAGE_JSON_FACEBOOK_ID_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_LEAD_USER_ID_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_PICTURE_PROFILE_ID_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_PICTURE_PROFILE_TYPE_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_FIRST_NAME_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_MIDDLE_NAME_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_lAST_NAME_TAG),
@@ -150,11 +150,11 @@ public class Parser {
                 for(int i=0; i < detailArray.length(); i++) {
                     JSONObject journalObj = detailArray.getJSONObject(i);
 
+                    //journalObj.getString(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG),
                     Journal mJournal = new Journal(journalObj.getString(Constant.MESSAGE_JSON_JOURNAL_ID_TAG),
-                            journalObj.getString(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG),
                             journalObj.getString(Constant.MESSAGE_JSON_PICTURE_COVER_ID_TAG),
                             journalObj.getString(Constant.MESSAGE_JSON_PICTURE_COVER_TYPE_TAG),
-                            journalObj.getString(Constant.MESSAGE_JSON_PICTURE_ALBUM_ID_TAG),
+                            journalObj.getString(Constant.MESSAGE_JSON_ALBUM_ID_TAG),
                             journalObj.getString(Constant.MESSAGE_JSON_TITLE_TAG),
                             journalObj.getString(Constant.MESSAGE_JSON_CONTENT_TAG),
                             journalObj.getString(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG),
@@ -214,7 +214,7 @@ public class Parser {
                 }
 
                 mAlbum = new Album(detailObj.getString(Constant.MESSAGE_JSON_USER_ID_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_PICTURE_ALBUM_ID_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_ALBUM_ID_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_TITLE_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_DESCRIPTION_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_HASH_TAG_TAG),
@@ -238,9 +238,9 @@ public class Parser {
     public String userObjectToJson(User user){
         JSONObject obj = new JSONObject();
         try{
+            //obj.put(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG, user.getJournalListID());
             obj.put(Constant.MESSAGE_JSON_FACEBOOK_ID_TAG, user.getFacebookID());
             obj.put(Constant.MESSAGE_JSON_PICTURE_PROFILE_ID_TAG, user.getProfilePictureID());
-            obj.put(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG, user.getJournalListID());
             obj.put(Constant.MESSAGE_JSON_FIRST_NAME_TAG, user.getFirstName());
             obj.put(Constant.MESSAGE_JSON_MIDDLE_NAME_TAG, user.getMiddleName());
             obj.put(Constant.MESSAGE_JSON_lAST_NAME_TAG, user.getLastName());
@@ -264,8 +264,6 @@ public class Parser {
             return "";
         }
     }
-
-
 
 
     public String createPictureCoverUrl(String pictureCoverID, String pictureCoverType, String userID){

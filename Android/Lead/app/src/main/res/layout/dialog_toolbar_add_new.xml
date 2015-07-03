@@ -17,7 +17,7 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/toolbar_text_title"
+            android:id="@+id/toolbar_text_title_add_new"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -25,15 +25,7 @@
             android:layout_centerVertical="true"
             android:textSize="@dimen/text_actionbar_title"
             android:textColor="@color/white"
-            android:text="@string/dialog_toolbar_tag_title"/>
-
-        <ImageView
-            android:id="@+id/image_toolbar_add_new_tag"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:src="@mipmap/ic_fab_add"/>
+            android:text="@string/dialog_toolbar_add_new_tag"/>
 
     </RelativeLayout>
 

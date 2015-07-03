@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.orbital.lead.Parser.FormatDate;
@@ -23,6 +25,7 @@ import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerProjectListAdapte
 import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerTagListAdapter;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
+import com.orbital.lead.model.EnumDialogEditJournalType;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.Project;
 import com.orbital.lead.model.ProjectList;
@@ -212,7 +215,7 @@ public class EditSpecificJournalActivity extends BaseActivity {
         this.mTextHashTag.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showHashTagDialog();
+                showTagDialog();
             }
         });
     }
@@ -317,7 +320,7 @@ public class EditSpecificJournalActivity extends BaseActivity {
         return this.datePickerListener;
     }
 
-   private void showHashTagDialog(){
+   private void showTagDialog(){
        AlertDialog.Builder builder = new AlertDialog.Builder(this);
        LayoutInflater inflater = this.getLayoutInflater();
 
@@ -325,6 +328,14 @@ public class EditSpecificJournalActivity extends BaseActivity {
 
        this.initRecyclerDialogTagAdapter(createDummyTagList());
        this.initDialogTagRecyclerView(dialogView);
+
+       ImageView addNewTag = (ImageView) dialogView.findViewById(R.id.image_toolbar_add_new_tag);
+       addNewTag.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               showAddNewDialog(EnumDialogEditJournalType.TAG);
+           }
+       });
 
        builder.setView(dialogView)
                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
@@ -348,6 +359,43 @@ public class EditSpecificJournalActivity extends BaseActivity {
 
         builder.setView(dialogView)
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+
+        builder.create().show();
+    }
+
+    private void showAddNewDialog(EnumDialogEditJournalType type){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        final View dialogView = inflater.inflate(R.layout.dialog_add_new_layout, null);
+        EditText mEditText = (EditText) dialogView.findViewById(R.id.edit_text_add_new);
+
+        TextView mToolbarTitle = (TextView) dialogView.findViewById(R.id.toolbar_text_title_add_new);
+        switch(type){
+            case TAG:
+                mToolbarTitle.setText(getResources().getString(R.string.dialog_toolbar_add_new_tag));
+                mEditText.setHint(getResources().getString(R.string.dialog_editext_tag_hint));
+                break;
+
+            case PROJECT:
+                mToolbarTitle.setText(getResources().getString(R.string.dialog_toolbar_add_new_project));
+                mEditText.setHint(getResources().getString(R.string.dialog_editext_project_hint));
+                break;
+        }
+
+        builder.setView(dialogView)
+                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.dismiss();

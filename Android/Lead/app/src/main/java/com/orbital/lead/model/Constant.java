@@ -52,7 +52,7 @@ public class Constant {
     public static final String URL_POST_PARAMETER_TAG_FACEBOOK_USER_ID = "fb_uid";
     public static final String URL_POST_PARAMETER_TAG_USER_ALUBM_ID = "aid";
     public static final String URL_POST_PARAMETER_TAG_PICTURE_QUERY_QUANTITY = "pic_qq";
-    public static final String URL_POST_PARAMETER_TAG_USER_JOURNAL_LIST_ID = "jlid";
+    //public static final String URL_POST_PARAMETER_TAG_USER_JOURNAL_LIST_ID = "jlid";
     public static final String URL_POST_PARAMETER_TAG_USER_JOURNAL_ID = "jid";
     public static final String URL_POST_PARAMETER_TAG_DETAIL = "detail";
     public static final String URL_POST_PARAMETER_TAG_URL = "url";
@@ -89,8 +89,8 @@ public class Constant {
     public static final String MESSAGE_JSON_LEAD_USER_ID_TAG = "leadUserID";
     public static final String MESSAGE_JSON_PICTURE_PROFILE_ID_TAG = "pictureProfileID";
     public static final String MESSAGE_JSON_PICTURE_PROFILE_TYPE_TAG = "pictureProfileType";
-    public static final String MESSAGE_JSON_JOURNAL_LIST_ID_TAG = "journalListID";
-    public static final String MESSAGE_JSON_EXPERIENCE_LIST_TAG = "experienceListID";
+   // public static final String MESSAGE_JSON_JOURNAL_LIST_ID_TAG = "journalListID";
+   // public static final String MESSAGE_JSON_EXPERIENCE_LIST_TAG = "experienceListID";
     public static final String MESSAGE_JSON_FIRST_NAME_TAG = "firstName";
     public static final String MESSAGE_JSON_MIDDLE_NAME_TAG = "middleName";
     public static final String MESSAGE_JSON_lAST_NAME_TAG = "lastName";
@@ -111,7 +111,7 @@ public class Constant {
     public static final String MESSAGE_JSON_PICTURE_COVER_ID_TAG = "pictureCoverID";
     public static final String MESSAGE_JSON_PICTURE_COVER_TYPE_TAG = "pictureCoverType";
     public static final String MESSAGE_JSON_PICTURE_TYPE_TAG = "pictureType";
-    public static final String MESSAGE_JSON_PICTURE_ALBUM_ID_TAG = "pictureAlbumID";
+    public static final String MESSAGE_JSON_ALBUM_ID_TAG = "albumID";
     public static final String MESSAGE_JSON_TITLE_TAG = "title";
     public static final String MESSAGE_JSON_CONTENT_TAG = "content";
     public static final String MESSAGE_JSON_DESCRIPTION_TAG = "description";
@@ -171,7 +171,7 @@ public class Constant {
     public static final String INTENT_SERVICE_EXTRA_RECEIVER_TAG = "receiver";
     public static final String INTENT_SERVICE_EXTRA_USER_ID_TAG = "uid";
     public static final String INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG = "jid";
-    public static final String INTENT_SERVICE_EXTRA_USER_JOURNAL_LIST_ID_TAG = "jlid";
+    //public static final String INTENT_SERVICE_EXTRA_USER_JOURNAL_LIST_ID_TAG = "jlid";
     public static final String INTENT_SERVICE_EXTRA_USER_PROFILE_PICTURE_ID_TAG = "u_profile_pic_id";
     public static final String INTENT_SERVICE_EXTRA_USER_PROFILE_PICTURE_FILENAME_TAG = "u_profile_pic_filename";
     public static final String INTENT_SERVICE_EXTRA_TYPE_TAG = "type";

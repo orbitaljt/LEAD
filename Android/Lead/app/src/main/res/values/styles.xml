@@ -257,6 +257,12 @@
         <item name="android:paddingBottom">8dp</item>
     </style>
 
+    <style name="editTextDialogStyle">
+        <item name="android:layout_marginTop">@dimen/edit_text_margin_top</item>
+        <item name="android:textSize">@dimen/text_primary</item>
+        <item name="android:textColor">@color/primary_text</item>
+    </style>
+
 
 
 </resources>

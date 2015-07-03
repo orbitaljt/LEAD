@@ -132,7 +132,7 @@ public class Logic {
 
 
     public void getUserJournalList(Context context, User currentUser){
-        if(this.getParser().isStringEmpty(currentUser.getJournalListID())){
+        if(currentUser == null){
             // profile picture not exist for the user
             this.getLogging().debug(TAG, "getUserJournalList => No journal list ID available.");
         }else{
@@ -505,7 +505,7 @@ public class Logic {
         switch(serviceType){
             case GET_ALL_JOURNAL:
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, currentUser.getUserID()); // user ID
-                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_LIST_ID_TAG, currentUser.getJournalListID()); // journal list ID
+                //intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_LIST_ID_TAG, currentUser.getJournalListID()); // journal list ID
                 break;
 
             case GET_SPECIFIC_JOURNAL:

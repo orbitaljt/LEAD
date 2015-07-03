@@ -36,6 +36,8 @@
     <string name="title_activity_picture">PictureActivity</string>
     <string name="title_activity_edit_specific_journal">EditSpecificJournalActivity</string>
 
+    <string name="dialog_toolbar_add_new_tag">Add New Tag</string>
+    <string name="dialog_toolbar_add_new_project">Add New Project</string>
     <string name="dialog_toolbar_tag_title">Select Tags</string>
     <string name="dialog_toolbar_project_title">Select A Project</string>
 
@@ -45,6 +47,9 @@
     <string name="dialog_set">Set</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_ok">Ok</string>
+
+    <string name="dialog_editext_tag_hint">Tag name</string>
+    <string name="dialog_editext_project_hint">Project name</string>
 
     <string name="button_set_as_album_cover">Set Cover</string>
 

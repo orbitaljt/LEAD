@@ -34,7 +34,6 @@ public class JournalService extends IntentService{
     private LocalStorage mLocalStorage;
     private String userID;
     private String journalID;
-    private String journalListID;
     private String userProfilePicID;
     private String urlStreamStr;
     private EnumJournalServiceType serviceType;
@@ -65,10 +64,11 @@ public class JournalService extends IntentService{
         if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG) != null){
             this.userID = intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG);
         }
-
+/*
         if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_LIST_ID_TAG) != null){
             this.journalListID = intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_LIST_ID_TAG);
         }
+*/
 
         if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG) != null){
             this.journalID = intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG);
@@ -94,7 +94,6 @@ public class JournalService extends IntentService{
                     url = Constant.URL_CLIENT_SERVER;
                     params = new HashMap<String, String>();
                     params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, this.getUserID());
-                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_JOURNAL_LIST_ID, this.getJournalListID());
 
                     this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_GET_USER_ALL_JOURNAL, params);
                     this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
@@ -167,10 +166,6 @@ public class JournalService extends IntentService{
 
     private String getJournalID() {
         return this.journalID;
-    }
-
-    private String getJournalListID(){
-        return this.journalListID;
     }
 
     private EnumJournalServiceType getServiceType(){
