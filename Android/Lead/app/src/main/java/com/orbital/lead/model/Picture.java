@@ -10,7 +10,7 @@ import com.orbital.lead.Parser.Parser;
  */
 public class Picture implements Parcelable {
 
-    private static Parser mParser = Parser.getInstance();
+    private Parser mParser = Parser.getInstance();
 
     private String _userID;
     private String _pictureID;
@@ -18,13 +18,13 @@ public class Picture implements Parcelable {
     private String _albumID;
     private String _title;
     private String _description;
-    private String _hashTag;
     private String _createdDate;
     private String _createdTime;
     private String _thumbnailUrl; // small image url
     private String _actualUrl;
     private boolean _fromFacebook;
     private boolean _fromLead;
+    private TagList tagList;
 
     @Override
     public int describeContents() {
@@ -39,13 +39,13 @@ public class Picture implements Parcelable {
         dest.writeString(this._albumID);
         dest.writeString(this._title);
         dest.writeString(this._description);
-        dest.writeString(this._hashTag);
         dest.writeString(this._createdDate);
         dest.writeString(this._createdTime);
         dest.writeString(this._thumbnailUrl);
         dest.writeString(this._actualUrl);
         dest.writeInt(this._fromFacebook ? 1 : 0);
         dest.writeInt(this._fromLead ? 1 : 0);
+        dest.writeParcelable(tagList, flags);
     }
 
     public static final Parcelable.Creator<Picture> CREATOR = new Parcelable.Creator<Picture>(){
@@ -62,7 +62,7 @@ public class Picture implements Parcelable {
     public Picture(String userID, String picID, String type){
         this._userID = userID;
         this._pictureID = picID;
-        this._pictureType = getParser().getType(type);
+        this._pictureType = getParser().getPictureType(type);
         this._thumbnailUrl = this.getParser().createPictureThumbnailUrl(picID, type, userID);
         this._actualUrl = this.getParser().createPictureNormalUrl(picID, type, userID);
     }
@@ -83,10 +83,6 @@ public class Picture implements Parcelable {
         return this._description;
     }
 
-    public String getHashTag(){
-        return this._hashTag;
-    }
-
     public String getCreatedDate(){
         return this._albumID;
     }
@@ -101,6 +97,10 @@ public class Picture implements Parcelable {
 
     public String getAcutalUrl() {
         return this._actualUrl;
+    }
+
+    public TagList getTagList() {
+        return this.tagList;
     }
 
     public boolean isFromFacebook(){
@@ -127,10 +127,6 @@ public class Picture implements Parcelable {
         this._description = value;
     }
 
-    public void setHashTag(String value){
-        this._hashTag = value;
-    }
-
     public void setCreatedDate(String value){
         this._createdDate = value;
     }
@@ -147,6 +143,9 @@ public class Picture implements Parcelable {
         this._fromLead = value;
     }
 
+    public void setTagList(TagList list) {
+        this.tagList = list;
+    }
 
     private Parser getParser() {
         return mParser;
@@ -164,14 +163,13 @@ public class Picture implements Parcelable {
         this._albumID = pc.readString();
         this._title = pc.readString();
         this._description = pc.readString();
-        this._hashTag = pc.readString();
         this._createdDate = pc.readString();
         this._createdTime = pc.readString();
         this._thumbnailUrl = pc.readString();
         this._actualUrl = pc.readString();
         this._fromFacebook = (pc.readInt() == 0) ? false : true;
         this._fromLead = (pc.readInt() == 0) ? false : true;
-
+        this.tagList = (TagList) pc.<TagList> readParcelable(TagList.class.getClassLoader());
     }
 
 /*

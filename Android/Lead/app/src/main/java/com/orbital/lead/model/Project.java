@@ -5,7 +5,7 @@ package com.orbital.lead.model;
  */
 public class Project {
 
-    private String projectID;
+    private String id;
     private String projectListID;
     private String title;
 

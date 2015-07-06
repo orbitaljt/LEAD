@@ -18,6 +18,8 @@ public class DrawerListObject {
 
             mHolder = new Holder(Constant.DRAWER_LIST_PROFILE_NAME, Constant.DRAWER_LIST_PROFILE_ICON);
             list.add(mHolder);
+            mHolder = new Holder(Constant.DRAWER_LIST_ALBUM_NAME, Constant.DRAWER_LIST_ALBUM_ICON);
+            list.add(mHolder);
             mHolder = new Holder(Constant.DRAWER_LIST_BADGE_NAME, Constant.DRAWER_LIST_BADGE_ICON);
             list.add(mHolder);
             mHolder = new Holder(Constant.DRAWER_LIST_MILESTONE_NAME, Constant.DRAWER_LIST_MILESTONE_ICON);

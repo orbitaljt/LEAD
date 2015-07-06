@@ -38,8 +38,15 @@
 
     <string name="dialog_toolbar_add_new_tag">Add New Tag</string>
     <string name="dialog_toolbar_add_new_project">Add New Project</string>
+    <string name="dialog_toolbar_edit_tag">Edit Tag</string>
+    <string name="dialog_toolbar_edit_project">Edit Project</string>
+    <string name="dialog_toolbar_delete_tag">Delete Tag</string>
+    <string name="dialog_toolbar_delete_project">Delete Project</string>
     <string name="dialog_toolbar_tag_title">Select Tags</string>
     <string name="dialog_toolbar_project_title">Select A Project</string>
+    <string name="dialog_description_delete_tag">Delete this tag?</string>
+    <string name="dialog_description_delete_project">Delete this project?</string>
+
 
     <string name="dialog_overflow_menu_edit">Edit</string>
     <string name="dialog_overflow_menu_delete">Delete</string>

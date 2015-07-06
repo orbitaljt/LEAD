@@ -1,14 +1,35 @@
 package com.orbital.lead.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 
 /**
  * Created by joseph on 20/6/2015.
  */
-public class PictureList {
+public class PictureList implements Parcelable {
 
     private ArrayList<Picture> _arrayPictures;
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(_arrayPictures);
+    }
+
+    public static final Parcelable.Creator<PictureList> CREATOR = new Parcelable.Creator<PictureList>(){
+        public PictureList createFromParcel(Parcel pc){
+            return new PictureList(pc);
+        }
+        public PictureList[] newArray(int size){
+            return new PictureList[size];
+        }
+    };
 
     public PictureList(){
         this.initArray();
@@ -38,6 +59,11 @@ public class PictureList {
 
     private void initArray(){
         this._arrayPictures = new ArrayList<Picture>();
+    }
+
+    private PictureList(Parcel pc){
+       // pc.readTypedList(this._arrayPictures, Picture.CREATOR);
+        this._arrayPictures = pc.createTypedArrayList(Picture.CREATOR);
     }
 
 }

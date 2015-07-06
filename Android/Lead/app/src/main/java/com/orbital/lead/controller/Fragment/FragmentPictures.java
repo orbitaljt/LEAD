@@ -1,6 +1,8 @@
 package com.orbital.lead.controller.Fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,85 +13,89 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.orbital.lead.R;
-import com.orbital.lead.controller.GridAdapter.GridAlbumsAdapter;
+import com.orbital.lead.controller.Activity.PictureActivity;
+import com.orbital.lead.controller.Activity.ViewPagerAdapter.PagerImageAdapter;
 import com.orbital.lead.controller.GridAdapter.GridPicturesAdapter;
 import com.orbital.lead.controller.GridAdapter.MultiChoiceModeListener;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.Album;
-import com.orbital.lead.model.AlbumList;
+import com.orbital.lead.model.Picture;
+import com.orbital.lead.widget.WrapContentHeightViewPager;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link FragmentAlbum.OnFragmentInteractionListener} interface
+ * {@link FragmentPictures.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link FragmentAlbum#newInstance} factory method to
+ * Use the {@link FragmentPictures#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FragmentAlbum extends Fragment {
+public class FragmentPictures extends Fragment {
     private final String TAG = this.getClass().getSimpleName();
 
-
-    public static final int REQUEST_OPEN_FRAGMENT_PICTURES = 1;
-
+    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_ALBUM = "album";
+   // private static final String ARG_PICTURE_LIST = "picturelist";
+    //private static Context mContext;
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private Album mParamAlbum;
+   // private ArrayList<Picture> mParamPictureList;
 
     private OnFragmentInteractionListener mListener;
     private CustomLogging mLogging;
     private Logic mLogic;
 
-    private AlbumList mAlbumList;
-    private GridAlbumsAdapter mGridAlbumsAdapter;
+    //private PictureActivity mPictureActivity;
     private GridView mGridView;
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param album Album object.
+     * //@param picList Picture ArrayList.
      * @return A new instance of fragment FragmentAlbum.
      */
     // TODO: Rename and change types and number of parameters
-    public static FragmentAlbum newInstance(String param1, String param2) {
-        FragmentAlbum fragment = new FragmentAlbum();
+    //Context context,
+    public static FragmentPictures newInstance(Album album) {
+        FragmentPictures fragment = new FragmentPictures();
+
+        //mContext = context;
+        //ArrayList<Picture> list = new ArrayList<Picture>(picList);
+
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putParcelable(ARG_ALBUM, album);
+        //args.putParcelableArrayList(ARG_PICTURE_LIST, list);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public FragmentAlbum() {
+    public FragmentPictures() {
         // Required empty public constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         this.initLogging();
-
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mParamAlbum = getArguments().getParcelable(ARG_ALBUM);
+            //mParamPictureList = getArguments().getParcelableArrayList(ARG_PICTURE_LIST);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-
         this.mLogging.debug(TAG, "onCreateView");
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_album, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_pictures, container, false);
 
         this.initLogic();
         this.initGridView(rootView);
@@ -102,6 +108,7 @@ public class FragmentAlbum extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        //this.initActivity(activity);
         try {
             mListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -116,11 +123,11 @@ public class FragmentAlbum extends Fragment {
         mListener = null;
     }
 
-    public void updateGridAlbum(AlbumList list){
-        this.setAlbumList(list);
-        this.initGridAlbumAdapter();
-        this.getGridView().setAdapter(this.mGridAlbumsAdapter);
+    /*
+    public PictureActivity getPictureActivity(){
+        return this.mPictureActivity;
     }
+    */
 
     private void initLogging(){
         this.mLogging = CustomLogging.getInstance();
@@ -130,50 +137,71 @@ public class FragmentAlbum extends Fragment {
         this.mLogic = Logic.getInstance();
     }
 
-    private void initGridAlbumAdapter(){
-        this.mGridAlbumsAdapter = new GridAlbumsAdapter(this.getAlbumList());
+    /*
+    private void initActivity(Activity activity){
+        if(activity instanceof PictureActivity){
+            this.mPictureActivity = (PictureActivity) activity;
+        }
     }
+    */
 
     private void initGridView(View v){
         this.mLogging.debug(TAG, "initGridView");
-        this.mGridView = (GridView) v.findViewById(R.id.grid_albums);
+        this.mGridView = (GridView) v.findViewById(R.id.grid_album_picture);
         //getActivity(),
-        if(mGridAlbumsAdapter == null){
-            this.initGridAlbumAdapter();
-        }
-        this.mGridView.setAdapter(mGridAlbumsAdapter);
+        this.mGridView.setAdapter(new GridPicturesAdapter(this.mGridView, this.getParamAlbum().getPictureList().getList()));
         this.mGridView.setChoiceMode(GridView.CHOICE_MODE_MULTIPLE_MODAL);
         this.mGridView.setMultiChoiceModeListener(new MultiChoiceModeListener(this.getGridView()));
         this.mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mLogging.debug(TAG, "onItemClick -> " + position);
-
-                //String url = getParamPictureList().get(position).getThumbnailUrl();
-                //mLogging.debug(TAG, "getThumbnailUrl -> " + url);
-                //showDialogPicture(getActivity(), getParamPictureList(), position);
-                Album selectedAlbum = getAlbumList().getAlbum(position);
-                if(selectedAlbum != null) {
-                    mListener.onFragmentAlbumInteraction(FragmentAlbum.REQUEST_OPEN_FRAGMENT_PICTURES, selectedAlbum);
-                }else{
-                    mLogging.debug(TAG, "onItemClick -> Selected album is null");
-                }
-
+                mLogging.debug(TAG, "onItemSelected -> " + position);
+                String url = getParamAlbum().getPictureList().getList().get(position).getThumbnailUrl();
+                mLogging.debug(TAG, "getThumbnailUrl -> " + url);
+                showDialogPicture(getActivity(), getParamAlbum().getPictureList().getList(), position);
             }
         });
 
     }
 
+    private Album getParamAlbum(){
+        return this.mParamAlbum;
+    }
+
+    //private ArrayList<Picture> getParamPictureList() {
+    //    return this.mParamPictureList;
+    //}
+
     private GridView getGridView() {
         return this.mGridView;
     }
 
-    private AlbumList getAlbumList() {
-        return this.mAlbumList;
-    }
+    /*============= Display Dialogs =================*/
+    public void showDialogPicture(Context mContext, ArrayList<Picture> list, int currentPosition){
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        if(mContext instanceof PictureActivity){ //may come from FragmentAlbum
+            LayoutInflater inflater = ((PictureActivity) mContext).getLayoutInflater();
 
-    private void setAlbumList(AlbumList list) {
-        this.mAlbumList = list;
+            final View dialogView = inflater.inflate(R.layout.dialog_viewpager_picture, null);
+
+            WrapContentHeightViewPager pager = (WrapContentHeightViewPager) dialogView.findViewById(R.id.pager_picture);
+            pager.setAdapter(new PagerImageAdapter(mContext, list));
+            pager.setCurrentItem(currentPosition);
+
+            builder.setView(dialogView);
+            builder.create().setCanceledOnTouchOutside(true);
+            builder.create().show();
+        }
+
+    }
+    /*
+    private Context getContext() {
+        return mContext;
+    }
+    */
+
+    private Logic getLogic() {
+        return this.mLogic;
     }
     /**
      * This interface must be implemented by activities that contain this
@@ -187,15 +215,17 @@ public class FragmentAlbum extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentAlbumInteraction(int request, Album selectedAlbum);
+        public void onFragmentPicturesInteraction(Uri uri);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onFragmentAlbumInteraction(0, null);
+            mListener.onFragmentPicturesInteraction(uri);
         }
     }
+
+
 
 
 }

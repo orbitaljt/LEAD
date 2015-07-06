@@ -28,8 +28,17 @@ public class Message {
     }
 
     private void checkType(String code){
+        if(code.equals(Constant.MESSAGE_HAS_RECORD)){
+            this._type = EnumMessageType.HAS_RECORD;
+            return;
+        }else if(code.equals(Constant.MESSAGE_NO_RECORD)){
+            this._type = EnumMessageType.NO_RECORD;
+            return;
+        }
+
         if(code.contains(Constant.MESSAGE_SUCCESS_TYPE)){
             this._type = EnumMessageType.SUCCESS;
+            return;
         }else{
             this._type = EnumMessageType.FAILURE;
         }

@@ -13,15 +13,19 @@ public class Constant {
     // Title
     public static final String TITLE_LEAD = "Lead";
     public static final String TITLE_SPECIFIC_JOURNAL = "My Journal";
+    public static final String TITLE_FRAGMENT_ALBUM = "Album";
+    public static final String TITLE_FRAGMENT_PICTURES = "Pictures";
 
     // Drawer List
     public static final String DRAWER_LIST_PROFILE_NAME = "Profile";
+    public static final String DRAWER_LIST_ALBUM_NAME = "Albums";
     public static final String DRAWER_LIST_BADGE_NAME = "Badge";
     public static final String DRAWER_LIST_MILESTONE_NAME = "Milestone";
     public static final String DRAWER_LIST_JOURNAL_NAME = "Journal";
     public static final String DRAWER_LIST_EXPERIENCE_NAME = "Experience";
     public static final String DRAWER_LIST_SETTING_NAME = "Setting";
     public static final int DRAWER_LIST_PROFILE_ICON = R.mipmap.ic_profile;
+    public static final int DRAWER_LIST_ALBUM_ICON = R.mipmap.ic_album;
     public static final int DRAWER_LIST_BADGE_ICON = R.mipmap.ic_badge;
     public static final int DRAWER_LIST_MILESTONE_ICON = R.mipmap.ic_milestone;
     public static final int DRAWER_LIST_JOURNAL_ICON = R.mipmap.ic_journal;
@@ -31,6 +35,7 @@ public class Constant {
 
     // Fragment name
     public static final String FRAGMENT_JOURNAL_LIST = "FragmentJournalList";
+    public static final String FRAGMENT_PICTURES = "FragmentPictures";
     public static final String FRAGMENT_ALBUM = "FragmentAlbum";
 
 
@@ -50,7 +55,7 @@ public class Constant {
     public static final String URL_POST_PARAMETER_TAG_PASSWORD = "pw";
     public static final String URL_POST_PARAMETER_TAG_USER_ID = "uid";
     public static final String URL_POST_PARAMETER_TAG_FACEBOOK_USER_ID = "fb_uid";
-    public static final String URL_POST_PARAMETER_TAG_USER_ALUBM_ID = "aid";
+    public static final String URL_POST_PARAMETER_TAG_USER_ALBUM_ID = "aid";
     public static final String URL_POST_PARAMETER_TAG_PICTURE_QUERY_QUANTITY = "pic_qq";
     //public static final String URL_POST_PARAMETER_TAG_USER_JOURNAL_LIST_ID = "jlid";
     public static final String URL_POST_PARAMETER_TAG_USER_JOURNAL_ID = "jid";
@@ -73,6 +78,7 @@ public class Constant {
     public static final String TYPE_GET_USER_SPECIFIC_JOURNAL = "401";
     public static final String TYPE_GET_USER_PICTURE = "900";
     public static final String TYPE_GET_USER_SPECIFIC_ALBUM = "901";
+    public static final String TYPE_GET_USER_ALL_ALBUM = "902";
     public static final String TYPE_UPLOAD_IMAGE_URL = "2000";
 
 
@@ -120,9 +126,10 @@ public class Constant {
     public static final String MESSAGE_JSON_LAST_MODIFIED_DATE_TAG = "lastModifiedDate";
     public static final String MESSAGE_JSON_LAST_MODIFIED_TIME_TAG = "lastModifiedTime";
     public static final String MESSAGE_JSON_IS_PUBLISHED_TAG = "isPublished";
-    public static final String MESSAGE_JSON_HASH_TAG_TAG = "hashTag";
     public static final String MESSAGE_JSON_LIST_OF_PICTURES_TAG = "listOfPictures";
-
+    public static final String MESSAGE_JSON_TAGS_TAG = "tags";
+    public static final String MESSAGE_JSON_TAGS_ID_TAG = "tagID";
+    public static final String MESSAGE_JSON_TAGS_NAME_TAG = "tagName";
 
     public static final String MESSAGE_JSON_JOURNAL_CONTENT_ID_TAG = "journalContentID";
     public static final String MESSAGE_JSON_JOURNAL_QUESTION_ID_TAG = "journalQuestionID";
@@ -151,6 +158,8 @@ public class Constant {
     // Message code
     public static final String MESSAGE_SUCCESS_TYPE = ".1";
     public static final String MESSAGE_FAILURE_TYPE = ".2";
+    public static final String MESSAGE_HAS_RECORD = "1001.1";
+    public static final String MESSAGE_NO_RECORD = "1001.2";
 
     //Bundle paremeters
     public static final String BUNDLE_PARAM_USERNAME = "username";
@@ -189,6 +198,12 @@ public class Constant {
     public static final String AWS_S3_FOLDER_PICTURE_NAME = "picture"; // bucket_name/user_id/picture/xxxx
     public static final String AWS_S3_SLASH = "/";
 
+
+    // Grid albums
+    public static final String GRID_DUMMY_NUMBER_OF_PICTURES = "[num_of_pics]";
+    public static final String GRID_ALBUM_NUMBER_OF_PICTURES_FORMAT = "[num_of_pics] Photos";
+    public static final String GRID_ALBUM_DEFAULT_UNTITLED = "Untitled Album";
+
     // Local Storage
     // getExternalStorageDirectory/Lead/Media/Profile/
     // getExternalStorageDirectory/Lead/Media/Picture/
@@ -205,5 +220,11 @@ public class Constant {
     // Formatting Strings
     public static final String DUMMY_NUMBER = "[num]";
     public static final String STRING_NUMBER_OF_PICTURES_FORMAT = "All Photos ([num])";
+
+
+    // Setting
+    public static final String PREFERENCE_HISTORY_RECENT_TAG_FILE_NAME = "recent_tag.txt";
+
+
 
 }

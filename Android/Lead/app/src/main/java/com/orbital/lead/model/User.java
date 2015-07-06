@@ -33,6 +33,7 @@ public class User {
     private boolean isLead = false;
 
     private JournalList mJournalList;
+    private TagList mTagList; //list of tags that are currently using across all journals
 
     public User(){
         this.initParser();
@@ -61,7 +62,7 @@ public class User {
         this._lastLoginDate = lastLoginDate;
         this._lastLoginTime = lastLoginTime;
         this._age = age;
-        this._profilePicType = getParser().getType(ppType);
+        this._profilePicType = getParser().getPictureType(ppType);
         this._profilePicUrl = getParser().createPictureNormalUrl(this._profilePicID,
                                                 this._profilePicType.toString(), this._userID);
     }
@@ -174,6 +175,8 @@ public class User {
         return this.mJournalList;
     }
 
+    public TagList getTagList() { return this.mTagList; }
+
     // Set
     public void setFacebookID(String val){
         this._facebookID = val;
@@ -277,6 +280,8 @@ public class User {
     public void setJournalList(JournalList list){
         this.mJournalList = list;
     }
+
+    public void setTagList(TagList list) { this.mTagList = list; }
 
     private void initParser(){
         this.mParser = Parser.getInstance();

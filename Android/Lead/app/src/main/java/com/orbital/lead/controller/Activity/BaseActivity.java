@@ -82,6 +82,22 @@ public class BaseActivity extends AppCompatActivity
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
+        switch(position){
+            case 0: // Profile
+                break;
+            case 1: // Albums
+                getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_ALBUM, null);
+                break;
+            case 2: // Badge
+                break;
+            case 3: // Milestone
+                break;
+            case 4: // Journal
+                break;
+            case 5: // Setting
+                break;
+
+        }
     }
 
     public void onSectionAttached(int number) {

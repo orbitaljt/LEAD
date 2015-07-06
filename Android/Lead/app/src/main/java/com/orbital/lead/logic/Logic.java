@@ -1,17 +1,22 @@
 package com.orbital.lead.logic;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.internal.view.menu.MenuBuilder;
 import android.support.v7.widget.PopupMenu;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.ViewAnimator;
 
 import com.nispok.snackbar.Snackbar;
@@ -35,16 +40,17 @@ import com.orbital.lead.logic.Asynchronous.AsyncUploadImage;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfilePicture;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfile;
 import com.orbital.lead.logic.LocalStorage.LocalStorage;
+import com.orbital.lead.logic.Preference.History;
 import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.EnumDialogEditJournalType;
 import com.orbital.lead.model.EnumJournalServiceType;
 import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.Journal;
-import com.orbital.lead.model.Picture;
 import com.orbital.lead.model.User;
 
-import java.util.ArrayList;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * Created by joseph on 14/6/2015.
@@ -59,12 +65,14 @@ public class Logic {
     private Parser mParser;
     private LocalStorage mStorageLogic;
     private CustomLogging mLogging;
+    private History mHistoryPref;
 
     private Logic(){} // private constructor to prevent creating new instance
 
     public static Logic getInstance(){
         mLogic.initLogging();
         mLogic.initParser();
+        mLogic.initHistoryPreference();
         mLogic.initLocalStorageLogic();
         return mLogic;
     }
@@ -146,7 +154,16 @@ public class Logic {
             this.getLogging().debug(TAG, "getUserSpecificAlbum => Album ID is empty.");
         }else{
             mLogging.debug(TAG, "getUserSpecificAlbum => Get specific album from web service with album ID => " + albumID);
-            this.executePictureService(context, EnumPictureServiceType.GET_ALBUM_PHOTO, albumID);
+            this.executePictureService(context, EnumPictureServiceType.GET_SPECIFIC_ALBUM, albumID, "");
+        }
+    }
+
+    public void getUserAllAlbum(Context context, String userID){
+        if(this.getParser().isStringEmpty(userID)){
+            this.getLogging().debug(TAG, "getUserAllAlbum => User ID is empty.");
+        }else{
+            mLogging.debug(TAG, "getUserAllAlbum => Get all album from web service with user ID => " + userID);
+            this.executePictureService(context, EnumPictureServiceType.GET_ALL_ALBUM, "", userID);
         }
     }
 
@@ -186,14 +203,15 @@ public class Logic {
         context.startActivity(newIntent);
     }
 
-    public void displayPictureActivity(Context context, String type, Album album, ArrayList<Picture> picList){
+    public void displayPictureActivity(Context context, String type, Album album){
+        //, ArrayList<Picture> picList
         mLogging.debug(TAG, "displayPictureActivity");
         Intent newIntent = new Intent(context, PictureActivity.class);
 
         Bundle mBundle = new Bundle();
         mBundle.putString(Constant.BUNDLE_PARAM_OPEN_FRAGMENT_TYPE, type);
         mBundle.putParcelable(Constant.BUNDLE_PARAM_ALBUM, album);
-        mBundle.putParcelableArrayList(Constant.BUNDLE_PARAM_PICTURE_LIST, picList);
+        //mBundle.putParcelableArrayList(Constant.BUNDLE_PARAM_PICTURE_LIST, picList);
 
         newIntent.putExtras(mBundle);
         context.startActivity(newIntent);
@@ -258,6 +276,12 @@ public class Logic {
     private void initParser(){
         if(this.mParser == null) {
             this.mParser = Parser.getInstance();
+        }
+    }
+
+    private void initHistoryPreference() {
+        if(this.mHistoryPref == null) {
+            this.mHistoryPref = History.getInstance();
         }
     }
 
@@ -520,51 +544,150 @@ public class Logic {
             intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((MainActivity) mContext).getJournalReceiver());
 
         }else if(mContext instanceof SpecificJournalActivity){
-            intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((SpecificJournalActivity) mContext).getJournalReceiver());
+            intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((SpecificJournalActivity) mContext).getPictureReceiver());
 
         }
 
         mContext.startService(intent);
     }
 
-    private void executePictureService(Context mContext, EnumPictureServiceType serviceType, String albumID) {
+    private void executePictureService(Context mContext, EnumPictureServiceType serviceType, String albumID, String userID) {
         Intent intent = new Intent(Intent.ACTION_SYNC, null, mContext, PictureService.class);
         switch(serviceType){
-            case GET_ALBUM_PHOTO:
+            case GET_SPECIFIC_ALBUM:
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG, albumID); // user ID
+                break;
+            case GET_ALL_ALBUM:
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, userID); // user ID
                 break;
         }
 
         intent.putExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG, serviceType);
 
         if(mContext instanceof SpecificJournalActivity){
-            intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((SpecificJournalActivity) mContext).getJournalReceiver());
+            intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((SpecificJournalActivity) mContext).getPictureReceiver());
+
+        }else if(mContext instanceof PictureActivity){
+            intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((PictureActivity) mContext).getPictureReceiver());
         }
 
         mContext.startService(intent);
     }
 
 
+    /*=========== DIALOGS WITH CUSTOM LAYOUT ===========*/
+    public void showEditTagProjectDialog(Context context, EnumDialogEditJournalType type, String editTextCurrentValue){
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        final View dialogView = inflater.inflate(R.layout.dialog_add_new_layout, null);
+        EditText mEditText = (EditText) dialogView.findViewById(R.id.edit_text_add_new);
+        TextView mToolbarTitle = (TextView) dialogView.findViewById(R.id.toolbar_text_title_add_new);
+
+        switch(type){
+            case ADD_TAG:
+                mToolbarTitle.setText(context.getResources().getString(R.string.dialog_toolbar_add_new_tag));
+                mEditText.setHint(context.getResources().getString(R.string.dialog_editext_tag_hint));
+                break;
+
+            case ADD_PROJECT:
+                mToolbarTitle.setText(context.getResources().getString(R.string.dialog_toolbar_add_new_project));
+                mEditText.setHint(context.getResources().getString(R.string.dialog_editext_project_hint));
+                break;
+
+            case EDIT_TAG:
+                mToolbarTitle.setText(context.getResources().getString(R.string.dialog_toolbar_edit_tag));
+                mEditText.setText(editTextCurrentValue);
+                break;
+
+            case EDIT_PROJECT:
+                mToolbarTitle.setText(context.getResources().getString(R.string.dialog_toolbar_edit_project));
+                mEditText.setText(editTextCurrentValue);
+                break;
+        }
+
+        builder.setView(dialogView)
+                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+
+        builder.create().show();
+    }
+
+    public void showDeleteTagProjectDialog(final Context context, final EnumDialogEditJournalType type){
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        final View dialogView = inflater.inflate(R.layout.dialog_delete_layout, null);
+
+        TextView mToolbarTitle = (TextView) dialogView.findViewById(R.id.toolbar_text_title_delete);
+        TextView mText = (TextView) dialogView.findViewById(R.id.text_delete);
+
+        switch(type) {
+            case DELETE_TAG:
+                mToolbarTitle.setText(context.getResources().getString(R.string.dialog_toolbar_delete_tag));
+                mText.setText(context.getResources().getString(R.string.dialog_description_delete_tag));
+                break;
+
+            case DELETE_PROJECT:
+                mToolbarTitle.setText(context.getResources().getString(R.string.dialog_toolbar_delete_project));
+                mText.setText(context.getResources().getString(R.string.dialog_description_delete_project));
+                break;
+        }
+
+        builder.setView(dialogView)
+                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+
+        builder.create().show();
+
+    }
+
+
+
     /*=========== POPUP MENU ===========*/
-    public void showPopUpMenu(Context context, View v, final EnumDialogEditJournalType type){
+    public void showPopUpMenu(final Context context, View v, final EnumDialogEditJournalType type, final String currentValue){
         PopupMenu menu = new PopupMenu(context, v){
             @Override
             public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.dialog_overflow_edit_journal_edit: // Edit the current row
                         switch(type){
-                            case TAG:
+                            case EDIT_TAG: //edit tag
+                                showEditTagProjectDialog(context, EnumDialogEditJournalType.EDIT_TAG, currentValue);
                                 break;
-                            case PROJECT:
+                            case EDIT_PROJECT:
+                                showEditTagProjectDialog(context, EnumDialogEditJournalType.EDIT_PROJECT, currentValue);
                                 break;
                         }
                         return true;
 
                     case R.id.dialog_overflow_edit_journal_delete: // Delete the current row
                         switch(type){
-                            case TAG:
+                            case EDIT_TAG:
+                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_TAG);
                                 break;
-                            case PROJECT:
+                            case EDIT_PROJECT:
+                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_PROJECT);
                                 break;
                         }
                         return true;
@@ -580,6 +703,25 @@ public class Logic {
     }
 
 
+
+
+    /*=========== ACCESS TO PREFERENCE ===========*/
+
+    public String getHistoryTags(Context context){
+        mLogging.debug(TAG, "getHistoryTags");
+        try{
+            return this.mHistoryPref.getRecentTags(context);
+
+        }catch (FileNotFoundException e){
+            mLogging.debug(TAG, "error -> " + e.getMessage());
+            e.printStackTrace();
+        }catch (IOException e){
+            mLogging.debug(TAG, "error -> " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 
 
 

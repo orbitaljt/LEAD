@@ -15,11 +15,11 @@ public class JournalList {
     }
 
     public void addJournal(Journal journal){
-        this.getJournalArray().add(journal);
+        this.getList().add(journal);
     }
 
     public void removeJournal(String journalID){
-        Iterator<Journal> iter = this.getJournalArray().iterator();
+        Iterator<Journal> iter = this.getList().iterator();
         while (iter.hasNext()) {
             Journal j = iter.next();
             if(j.getJournalID().equals(journalID)){
@@ -29,14 +29,14 @@ public class JournalList {
     }
 
     public Journal get(int position){
-        return getJournalArray().get(position);
+        return getList().get(position);
     }
 
     public int size(){
         return this.mJournalArray.size();
     }
 
-    private ArrayList<Journal> getJournalArray(){
+    public ArrayList<Journal> getList(){
         if(this.mJournalArray == null)
             initArray();
         return this.mJournalArray;

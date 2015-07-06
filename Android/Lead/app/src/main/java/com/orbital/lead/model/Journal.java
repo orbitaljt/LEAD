@@ -9,7 +9,10 @@ import com.orbital.lead.Parser.Parser;
  * Created by joseph on 22/6/2015.
  */
 public class Journal implements Parcelable {
+    // each journal has an album
     private Parser mParser;
+    private Album album;
+    private TagList tagList;
     private String journalID;
     private String pictureCoverID;
     private EnumPictureType pictureCoverType;
@@ -47,6 +50,8 @@ public class Journal implements Parcelable {
         dest.writeString(this.createdDate);
         dest.writeString(this.createdTime);
         dest.writeInt(this.isPublished ? 1 : 0);
+        dest.writeParcelable(this.album, flags);
+        dest.writeParcelable(this.tagList, flags);
     }
 
     public static final Parcelable.Creator<Journal> CREATOR = new Parcelable.Creator<Journal>(){
@@ -65,7 +70,7 @@ public class Journal implements Parcelable {
 
         this.journalID = jID;
         this.pictureCoverID = picCoverID;
-        this.pictureCoverType = this.getParser().getType(picCoverType);
+        this.pictureCoverType = this.getParser().getPictureType(picCoverType);
         this.albumID = albumID;
         this.title = title;
         this.content = content;
@@ -77,6 +82,14 @@ public class Journal implements Parcelable {
         this.createdDate = createdDate;
         this.createdTime = createdTime;
         this.isPublished = this.getParser().convertStringToBoolean(isPub);
+    }
+
+    public Album getAlbum(){
+        return this.album;
+    }
+
+    public TagList getTagList() {
+        return this.tagList;
     }
 
     public String getJournalID(){
@@ -133,6 +146,14 @@ public class Journal implements Parcelable {
 
     public boolean getIsPublished(){
         return this.isPublished;
+    }
+
+    public void setAlbum(Album album) {
+        this.album = album;
+    }
+
+    public void setTagList(TagList list) {
+        this.tagList = list;
     }
 
     public void setJournalID(String val){
@@ -214,6 +235,8 @@ public class Journal implements Parcelable {
         this.createdDate = pc.readString();
         this.createdTime = pc.readString();
         this.isPublished = (pc.readInt() == 0) ? false : true;
+        this.album = (Album) pc.<Album> readParcelable(Album.class.getClassLoader());
+        this.tagList = (TagList) pc.<TagList> readParcelable(TagList.class.getClassLoader());
     }
 
 }

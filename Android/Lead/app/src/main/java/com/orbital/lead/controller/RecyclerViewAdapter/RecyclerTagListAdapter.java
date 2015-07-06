@@ -1,7 +1,6 @@
 package com.orbital.lead.controller.RecyclerViewAdapter;
 
 import android.content.Context;
-import android.media.Image;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -114,7 +113,7 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             this.mImageOptions.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                   mLogic.showPopUpMenu(mContext, v, EnumDialogEditJournalType.TAG);
+                   mLogic.showPopUpMenu(mContext, v, EnumDialogEditJournalType.EDIT_TAG, getTextTitle());
                 }
             });
         }
@@ -130,12 +129,12 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     //MainActivity activity, View headerView,
-    public RecyclerTagListAdapter(TagList list){
+    public RecyclerTagListAdapter(TagList overallTaglist, TagList currentUsedTagList){
         this.initLogging();
         this.initLogic();
         this.initParser();
         //this.setHeaderView(headerView);
-        this.setTagList(list);
+        this.setCurrentUsedTagList(currentUsedTagList);
     }
 
     @Override
@@ -244,7 +243,8 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
     */
 
-    private void setTagList(TagList list){
+
+    private void setCurrentUsedTagList(TagList list){
         this.mTagList = list;
     }
 

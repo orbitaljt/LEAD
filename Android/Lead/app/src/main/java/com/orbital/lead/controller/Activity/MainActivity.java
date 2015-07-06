@@ -22,7 +22,9 @@ import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumJournalServiceType;
 import com.orbital.lead.model.FacebookUserObject;
+import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.JournalList;
+import com.orbital.lead.model.TagList;
 import com.orbital.lead.model.User;
 
 
@@ -168,6 +170,16 @@ public class MainActivity extends BaseActivity
 
     private void updateFragmentMainUserJournalList(JournalList list){
         this.getFragmentJournalList().updateJournalList(list);
+    }
+
+    private void updateCurrentUserUsingTagList(JournalList list){
+        TagList tagList = new TagList();
+        for(Journal j : list.getList()){
+            tagList.getList().addAll(j.getTagList().getList()); //copy all tags into new taglist
+            this.getCustomLogging().debug(TAG, "updateCurrentUserUsingTagList copying tag");
+        }
+
+        this.getCurrentUser().setTagList(tagList);
     }
     /*
     public void initHeader(){
@@ -485,7 +497,7 @@ public class MainActivity extends BaseActivity
     }
 
     public void setNavigationDrawerUserEmail(){
-        this.getNavigationDrawerFragment().setmTextUserEmail(this.getCurrentUser().getEmail());
+        this.getNavigationDrawerFragment().setTextUserEmail(this.getCurrentUser().getEmail());
     }
 
     /*
@@ -540,9 +552,15 @@ public class MainActivity extends BaseActivity
                         this.getCustomLogging().debug(TAG, "onReceiveResult GET_ALL_JOURNAL -> jsonResult => " + jsonResult);
                         JournalList list = this.getJournalListFromJson(jsonResult);
 
-                        this.setUserJournalList(list);
-                        this.getCustomLogging().debug(TAG, "onReceiveResult list -> list.size() => " + list.size());
-                        this.updateFragmentMainUserJournalList(list);
+                        if(list != null){
+                            this.getCustomLogging().debug(TAG, "onReceiveResult list.size() => " + list.size());
+                            this.setUserJournalList(list);
+                            this.updateFragmentMainUserJournalList(list);
+                            this.updateCurrentUserUsingTagList(list);
+                        }else{
+                            this.getCustomLogging().debug(TAG, "onReceiveResult list is null");
+                        }
+
                         break;
 
                     /*

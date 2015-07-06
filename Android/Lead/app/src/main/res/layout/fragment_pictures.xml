@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:fab="http://schemas.android.com/apk/res-auto"
-    tools:context="com.orbital.lead.controller.Fragment.FragmentAlbum"
+    tools:context="com.orbital.lead.controller.Fragment.FragmentPictures"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
@@ -14,7 +14,7 @@
         android:layout_height="match_parent" >
 
         <GridView
-            android:id="@+id/grid_albums"
+            android:id="@+id/grid_album_picture"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:verticalSpacing="4dp"
@@ -23,9 +23,8 @@
             android:stretchMode="columnWidth"
             android:padding="8dp" />
 
-        <!--
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fab_add_album"
+            android:id="@+id/fab_add_picture"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"
@@ -37,7 +36,7 @@
             fab:fab_colorRipple="#FF80AB"
             fab:fab_showAnimation="@anim/show_from_bottom"
             fab:fab_hideAnimation="@anim/hide_to_bottom"/>
-        -->
+
     </FrameLayout>
 
 </LinearLayout>

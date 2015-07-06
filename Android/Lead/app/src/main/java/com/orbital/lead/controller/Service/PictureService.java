@@ -10,7 +10,6 @@ import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.WebConnector;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.EnumPictureServiceType;
-import com.orbital.lead.model.EnumPictureType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +31,7 @@ public class PictureService extends IntentService  {
     InputStream urlStream = null;
     private String urlStreamStr;
     private String albumID;
+    private String userID;
 
     public PictureService() {
         super(PictureService.class.getName());
@@ -52,10 +52,17 @@ public class PictureService extends IntentService  {
         final ResultReceiver receiver = intent.getParcelableExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG);
 
         if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG) != null){
+            this.mLogging.debug(TAG, "setAlbumID" );
            this.setAlbumID(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG));
         }
 
+        if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG) != null){
+            this.mLogging.debug(TAG, "setUserID" );
+            this.setUserID(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG));
+        }
+
         if(intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG) != null){
+            this.mLogging.debug(TAG, "setServiceType" );
             this.setServiceType((EnumPictureServiceType) intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG));
         }
 
@@ -64,16 +71,35 @@ public class PictureService extends IntentService  {
         /* Update UI: Download Service is Running */
         receiver.send(STATUS_RUNNING, Bundle.EMPTY);
 
+        this.mLogging.debug(TAG, "this.getServiceType() => " + this.getServiceType().toString());
+
         try {
             switch (this.getServiceType()) {
-                case GET_ALBUM_PHOTO:
+                case GET_SPECIFIC_ALBUM:
                     // get all photo of an album
                     // requires album ID
                     url = Constant.URL_CLIENT_SERVER;
                     params = new HashMap<String, String>();
-                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_ALUBM_ID, this.getAlbumID());
+                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_ALBUM_ID, this.getAlbumID());
 
                     this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_GET_USER_SPECIFIC_ALBUM, params);
+                    this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
+
+                    returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
+                    receiver.send(STATUS_FINISHED, returnBundle);
+
+                    break;
+
+                case GET_ALL_ALBUM:
+                    // get all photo from all album
+                    // requires user ID
+                    url = Constant.URL_CLIENT_SERVER;
+                    params = new HashMap<String, String>();
+
+                    this.mLogging.debug(TAG, "this.getUserID() -> " + this.getUserID());
+
+                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, this.getUserID());
+                    this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_GET_USER_ALL_ALBUM, params);
                     this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
 
                     returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
@@ -113,6 +139,10 @@ public class PictureService extends IntentService  {
         this.albumID = id;
     }
 
+    private void setUserID(String id) {
+        this.userID = id;
+    }
+
     private EnumPictureServiceType getServiceType() {
         return this.serviceType;
     }
@@ -121,5 +151,8 @@ public class PictureService extends IntentService  {
         return this.albumID;
     }
 
+    private String getUserID() {
+        return this.userID;
+    }
 
 }

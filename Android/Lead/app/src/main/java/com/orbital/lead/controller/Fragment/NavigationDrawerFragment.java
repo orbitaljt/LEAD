@@ -34,6 +34,7 @@ import com.orbital.lead.controller.Activity.BaseActivity;
 import com.orbital.lead.controller.Activity.MainActivity;
 import com.orbital.lead.controller.ListAdapter.DrawerListAdapter;
 import com.orbital.lead.logic.CustomLogging;
+import com.orbital.lead.model.DrawerListObject;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -360,12 +361,12 @@ public class NavigationDrawerFragment extends Fragment {
         }
     }
 
-    public void setTextUserName(String firstName, String middleName, String lastName){
+    public void setTextUserName(String firstName, String middleName, String lastName) {
         String fullName = firstName + " " + middleName + " " + lastName;
         this.mTextUserName.setText(fullName);
     }
 
-    public void setmTextUserEmail(String email){
+    public void setTextUserEmail(String email){
         this.mTextUserEmail.setText(email);
     }
 
@@ -373,13 +374,13 @@ public class NavigationDrawerFragment extends Fragment {
         this.mLogging = CustomLogging.getInstance();
     }
 
-    private void initDrawerListAdapter(){
+    private void initDrawerListAdapter() {
         if(this.mDrawerListAdapter == null){
             this.mDrawerListAdapter = new DrawerListAdapter(getBaseActivity().getBaseContext(), R.layout.drawer_list_row_layout, null);
         }
     }
 
-    private void initDrawerList(View v){
+    private void initDrawerList(View v) {
         this.mDrawerListView = (ListView) v.findViewById(R.id.drawer_list_view);
         this.mDrawerListView.setAdapter(mDrawerListAdapter);
         this.mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

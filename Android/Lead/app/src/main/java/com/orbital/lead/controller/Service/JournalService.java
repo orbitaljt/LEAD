@@ -95,6 +95,8 @@ public class JournalService extends IntentService{
                     params = new HashMap<String, String>();
                     params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, this.getUserID());
 
+                    mLogging.debug(TAG, "getUserID ->" + getUserID());
+
                     this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_GET_USER_ALL_JOURNAL, params);
                     this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
 

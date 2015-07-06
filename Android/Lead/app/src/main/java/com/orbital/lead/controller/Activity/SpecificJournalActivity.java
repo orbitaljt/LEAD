@@ -36,6 +36,8 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
     private WideImageView mImageJournalCover;
     private ViewAnimator mAnimator;
     private TextView mTextPictureCount;
+    private TextView mTextTag;
+    private TextView mTextProject;
     private TextView mTextDayDigit; //01-31
     private TextView mTextDayName; // Monday - Sunday
     private TextView mTextMonthYear; // January 1990
@@ -65,6 +67,8 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         this.initViewAnimator();
         this.initImageJournalCover();
         this.initTextPictureCount();
+        this.initTextTag();
+        this.initTextProject();
         this.initTextDayDigit();
         this.initTextDayName();
         this.initTextMonthYear();
@@ -82,11 +86,12 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
                                     CurrentLoginUser.getUser().getUserID()));
 
 
-
             String time = FormatTime.parseTime(this.getJournal().getJournalTime(), FormatTime.DATABASE_TIME_TO_DISPLAY_TIME); // HH:mm
             String date = FormatDate.parseDate(this.getJournal().getJournalDate(), FormatDate.DATABASE_DATE_TO_DISPLAY_DATE, FormatDate.DISPLAY_FULL_FORMAT); // dd MMMM yyyy cccc
             String[] dates = date.split(" ");
 
+            this.setTextTag(this.getJournal().getTagList().toString());
+            //this.setTextProject();
             this.setTextDayDigit(dates[0]);
             this.setTextMonthYear(dates[1] + " " + dates[2]);
             this.setTextDayName(dates[3]);
@@ -173,13 +178,13 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
     }
 
 
-    /*===================== Journal Intent Service & Receiver ================================*/
+    /*===================== Picture Intent Service & Receiver ================================*/
     public void initPictureReceiver(){
         mPictureReceiver = new PictureReceiver(new Handler());
         mPictureReceiver.setReceiver(this);
     }
 
-    public PictureReceiver getJournalReceiver(){
+    public PictureReceiver getPictureReceiver(){
         if(this.mPictureReceiver == null){
             this.initPictureReceiver();
         }
@@ -197,11 +202,20 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         this.getNavigationDrawerFragment().setTextUserName(CurrentLoginUser.getUser().getFirstName(),
                 CurrentLoginUser.getUser().getMiddleName(),
                 CurrentLoginUser.getUser().getLastName());
-        this.getNavigationDrawerFragment().setmTextUserEmail(CurrentLoginUser.getUser().getEmail());
+        this.getNavigationDrawerFragment().setTextUserEmail(CurrentLoginUser.getUser().getEmail());
     }
 
     private void initImageJournalCover() {
         this.mImageJournalCover = (WideImageView) findViewById(R.id.image_journal_cover);
+        this.mImageJournalCover.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getCustomLogging().debug(TAG, "mImageJournalCover onClick");
+                if(getAlbum() != null){
+                    getLogic().displayPictureActivity(getContext(), PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, getAlbum());
+                }
+            }
+        });
     }
 
     private void initViewAnimator() {
@@ -215,10 +229,18 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
             public void onClick(View v) {
                 getCustomLogging().debug(TAG, "mTextPictureCount onClick");
                 if(getAlbum() != null){
-                    getLogic().displayPictureActivity(getContext(), PictureActivity.OPEN_FRAGMENT_ALBUM, getAlbum(), getAlbum().getPictureList().getList());
+                    getLogic().displayPictureActivity(getContext(), PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, getAlbum());
                 }
             }
         });
+    }
+
+    private void initTextTag() {
+        this.mTextTag = (TextView) findViewById(R.id.text_tag);
+    }
+
+    private void initTextProject() {
+        this.mTextProject = (TextView) findViewById(R.id.text_project);
     }
 
     private void initTextDayDigit() {
@@ -254,24 +276,6 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         //.error(R.drawable.image_blank_picture)
         //.transform(new RoundedTransformation(10, 0))
         if(!this.getParser().isStringEmpty(url)){
-            /*
-            Picasso.with(this)
-                    .load(url)
-                    .noFade()
-                    .into(getImageJournalCover(), new Callback() {
-                        @Override
-                        public void onSuccess() {
-                            getCustomLogging().debug(TAG, "setImageJournalCover -> Picasso onSuccess");
-                            mAnimator.setDisplayedChild(0); // show actual image
-                        }
-
-                        @Override
-                        public void onError() {
-                            getCustomLogging().debug(TAG, "setImageJournalCover -> Picasso onError");
-                            mAnimator.setDisplayedChild(2);
-                        }
-                    });
-            */
             ImageLoader.getInstance()
                     .displayImage(url, this.getImageJournalCover(), this.getCustomApplication().getDisplayImageOptions(),
                             new SimpleImageLoadingListener(){
@@ -312,6 +316,14 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
 
     private void setTextPictureCount(String numOfPictures) {
         this.mTextPictureCount.setText(Constant.STRING_NUMBER_OF_PICTURES_FORMAT.replace(Constant.DUMMY_NUMBER, numOfPictures));
+    }
+
+    private void setTextTag(String val){
+        this.mTextTag.setText(val);
+    }
+
+    private void setTextProject(String val){
+        this.mTextProject.setText(val);
     }
 
     private void setTextDayDigit(String val) {
@@ -385,16 +397,19 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
                 type = (EnumPictureServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
 
                 switch(type){
-                    case GET_ALBUM_PHOTO:
+                    case GET_SPECIFIC_ALBUM:
                         jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
-                        this.getCustomLogging().debug(TAG, "onReceiveResult GET_ALBUM_PHOTO -> jsonResult => " + jsonResult);
+                        this.getCustomLogging().debug(TAG, "onReceiveResult GET_SPECIFIC_ALBUM -> jsonResult => " + jsonResult);
 
-                        this.setAlbum(this.getParser().parseJsonToAlbum(jsonResult));
+                        Album album = this.getParser().parseJsonToSpecificAlbum(jsonResult);
+
+                        this.getJournal().setAlbum(album);
+                        this.setAlbum(album);
+
                         if(this.getAlbum() != null) {
                             this.setTextPictureCount(this.getParser().convertIntegerToString(this.getAlbum().getPictureList().size()));
                         }
                         break;
-
                 }
 
                 break;

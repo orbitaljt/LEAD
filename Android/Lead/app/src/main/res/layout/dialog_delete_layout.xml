@@ -3,7 +3,7 @@
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/dialog_toolbar_add_new" />
+    <include layout="@layout/dialog_toolbar_delete" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,14 +14,13 @@
         android:paddingBottom="8dp"
         android:paddingRight="16dp">
 
-        <EditText
-            android:id="@+id/edit_text_add_new"
+        <TextView
+            android:id="@+id/text_delete"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/dialog_editext_tag_hint"
+            android:text="Delete"
             style="@style/editTextDialogStyle"/>
 
     </LinearLayout>
-
 
 </LinearLayout>
