@@ -1,23 +1,27 @@
 package com.orbital.lead.controller.Activity;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.FrameLayout;
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.orbital.lead.Parser.Parser;
+import com.orbital.lead.Parser.ParserFacebook;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.controller.Fragment.NavigationDrawerFragment;
 import com.orbital.lead.logic.CustomLogging;
+import com.orbital.lead.logic.FacebookLogic;
 import com.orbital.lead.logic.Logic;
+import com.orbital.lead.model.AlbumList;
+
+import org.json.JSONObject;
 
 
 public class BaseActivity extends AppCompatActivity
@@ -39,15 +43,21 @@ public class BaseActivity extends AppCompatActivity
     private CustomLogging mLogging;
     private Parser mParser;
     private Logic mLogic;
+    private FacebookLogic mFacebookLogic;
+
+    private boolean isFacebookLogin;
+    private String currentFacebookAccessToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_base_layout);
         this.initApplication();
         this.initLogging(); // initialize logging first
         this.initParser();
         this.initLogic();
+        this.initFacebookLogic();
         this.initBaseFrameLayout();
 
         mTitle = getTitle();
@@ -204,12 +214,97 @@ public class BaseActivity extends AppCompatActivity
         return this.mNavigationDrawerToggle;
     }
 
+    protected FacebookLogic getFacebookLogic() {
+        return this.mFacebookLogic;
+    }
+
+    /*
+    protected void setIsFacebookLogin(boolean val) {
+        mLogging.debug(TAG, "setIsFacebookLogin to => " + val);
+        this.isFacebookLogin = val;
+    }
+
+
+    protected boolean getIsFacebookLogin() {
+        return this.isFacebookLogin;
+    }
+
+    protected String getCurrentFacebookAccessTokenString() {
+        try {
+            return AccessToken.getCurrentAccessToken().getToken();
+        }catch(NullPointerException e){
+            return "";
+        }
+    }
+
+    protected AccessToken getCurrentFacebookAccessToken() {
+        try {
+            return AccessToken.getCurrentAccessToken();
+        }catch(NullPointerException e){
+            return null;
+        }
+    }
+
+
+    public AlbumList getFacebookAllAlbum(String param) {
+        mLogging.debug(TAG, "getFacebookAllAlbum");
+
+        boolean finishLoop = false;
+
+        GraphRequest request = GraphRequest.newMeRequest(
+                this.getCurrentFacebookAccessToken(),
+                new GraphRequest.GraphJSONObjectCallback() {
+                    @Override
+                    public void onCompleted(
+                            JSONObject object,
+                            GraphResponse response) {
+                        mLogging.debug(TAG, "response getRawResponse -> " + response.getRawResponse());
+
+                        //set that user is login using facebook
+                        String data = response.getRawResponse();
+                        if(!mParser.isStringEmpty(data)){
+
+                            AlbumList facebookAlbumList = ParserFacebook.getFacebookAlbumList(data);
+
+                            if(BaseActivity.this instanceof PictureActivity) {
+                                if(facebookAlbumList != null){
+                                    ((PictureActivity) BaseActivity.this).updateFragmentAlbumGridAdapter(facebookAlbumList);
+                                }else{
+                                    mLogging.debug(TAG, "facebookAlbumList is null");
+                                }
+
+                            }
+
+
+
+                        }else{
+                            mLogging.debug(TAG, "unable to get respose data. get error -> " + response.getError().toString());
+                        }
+
+                    }
+
+                });
+
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", param);
+        request.setParameters(parameters);
+        request.executeAsync();
+
+        return null;
+
+    }
+    */
+
     public CustomApplication getCustomApplication(){
         return this.mApp;
     }
 
     private void initApplication(){
         this.mApp = (CustomApplication) getApplicationContext();
+    }
+
+    private void initFacebookLogic() {
+        this.mFacebookLogic = FacebookLogic.getInstance();
     }
 
 

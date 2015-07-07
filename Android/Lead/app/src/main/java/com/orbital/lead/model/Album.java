@@ -4,12 +4,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.orbital.lead.Parser.Parser;
+import com.orbital.lead.Parser.ParserFacebook;
+import com.orbital.lead.logic.FacebookLogic;
 
 /**
  * Created by joseph on 27/6/2015.
  */
 public class Album implements Parcelable {
     private Parser mParser = Parser.getInstance();
+    private FacebookLogic mFacebookLogic = FacebookLogic.getInstance();
 
     private String _userID;
     private String _albumID;
@@ -26,6 +29,7 @@ public class Album implements Parcelable {
     private int numofPicture;
     private PictureList _list;
     private TagList tagList;
+    private boolean isFromFacebook;
 
     @Override
     public int describeContents() {
@@ -49,6 +53,7 @@ public class Album implements Parcelable {
         dest.writeInt(this.numofPicture);
         dest.writeParcelable(_list, flags);
         dest.writeParcelable(tagList, flags);
+        dest.writeInt(this.isFromFacebook ? 1 : 0);
     }
 
     public static final Parcelable.Creator<Album> CREATOR = new Parcelable.Creator<Album>(){
@@ -63,22 +68,34 @@ public class Album implements Parcelable {
 
     public Album(String userID, String albumID, String picCoverID, String picCoverType, String title, String desc,
                  String createdDate, String createdTime, String lastModDate, String lastModTime,
-                 PictureList list, TagList taglist){
+                 PictureList list, TagList taglist, boolean isFromFacebook){
         this._userID = userID;
         this._albumID = albumID;
         this.pictureCoverID = picCoverID;
         this.pictureCoverType = getParser().getPictureType(picCoverType);
-        this._thumbnailUrl = this.getParser().createPictureThumbnailUrl(this.pictureCoverID, picCoverType, userID);
-        this._actualUrl = this.getParser().createPictureNormalUrl(this.pictureCoverID, picCoverType, userID);
+        if(isFromFacebook){
+            this._thumbnailUrl = ParserFacebook.createFacebookPictureThumbnailUrl(mFacebookLogic.getCurrentFacebookAccessTokenString(), albumID);
+            this._thumbnailUrl = ParserFacebook.createFacebookPictureNormalUrl(mFacebookLogic.getCurrentFacebookAccessTokenString(), albumID);
+
+        }else{
+            this._thumbnailUrl = this.getParser().createPictureThumbnailUrl(this.pictureCoverID, picCoverType, userID);
+            this._actualUrl = this.getParser().createPictureNormalUrl(this.pictureCoverID, picCoverType, userID);
+        }
+
         this._title = title;
         this._description = desc;
         this._createdDate = createdDate;
         this._createdTime = createdTime;
         this.lastModifiedDate = lastModDate;
         this.lastModifiedTime = lastModTime;
-        this.numofPicture = list.size();
+        if(list != null) {
+            this.numofPicture = list.size();
+        }else{
+            this.numofPicture = 0;
+        }
         this._list = list;
         this.tagList = taglist;
+        this.isFromFacebook = isFromFacebook;
     }
 
 
@@ -134,6 +151,10 @@ public class Album implements Parcelable {
         return this.tagList;
     }
 
+    public boolean getIsFromFacebook() {
+        return this.isFromFacebook;
+    }
+
     public void setUserID(String id) {
         this._userID = id;
     }
@@ -178,6 +199,10 @@ public class Album implements Parcelable {
         this.tagList = list;
     }
 
+    public void setIsFromFacebook(boolean val) {
+        this.isFromFacebook = val;
+    }
+
     private Parser getParser() {
         return mParser;
     }
@@ -202,6 +227,7 @@ public class Album implements Parcelable {
         this.numofPicture = pc.readInt();
         this._list = (PictureList) pc.<PictureList> readParcelable(PictureList.class.getClassLoader());
         this.tagList = (TagList) pc.<TagList> readParcelable(TagList.class.getClassLoader());
+        this.isFromFacebook = (pc.readInt() == 0) ? false : true;
     }
 
 }

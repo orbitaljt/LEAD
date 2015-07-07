@@ -28,8 +28,8 @@ import com.orbital.lead.model.EnumPictureServiceType;
  * A placeholder fragment containing a simple view.
  */
 public class PictureActivity extends BaseActivity implements
-       FragmentPictures.OnFragmentInteractionListener,
-                FragmentAlbum.OnFragmentInteractionListener,
+        FragmentPictures.OnFragmentInteractionListener,
+        FragmentAlbum.OnFragmentInteractionListener,
         PictureReceiver.Receiver{
     private final String TAG = this.getClass().getSimpleName();
 
@@ -77,15 +77,25 @@ public class PictureActivity extends BaseActivity implements
                 //this.setPictureList(this.getAlbum().getPictureList().getList());
             }
 
+            //this.setIsFacebookLogin(getBundleExtra.getBoolean(Constant.BUNDLE_PARAM_IS_FACEBOOK_LOGIN));
+
             /*
             if(getBundleExtra.getParcelableArrayList(Constant.BUNDLE_PARAM_PICTURE_LIST) != null) {
                 this.setPictureList((ArrayList) getBundleExtra.getParcelableArrayList(Constant.BUNDLE_PARAM_PICTURE_LIST));
             }
             */
 
+            //this.getCustomLogging().debug(TAG, "this.getIsFacebookLogin() => " + this.getIsFacebookLogin());
+            //this.getCustomLogging().debug(TAG, "this.getCurrentFacebookAccessTokenString() => " + this.getCurrentFacebookAccessTokenString());
+
             switch(this.getOpenFragmentType()){
                 case PictureActivity.OPEN_FRAGMENT_ALBUM:
                     this.getCustomLogging().debug(TAG, "PictureActivity.OPEN_FRAGMENT_ALBUM");
+
+                    if(this.getFacebookLogic().getIsFacebookLogin()){
+                        this.getFacebookLogic().getFacebookAllAlbum(this, Constant.FACEBOOK_GRAPH_ALBUM_QUERY);
+                    }
+
                     this.getLogic().getUserAllAlbum(this, CurrentLoginUser.getUser().getUserID());
                     this.setToolbarTitle(Constant.TITLE_FRAGMENT_ALBUM);
                     this.displayFragmentAlbum();
@@ -206,7 +216,8 @@ public class PictureActivity extends BaseActivity implements
 
     private void displayFragmentAlbum(){
         this.getCustomLogging().debug(TAG, "displayFragmentAlbum");
-        this.mFragmentAlbum = FragmentAlbum.newInstance("", "");
+        this.mFragmentAlbum = FragmentAlbum.newInstance(this.getFacebookLogic().getIsFacebookLogin(),
+                                                        this.getFacebookLogic().getCurrentFacebookAccessTokenString());
         this.replaceFragment(this.mFragmentAlbum, Constant.FRAGMENT_ALBUM);
     }
 
@@ -253,12 +264,23 @@ public class PictureActivity extends BaseActivity implements
         setSupportActionBar((Toolbar) this.getToolbar());
     }
 
+    /*
     private void updateFragmentAlbum(AlbumList list) {
         if(this.mFragmentAlbum != null) {
-            this.getCustomLogging().debug(TAG, "onReceiveResult -> mFragmentAlbum.updateGridAlbum");
+            this.getCustomLogging().debug(TAG, "updateFragmentAlbum -> mFragmentAlbum.updateGridAlbum");
             this.mFragmentAlbum.updateGridAlbum(list);
         }else{
-            this.getCustomLogging().debug(TAG, "onReceiveResult -> mFragmentAlbum is null");
+            this.getCustomLogging().debug(TAG, "updateFragmentAlbum -> mFragmentAlbumis null");
+        }
+    }
+    */
+
+    public void updateFragmentAlbumGridAdapter(AlbumList list) {
+        if(this.mFragmentAlbum != null) {
+            this.getCustomLogging().debug(TAG, "updateFragmentAlbumGridAdapter -> mFragmentAlbum.updateGridAlbumAdapter");
+            this.mFragmentAlbum.updateGridAlbumAdapter(list);
+        }else{
+            this.getCustomLogging().debug(TAG, "updateFragmentAlbumGridAdapter -> mFragmentAlbum is null");
         }
     }
 
@@ -343,10 +365,14 @@ public class PictureActivity extends BaseActivity implements
 
                         AlbumList list = getParser().parseJsonToAlbumList(jsonResult);
                         this.setAlbumList(list);
-                        this.getCustomLogging().debug(TAG, "onReceiveResult this.getAlbumList().size() => " + this.getAlbumList().size());
+
 
                         if(this.getAlbumList() !=  null){
-                            this.updateFragmentAlbum(this.getAlbumList());
+                            this.getCustomLogging().debug(TAG, "onReceiveResult this.getAlbumList().size() => " + this.getAlbumList().size());
+                            //this.updateFragmentAlbum(this.getAlbumList());
+                            this.updateFragmentAlbumGridAdapter(this.getAlbumList());
+                        }else{
+                            this.getCustomLogging().debug(TAG, "onReceiveResult this.getAlbumList() is null!");
                         }
 
                         break;
@@ -360,4 +386,6 @@ public class PictureActivity extends BaseActivity implements
         }
 
     }
+
+
 }

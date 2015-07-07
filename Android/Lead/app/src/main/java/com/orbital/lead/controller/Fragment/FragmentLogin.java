@@ -89,6 +89,7 @@ public class FragmentLogin extends Fragment {
     private boolean isFacebookLogin;
     private String leadUserID;
     private String facebookUserID;
+    private AccessToken facebookAccessToken;
 
     private String facebookResponse;
 
@@ -129,10 +130,10 @@ public class FragmentLogin extends Fragment {
         this.initFacebookCallbackManager();
         this.initProfileTracker();
         this.initAccessTokenTrack();
-        //if(hasLoginToFacebook()){
+
         Profile.fetchProfileForCurrentAccessToken();
         this.setProfile(Profile.getCurrentProfile());
-        //}
+
 
 
     }
@@ -268,7 +269,7 @@ public class FragmentLogin extends Fragment {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 mLogging.debug(TAG, "onSuccess");
-               // mLogging.debug(TAG, "access token -> " + loginResult.getAccessToken().getToken());
+               //mLogging.debug(TAG, "access token -> " + loginResult.getAccessToken().getToken());
             }
 
             @Override
@@ -355,6 +356,7 @@ public class FragmentLogin extends Fragment {
         if(this.isFacebookLogin()){ // if login through facebook, just get ID
             mBundle.putString(Constant.BUNDLE_PARAM_FACEBOOK_USER_ID, facebookID); // "" or value
             mBundle.putString(Constant.BUNDLE_PARAM_FACEBOOK_RESPONSE, this.getFacebookResponse()); // get response usually contain id, name, email etc
+
         }else{
             mBundle.putString(Constant.BUNDLE_PARAM_USERNAME, getEditTextUsername());
             mBundle.putString(Constant.BUNDLE_PARAM_PASSWORD, getEditTextPassword());
@@ -415,6 +417,7 @@ public class FragmentLogin extends Fragment {
                                 // pass in current lead user ID
                                 displayMainActivity("", getLeadUserID(), true);
                                 break;
+
                             case LOGIN_FACEBOOK:
                                 setLeadUserID(mParser.parseUserIDFromJson(result));
                                 mLogging.debug(TAG, "current facebook user ID => " + getLeadUserID());
@@ -513,6 +516,7 @@ public class FragmentLogin extends Fragment {
         } else {
 
             AccessToken at = AccessToken.getCurrentAccessToken();
+            AccessToken.setCurrentAccessToken(at);
             this.mLogging.debug(this.TAG, "Current Access Token => " + at.getToken());
             this.accessUserGraph(at);
 
@@ -529,7 +533,7 @@ public class FragmentLogin extends Fragment {
         }
     }
 
-    private void accessUserGraph(AccessToken mAccessToken){
+    private void accessUserGraph(final AccessToken mAccessToken){
         GraphRequest request = GraphRequest.newMeRequest(
                 mAccessToken,
                 new GraphRequest.GraphJSONObjectCallback() {
@@ -542,10 +546,9 @@ public class FragmentLogin extends Fragment {
                         //set that user is login using facebook
                         String data = response.getRawResponse();
                         if(!mParser.isStringEmpty(data)){
-                            //setIsFacebookLogin(true);
-
 
                             // set current facebook user id
+                            setFacebookAccessToken(mAccessToken);
                             setFacebookUserID(ParserFacebook.getFacebookID(data));
                             setFacebookResponse(data);
                             runLoginUsingFacebook(getFacebookUserID()); //try login to server
@@ -614,6 +617,10 @@ public class FragmentLogin extends Fragment {
         this.facebookUserID = id;
     }
 
+    private void setFacebookAccessToken(AccessToken at) {
+        this.facebookAccessToken = at;
+    }
+
     private void setFacebookResponse(String value){
         this.facebookResponse = value;
     }
@@ -628,6 +635,10 @@ public class FragmentLogin extends Fragment {
 
     private String getFacebookUserID() {
         return this.facebookUserID;
+    }
+
+    private AccessToken getFacebookAccessToken() {
+        return this.facebookAccessToken;
     }
 
     private String getFacebookResponse() {

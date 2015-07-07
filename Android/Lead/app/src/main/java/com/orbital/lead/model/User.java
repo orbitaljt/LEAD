@@ -1,5 +1,6 @@
 package com.orbital.lead.model;
 
+import com.facebook.AccessToken;
 import com.orbital.lead.Parser.Parser;
 
 /**
@@ -7,6 +8,7 @@ import com.orbital.lead.Parser.Parser;
  */
 public class User {
     private Parser mParser;
+    private AccessToken _facebookAccessToken = null;
     private String _facebookID = "";
     private String _userID = "";
     private String _profilePicID = "";
@@ -68,6 +70,10 @@ public class User {
     }
 
     // Get
+    public AccessToken getFacebookAccessToken() {
+        return this._facebookAccessToken;
+    }
+
     public String getFacebookID(){
         return this._facebookID;
     }
@@ -178,6 +184,10 @@ public class User {
     public TagList getTagList() { return this.mTagList; }
 
     // Set
+    public void setFacebookAccessToken(AccessToken at) {
+        this._facebookAccessToken = at;
+    }
+
     public void setFacebookID(String val){
         this._facebookID = val;
     }

@@ -12,7 +12,6 @@ import android.widget.GridView;
 
 import com.orbital.lead.R;
 import com.orbital.lead.controller.GridAdapter.GridAlbumsAdapter;
-import com.orbital.lead.controller.GridAdapter.GridPicturesAdapter;
 import com.orbital.lead.controller.GridAdapter.MultiChoiceModeListener;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.Logic;
@@ -34,12 +33,12 @@ public class FragmentAlbum extends Fragment {
     public static final int REQUEST_OPEN_FRAGMENT_PICTURES = 1;
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_IS_FACEBOOK_LOGIN = "isFacebookLogin";
+    private static final String ARG_FACEBOOK_ACCESS_TOKEN = "currentFacebookAccessToken";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private boolean mParamIsFacebookLogin;
+    private String mParamCurrentFacebookAccessToken;
 
     private OnFragmentInteractionListener mListener;
     private CustomLogging mLogging;
@@ -52,16 +51,16 @@ public class FragmentAlbum extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param isFacebookLogin true or false.
+     * @param facebookAccessToken access token for facebook.
      * @return A new instance of fragment FragmentAlbum.
      */
     // TODO: Rename and change types and number of parameters
-    public static FragmentAlbum newInstance(String param1, String param2) {
+    public static FragmentAlbum newInstance(boolean isFacebookLogin, String facebookAccessToken) {
         FragmentAlbum fragment = new FragmentAlbum();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putBoolean(ARG_IS_FACEBOOK_LOGIN, isFacebookLogin);
+        args.putString(ARG_FACEBOOK_ACCESS_TOKEN, facebookAccessToken);
         fragment.setArguments(args);
         return fragment;
     }
@@ -77,8 +76,8 @@ public class FragmentAlbum extends Fragment {
         this.initLogging();
 
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mParamIsFacebookLogin = getArguments().getBoolean(ARG_IS_FACEBOOK_LOGIN);
+            mParamCurrentFacebookAccessToken = getArguments().getString(ARG_FACEBOOK_ACCESS_TOKEN);
         }
     }
 
@@ -116,10 +115,17 @@ public class FragmentAlbum extends Fragment {
         mListener = null;
     }
 
+    /*
     public void updateGridAlbum(AlbumList list){
         this.setAlbumList(list);
         this.initGridAlbumAdapter();
         this.getGridView().setAdapter(this.mGridAlbumsAdapter);
+    }
+    */
+
+    public void updateGridAlbumAdapter(AlbumList list) {
+        this.getAlbumList().getList().addAll(list.getList());
+        this.mGridAlbumsAdapter.notifyDataSetChanged();
     }
 
     private void initLogging(){
@@ -169,6 +175,9 @@ public class FragmentAlbum extends Fragment {
     }
 
     private AlbumList getAlbumList() {
+        if(this.mAlbumList == null) {
+            this.mAlbumList = new AlbumList();
+        }
         return this.mAlbumList;
     }
 

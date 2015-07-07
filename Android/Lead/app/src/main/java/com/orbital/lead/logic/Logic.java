@@ -211,6 +211,7 @@ public class Logic {
         Bundle mBundle = new Bundle();
         mBundle.putString(Constant.BUNDLE_PARAM_OPEN_FRAGMENT_TYPE, type);
         mBundle.putParcelable(Constant.BUNDLE_PARAM_ALBUM, album);
+        //mBundle.putBoolean(Constant.BUNDLE_PARAM_IS_FACEBOOK_LOGIN, isFacebookLogin);
         //mBundle.putParcelableArrayList(Constant.BUNDLE_PARAM_PICTURE_LIST, picList);
 
         newIntent.putExtras(mBundle);

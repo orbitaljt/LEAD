@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.facebook.AccessToken;
 import com.orbital.lead.Parser.FormatDate;
 import com.orbital.lead.Parser.ParserFacebook;
 import com.orbital.lead.R;
@@ -16,6 +17,7 @@ import com.orbital.lead.controller.Fragment.FragmentDetail;
 import com.orbital.lead.controller.Fragment.FragmentMainUserJournalList;
 import com.orbital.lead.controller.Service.JournalReceiver;
 import com.orbital.lead.controller.Service.JournalService;
+import com.orbital.lead.logic.FacebookLogic;
 import com.orbital.lead.model.Constant;
 
 
@@ -77,6 +79,7 @@ public class MainActivity extends BaseActivity
         this.initSlidingTabLayout();
         */
 
+
         this.initJournalReceiver();
 
         Bundle getBundleExtra = getIntent().getExtras();
@@ -86,7 +89,13 @@ public class MainActivity extends BaseActivity
             this.currentIsFacebookLogin = getBundleExtra.getBoolean(Constant.BUNDLE_PARAM_IS_FACEBOOK_LOGIN, false);
             this.currentLeadUserID = getBundleExtra.getString(Constant.BUNDLE_PARAM_LEAD_USER_ID, ""); // if lead user is null, will return empty
 
-            if(this.currentIsFacebookLogin) { // login using facebook
+            this.getFacebookLogic().setIsFacebookLogin(this.currentIsFacebookLogin); // is from base activity
+
+
+            if(this.getFacebookLogic().getIsFacebookLogin()) { // login using facebook
+                //getCustomLogging().debug(TAG, "AccessToken.getCurrentAccessToken().getToken() => " + AccessToken.getCurrentAccessToken().getToken());
+                //this.currentFacebookAccessToken = AccessToken.getCurrentAccessToken().getToken(); //get current access token string
+
                 this.currentFacebookUserID = getBundleExtra.getString(Constant.BUNDLE_PARAM_FACEBOOK_USER_ID, "");
                 this.currentFacebookResponse = getBundleExtra.getString(Constant.BUNDLE_PARAM_FACEBOOK_RESPONSE, "");
 
@@ -101,7 +110,7 @@ public class MainActivity extends BaseActivity
                 // update user profile from facebook will be done after getUserProfile onPostExecute
                 // update user profile picture from facebook will be done after getUserProfile onPostExecute
 
-                if(!this.currentIsFacebookLogin){ // login with lead account
+                if(!this.getFacebookLogic().getIsFacebookLogin()){ // login with lead account
                     this.currentLoginUsername = getBundleExtra.getString(Constant.BUNDLE_PARAM_USERNAME, "");
                     this.currentLoginPassword = getBundleExtra.getString(Constant.BUNDLE_PARAM_PASSWORD, "");
                 }
@@ -147,7 +156,6 @@ public class MainActivity extends BaseActivity
         this.mFragmentManager = getSupportFragmentManager();
     }
 
-
     private void displayFragmentJournalList(){
         this.getCustomLogging().debug(TAG, "displayFragmentAlbum");
         //this,
@@ -181,6 +189,14 @@ public class MainActivity extends BaseActivity
 
         this.getCurrentUser().setTagList(tagList);
     }
+
+    /*
+    private String getCurrentFacebookAccessTokenString() {
+        return this.currentFacebookAccessToken;
+    }
+    */
+
+
     /*
     public void initHeader(){
         this.mHeaderView = findViewById(R.id.header);

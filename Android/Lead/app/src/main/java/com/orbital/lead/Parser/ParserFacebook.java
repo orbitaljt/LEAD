@@ -5,13 +5,22 @@ package com.orbital.lead.Parser;
  */
 
 import com.orbital.lead.logic.CustomLogging;
+import com.orbital.lead.model.Album;
+import com.orbital.lead.model.AlbumList;
 import com.orbital.lead.model.Constant;
+import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumPictureType;
 import com.orbital.lead.model.FacebookUserObject;
 import com.orbital.lead.model.Message;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * This class will parse all facebook responses
@@ -119,6 +128,110 @@ public class ParserFacebook {
         }
     }
 
+    public static AlbumList getFacebookAlbumList(String response) {
+        AlbumList list = new AlbumList();
+
+        try{
+            JSONObject obj = new JSONObject(response);
+
+            JSONObject albumObj = obj.getJSONObject(Constant.FACEBOOK_JSON_ALBUMS_TAG);
+            JSONArray albumArray = albumObj.getJSONArray(Constant.FACEBOOK_JSON_DATA_TAG);
+
+            for(int i=0; i< albumArray.length(); i++){
+                Album album = getFacebookSpecificAlbum(albumArray.getJSONObject(i));
+
+                if(album != null) {
+                    list.addAlbum(album);
+                }else{
+                    mLogging.debug(TAG, "getFacebookAlbumList Album at " + i + " is null!!!");
+                }
+            }
+
+            return list;
+
+        } catch (JSONException e) {
+            mLogging.debug(TAG, "getFacebookAlbumList error => " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Album getFacebookSpecificAlbum(JSONObject dataObj) {
+        try{
+            String albumCoverPictureType = EnumPictureType.JPEG.toString();
+
+            String albumID = "";
+            String albumCoverPictureID = "";
+            String albumName = "";
+            String createdTimeStamp = "";
+            String updatedTimeStamp = "";
+            String description = "";
+            String createdDate = "";
+            String createdTime = "";
+            String updatedDate = "";
+            String updatedTime = "";
+
+            int numofPictures = 0;
+
+            try{
+                albumCoverPictureID = dataObj.getString(Constant.FACEBOOK_JSON_COVER_PHOTO_TAG);
+            }catch (JSONException e){
+                mLogging.debug(TAG, "getFacebookSpecificAlbum albumCoverPictureID error =>" + e.getMessage());
+                albumCoverPictureID = "";
+            }
+
+            try{
+                albumName = dataObj.getString(Constant.FACEBOOK_JSON_ALBUM_NAME_TAG);
+            }catch (JSONException e){
+                mLogging.debug(TAG, "getFacebookSpecificAlbum albumName error =>" + e.getMessage());
+                albumName = "";
+            }
+
+            try{
+                description = dataObj.getString(Constant.FACEBOOK_JSON_DESCRIPTION_TAG); // some albums doesn't have description
+            }catch (JSONException e){
+                mLogging.debug(TAG, "getFacebookSpecificAlbum description error =>" + e.getMessage());
+                description = "";
+            }
+
+            albumID = dataObj.getString(Constant.FACEBOOK_JSON_ID_TAG);
+            createdTimeStamp = dataObj.getString(Constant.FACEBOOK_JSON_CREATED_TIME_TAG);
+            updatedTimeStamp = dataObj.getString(Constant.FACEBOOK_JSON_UPDATED_TIME_TAG);
+            numofPictures = dataObj.getInt(Constant.FACEBOOK_JSON_COUNT_TAG);
+
+            createdDate = getDatabaseDateFromFacebookTimeStamp(createdTimeStamp);
+            createdTime = getDatabaseTimeFromFacebookTimeStamp(createdTimeStamp);
+            updatedDate = getDatabaseDateFromFacebookTimeStamp(updatedTimeStamp);
+            updatedTime = getDatabaseTimeFromFacebookTimeStamp(updatedTimeStamp);
+
+            Album newAlbum = new Album(CurrentLoginUser.getUser().getUserID(),
+                    albumID,
+                    albumCoverPictureID,
+                    albumCoverPictureType,
+                    albumName,
+                    description,
+                    createdDate,
+                    createdTime,
+                    updatedDate,
+                    updatedTime,
+                    null,
+                    null,
+                    true);
+
+            newAlbum.setNumberOfPicture(numofPictures);
+
+            return newAlbum;
+
+        } catch (JSONException e) {
+            mLogging.debug(TAG, "getFacebookAlbumList error => " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+
+
     public static String getFacebookImageID(String rawUrl){
         String id = getFacebookImageName(rawUrl);
         id = id.substring(0, id.indexOf("."));
@@ -145,6 +258,61 @@ public class ParserFacebook {
         //fileName = fileName.replace("https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p200x200/", "");
         return fileName;
     }
+
+    public static String createFacebookPictureThumbnailUrl(String accessToken, String albumID){
+        return getFacebookPictureCoverUrl(accessToken, albumID);
+    }
+
+    public static String createFacebookPictureNormalUrl(String accessToken, String albumID) {
+        return getFacebookPictureCoverUrl(accessToken, albumID);
+    }
+
+    private static String getDatabaseDateFromFacebookTimeStamp(String timeStamp) {
+        // facebook time format is yyyy-MM-dd'T'HH:mm:ssZ
+        // return date in yyyy-MM-dd
+        try{
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
+            DateFormat outputFormat = new SimpleDateFormat(FormatDate.DATABASE_FORMAT);
+
+            Date parsedDate = dateFormat.parse(timeStamp);
+            String outputText = outputFormat.format(parsedDate);
+
+            //mLogging.debug(TAG, "getDateFromFacebookTimeStamp parsed Date => " + outputText);
+
+            return outputText;
+
+        }catch(Exception e){
+            mLogging.debug(TAG, "getDateFromFacebookTimeStamp error => " + e.getMessage());
+            return "";
+        }
+    }
+
+    private static String getDatabaseTimeFromFacebookTimeStamp(String timeStamp) {
+        // facebook time format is yyyy-MM-dd'T'HH:mm:ssZ
+        // return date in yyyy-MM-dd
+        try{
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
+            DateFormat outputFormat = new SimpleDateFormat("HH:mm:ss");
+
+            Date parsedTime = dateFormat.parse(timeStamp);
+            String outputText = outputFormat.format(parsedTime);
+
+            //mLogging.debug(TAG, "getDateFromFacebookTimeStamp parsed time => " + outputText);
+
+            return outputText;
+
+        }catch(Exception e){
+            mLogging.debug(TAG, "getDateFromFacebookTimeStamp error => " + e.getMessage());
+            return "";
+        }
+    }
+
+    private static String getFacebookPictureCoverUrl(String accessToken, String albumID){
+        return Constant.URL_FACEBOOK_ALBUM_PHOTO_COVER
+                .replace(Constant.URL_DUMMY_ALBUM_ID, albumID)
+                .replace(Constant.URL_DUMMY_ACCESS_TOKEN, accessToken);
+    }
+
 
 
 }

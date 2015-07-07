@@ -241,7 +241,8 @@ public class Parser {
                         detailObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_DATE_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_TIME_TAG),
                         pList,
-                        tagList);
+                        tagList,
+                        false);
 
             }//end if
 
@@ -295,7 +296,8 @@ public class Parser {
                             albumObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_DATE_TAG),
                             albumObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_TIME_TAG),
                             pList,
-                            albumTagList);
+                            albumTagList,
+                            false);
 
                     mAlbumList.addAlbum(mAlbum);
                 }// end for

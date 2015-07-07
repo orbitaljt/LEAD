@@ -46,8 +46,10 @@ public class Constant {
     public static final String URL_DUMMY_FACEBOOK_USER_ID = "[fb_user_id]";
     public static final String URL_DUMMY_USER_ID = "[user_id]";
     public static final String URL_DUMMY_FILE_NAME = "[file_name]";
+    public static final String URL_DUMMY_ALBUM_ID = "[album_id]";
+    public static final String URL_DUMMY_ACCESS_TOKEN = "[access_token]";
     public static final String URL_FACEBOOK_PROFILE_PICTURE = "https://graph.facebook.com/[fb_user_id]/picture?width=640&height=640";
-
+    public static final String URL_FACEBOOK_ALBUM_PHOTO_COVER = "https://graph.facebook.com/[album_id]/picture?type=album&access_token=[access_token]";
 
     // URL post parameters
     public static final String URL_POST_PARAMETER_TAG_QUERY_TYPE = "type";
@@ -144,6 +146,7 @@ public class Constant {
     public static final String MESSAGE_JSON = "";
     public static final String MESSAGE_JSON = "";
     */
+    public static final String FACEBOOK_GRAPH_ALBUM_QUERY = "albums.limit(100){id,cover_photo,name,created_time,updated_time,count,description}";
     public static final String FACEBOOK_JSON_ID_TAG = "id";
     public static final String FACEBOOK_JSON_PROFILE_PICTURE_TAG = "picture";
     public static final String FACEBOOK_JSON_DATA_TAG = "data";
@@ -154,6 +157,15 @@ public class Constant {
     public static final String FACEBOOK_JSON_FIRST_NAME_TAG = "first_name";
     public static final String FACEBOOK_JSON_MIDDLE_NAME_TAG = "middle_name";
     public static final String FACEBOOK_JSON_LAST_NAME_TAG = "last_name";
+    public static final String FACEBOOK_JSON_ALBUMS_TAG = "albums";
+    public static final String FACEBOOK_JSON_ALBUM_NAME_TAG = "name";
+    public static final String FACEBOOK_JSON_COVER_PHOTO_TAG = "cover_photo";
+    public static final String FACEBOOK_JSON_CREATED_TIME_TAG = "created_time";
+    public static final String FACEBOOK_JSON_UPDATED_TIME_TAG = "updated_time";
+    public static final String FACEBOOK_JSON_PAGING_TAG = "paging";
+    public static final String FACEBOOK_JSON_AFTER_TAG = "after";
+    public static final String FACEBOOK_JSON_DESCRIPTION_TAG = "description";
+    public static final String FACEBOOK_JSON_COUNT_TAG = "count";
 
     // Message code
     public static final String MESSAGE_SUCCESS_TYPE = ".1";
