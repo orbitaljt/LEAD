@@ -11,7 +11,8 @@ import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumPictureType;
 import com.orbital.lead.model.FacebookUserObject;
-import com.orbital.lead.model.Message;
+import com.orbital.lead.model.Picture;
+import com.orbital.lead.model.PictureList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -156,6 +157,35 @@ public class ParserFacebook {
         }
     }
 
+    public static AlbumList getFacebookNextPageAlbumList(String response) {
+        AlbumList list = new AlbumList();
+
+        // when query facebook next page album list, there is no "albums" tag.
+        // it will start from "data" tag instead
+        try{
+            JSONObject obj = new JSONObject(response);
+            JSONArray albumArray = obj.getJSONArray(Constant.FACEBOOK_JSON_DATA_TAG);
+
+            for(int i=0; i< albumArray.length(); i++){
+                Album album = getFacebookSpecificAlbum(albumArray.getJSONObject(i));
+
+                if(album != null) {
+                    list.addAlbum(album);
+                }else{
+                    mLogging.debug(TAG, "getFacebookAlbumList Album at " + i + " is null!!!");
+                }
+            }
+
+            return list;
+
+        } catch (JSONException e) {
+            mLogging.debug(TAG, "getFacebookAlbumList error => " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
     public static Album getFacebookSpecificAlbum(JSONObject dataObj) {
         try{
             String albumCoverPictureType = EnumPictureType.JPEG.toString();
@@ -181,7 +211,7 @@ public class ParserFacebook {
             }
 
             try{
-                albumName = dataObj.getString(Constant.FACEBOOK_JSON_ALBUM_NAME_TAG);
+                albumName = dataObj.getString(Constant.FACEBOOK_JSON_NAME_TAG);
             }catch (JSONException e){
                 mLogging.debug(TAG, "getFacebookSpecificAlbum albumName error =>" + e.getMessage());
                 albumName = "";
@@ -229,6 +259,150 @@ public class ParserFacebook {
         }
     }
 
+
+    public static String getFacebookAlbumListNextPageUrl(String response) {
+        try{
+            String nextUrl = "";
+
+            JSONObject obj = new JSONObject(response);
+
+            JSONObject albumObj = obj.getJSONObject(Constant.FACEBOOK_JSON_ALBUMS_TAG);
+            JSONObject pagingObj = albumObj.getJSONObject(Constant.FACEBOOK_JSON_PAGING_TAG);
+
+            nextUrl = pagingObj.getString(Constant.FACEBOOK_JSON_NEXT_TAG);
+
+            return nextUrl;
+
+        } catch (JSONException e) {
+            mLogging.debug(TAG, "getFacebookAlbumListNextPageUrl error => " + e.getMessage());
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public static String getFacebookNextPageAlbumListNextPageUrl(String response) {
+        try{
+            String nextUrl = "";
+
+            JSONObject obj = new JSONObject(response);
+            JSONObject pagingObj = obj.getJSONObject(Constant.FACEBOOK_JSON_PAGING_TAG);
+
+            nextUrl = pagingObj.getString(Constant.FACEBOOK_JSON_NEXT_TAG);
+
+            return nextUrl;
+
+        } catch (JSONException e) {
+            mLogging.debug(TAG, "getFacebookAlbumListNextPageUrl error => " + e.getMessage());
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public static PictureList getFacebookPictureList(String albumID, String response){
+        // a list of picture based on one album
+        PictureList list = new PictureList();
+        try{
+            String nextUrl = "";
+
+            JSONObject obj = new JSONObject(response);
+            JSONArray dataArray = obj.getJSONArray(Constant.FACEBOOK_JSON_DATA_TAG);
+
+            for(int i=0; i<dataArray.length(); i++) {
+                Picture picture = getFacebookSpecificPicture(albumID, dataArray.getJSONObject(i));
+                list.addPicture(picture);
+            }
+
+            return list;
+
+        } catch (JSONException e) {
+            mLogging.debug(TAG, "getFacebookNextPagePictureList error => " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Picture getFacebookSpecificPicture(String currentAlbumID, JSONObject dataObj) {
+        try{
+            String pictureType = EnumPictureType.JPEG.toString();
+
+            String pictureID = "";
+            String pictureName = "";
+            String createdTimeStamp = "";
+            String updatedTimeStamp = "";
+            String description = "";
+            String createdDate = "";
+            String createdTime = "";
+            String updatedDate = "";
+            String updatedTime = "";
+            String source = "";
+
+            try{
+                pictureID = dataObj.getString(Constant.FACEBOOK_JSON_ID_TAG);
+            }catch (JSONException e){
+                mLogging.debug(TAG, "getFacebookSpecificPicture pictureID error =>" + e.getMessage());
+                pictureID = "";
+            }
+
+            try{
+                pictureName = dataObj.getString(Constant.FACEBOOK_JSON_NAME_TAG);
+            }catch (JSONException e){
+                mLogging.debug(TAG, "getFacebookSpecificPicture pictureName error =>" + e.getMessage());
+                pictureName = "";
+            }
+
+            try{
+                source = dataObj.getString(Constant.FACEBOOK_JSON_SOURCE_TAG); // some albums doesn't have description
+            }catch (JSONException e){
+                mLogging.debug(TAG, "getFacebookSpecificPicture source error =>" + e.getMessage());
+                source = "";
+            }
+
+            createdTimeStamp = dataObj.getString(Constant.FACEBOOK_JSON_CREATED_TIME_TAG);
+            //updatedTimeStamp = dataObj.getString(Constant.FACEBOOK_JSON_UPDATED_TIME_TAG);
+
+            createdDate = getDatabaseDateFromFacebookTimeStamp(createdTimeStamp);
+            createdTime = getDatabaseTimeFromFacebookTimeStamp(createdTimeStamp);
+            //updatedDate = getDatabaseDateFromFacebookTimeStamp(updatedTimeStamp);
+            //updatedTime = getDatabaseTimeFromFacebookTimeStamp(updatedTimeStamp);
+
+            Picture pic = new Picture(CurrentLoginUser.getUser().getUserID(),
+                    pictureID,
+                    pictureType);
+            pic.setCreatedDate(createdDate);
+            pic.setCreatedTime(createdTime);
+            pic.setAlbumID(currentAlbumID);
+            pic.setTitle(pictureName);
+            pic.setIsFromFacebook(true);
+            pic.setIsFromLead(false);
+            pic.setThumbnailUrl(source);
+            pic.setActualUrl(source);
+
+            return pic;
+
+        } catch (JSONException e) {
+            mLogging.debug(TAG, "getFacebookSpecificPicture error => " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getFacebookPictureListNextPageUrl(String response) {
+        try{
+            String nextUrl = "";
+
+            JSONObject obj = new JSONObject(response);
+
+            JSONObject pagingObj = obj.getJSONObject(Constant.FACEBOOK_JSON_PAGING_TAG);
+            nextUrl = pagingObj.getString(Constant.FACEBOOK_JSON_NEXT_TAG);
+
+            return nextUrl;
+
+        } catch (JSONException e) {
+            mLogging.debug(TAG, "getFacebookPictureListNextPageUrl error => " + e.getMessage());
+            e.printStackTrace();
+            return "";
+        }
+    }
 
 
 

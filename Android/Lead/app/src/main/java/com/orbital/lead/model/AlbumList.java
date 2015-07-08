@@ -42,6 +42,14 @@ public class AlbumList implements Parcelable {
         this._arrayAlbum.add(album);
     }
 
+    public void addAlbum(AlbumList list){
+        if(this._arrayAlbum == null){
+            this._arrayAlbum = new ArrayList<Album>(list.getList());
+        }else{
+            this._arrayAlbum.addAll(list.getList());
+        }
+    }
+
     public void removePicture(){
 
     }

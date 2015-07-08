@@ -22,7 +22,9 @@ import com.orbital.lead.model.Album;
 import com.orbital.lead.model.AlbumList;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
+import com.orbital.lead.model.EnumFacebookQueryType;
 import com.orbital.lead.model.EnumPictureServiceType;
+import com.orbital.lead.model.PictureList;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -73,8 +75,8 @@ public class PictureActivity extends BaseActivity implements
             }
 
             if(getBundleExtra.getParcelable(Constant.BUNDLE_PARAM_ALBUM)!= null) {
-                this.setAlbum((Album) getBundleExtra.getParcelable(Constant.BUNDLE_PARAM_ALBUM));
-                //this.setPictureList(this.getAlbum().getPictureList().getList());
+                this.setSelectedAlbum((Album) getBundleExtra.getParcelable(Constant.BUNDLE_PARAM_ALBUM));
+                //this.setPictureList(this.getSelectedAlbum().getPictureList().getList());
             }
 
             //this.setIsFacebookLogin(getBundleExtra.getBoolean(Constant.BUNDLE_PARAM_IS_FACEBOOK_LOGIN));
@@ -93,7 +95,7 @@ public class PictureActivity extends BaseActivity implements
                     this.getCustomLogging().debug(TAG, "PictureActivity.OPEN_FRAGMENT_ALBUM");
 
                     if(this.getFacebookLogic().getIsFacebookLogin()){
-                        this.getFacebookLogic().getFacebookAllAlbum(this, Constant.FACEBOOK_GRAPH_ALBUM_QUERY);
+                        this.getFacebookLogic().sendGraphRequest(this, EnumFacebookQueryType.GET_ALL_ALBUM, "");
                     }
 
                     this.getLogic().getUserAllAlbum(this, CurrentLoginUser.getUser().getUserID());
@@ -104,6 +106,13 @@ public class PictureActivity extends BaseActivity implements
 
                 case PictureActivity.OPEN_FRAGMENT_LIST_PICTURES:
                     this.getCustomLogging().debug(TAG, "PictureActivity.OPEN_FRAGMENT_LIST_PICTURES");
+
+                    if(this.getFacebookLogic().getIsFacebookLogin()){
+                        this.getFacebookLogic().sendGraphRequest(this,
+                                                EnumFacebookQueryType.GET_ALL_ALBUM_PICTURES,
+                                                this.getSelectedAlbum().getAlbumID());
+                    }
+
                     this.setToolbarTitle(Constant.TITLE_FRAGMENT_PICTURES);
                     this.displayFragmentPictures();
                     break;
@@ -203,7 +212,7 @@ public class PictureActivity extends BaseActivity implements
 
     private void displayFragmentPictures(){
         this.getCustomLogging().debug(TAG, "displayFragmentPictures");
-        this.mFragmentPictures = FragmentPictures.newInstance(this.getAlbum());
+        this.mFragmentPictures = FragmentPictures.newInstance(this.getSelectedAlbum());
         if(!isAnyFragmentExist()){ // no fragment exist
             this.getCustomLogging().debug(TAG, "Replace Fragment");
             this.replaceFragment(this.mFragmentPictures, Constant.FRAGMENT_PICTURES);
@@ -284,6 +293,15 @@ public class PictureActivity extends BaseActivity implements
         }
     }
 
+    public void updateFragmentPicturesGridAdapter(PictureList list) {
+        if(this.mFragmentPictures != null) {
+            this.getCustomLogging().debug(TAG, "updateFragmentPicturesGridAdapter -> mFragmentPictures.updateGridPicturesAdapter");
+            this.mFragmentPictures.updateGridPicturesAdapter(list);
+        }else{
+            this.getCustomLogging().debug(TAG, "updateFragmentPicturesGridAdapter -> mFragmentPictures is null");
+        }
+    }
+
     private String getOpenFragmentType() {
         return this.openType;
     }
@@ -296,7 +314,7 @@ public class PictureActivity extends BaseActivity implements
         return this.mAlbumList;
     }
 
-    private Album getAlbum() {
+    private Album getSelectedAlbum() {
         return this.mAlbum;
     }
 
@@ -317,7 +335,7 @@ public class PictureActivity extends BaseActivity implements
         this.mAlbumList = list;
     }
 
-    private void setAlbum(Album a) {
+    private void setSelectedAlbum(Album a) {
         this.mAlbum = a;
     }
 
@@ -334,11 +352,17 @@ public class PictureActivity extends BaseActivity implements
 
     @Override
     public void onFragmentAlbumInteraction(int request, Album selectedAlbum) {
+        this.setSelectedAlbum(selectedAlbum);
         switch(request){
             case FragmentAlbum.REQUEST_OPEN_FRAGMENT_PICTURES:
                 this.getCustomLogging().debug(TAG, "onFragmentAlbumInteraction REQUEST_OPEN_FRAGMENT_PICTURES");
+                if(this.getFacebookLogic().getIsFacebookLogin()){
+                    this.getFacebookLogic().sendGraphRequest(this,
+                            EnumFacebookQueryType.GET_ALL_ALBUM_PICTURES,
+                            this.getSelectedAlbum().getAlbumID());
+                }
                 this.setToolbarTitle(Constant.TITLE_FRAGMENT_PICTURES);
-                this.setAlbum(selectedAlbum);
+                this.setSelectedAlbum(selectedAlbum);
                 this.displayFragmentPictures();
                 break;
         }

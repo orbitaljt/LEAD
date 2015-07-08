@@ -115,13 +115,6 @@ public class FragmentAlbum extends Fragment {
         mListener = null;
     }
 
-    /*
-    public void updateGridAlbum(AlbumList list){
-        this.setAlbumList(list);
-        this.initGridAlbumAdapter();
-        this.getGridView().setAdapter(this.mGridAlbumsAdapter);
-    }
-    */
 
     public void updateGridAlbumAdapter(AlbumList list) {
         this.getAlbumList().getList().addAll(list.getList());
@@ -155,9 +148,6 @@ public class FragmentAlbum extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mLogging.debug(TAG, "onItemClick -> " + position);
 
-                //String url = getParamPictureList().get(position).getThumbnailUrl();
-                //mLogging.debug(TAG, "getThumbnailUrl -> " + url);
-                //showDialogPicture(getActivity(), getParamPictureList(), position);
                 Album selectedAlbum = getAlbumList().getAlbum(position);
                 if(selectedAlbum != null) {
                     mListener.onFragmentAlbumInteraction(FragmentAlbum.REQUEST_OPEN_FRAGMENT_PICTURES, selectedAlbum);

@@ -84,10 +84,10 @@ public class GridAlbumsAdapter extends BaseAdapter{
         this.mContext = parent.getContext();
         this.initAnimation();
 
-        final View root;
+        View root;
         if(convertView == null){
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            root = inflater.inflate(R.layout.grid_album_item_layout, null); // inflate cust
+            root = inflater.inflate(R.layout.grid_album_item_layout, null);
         }else{
             root = convertView;
         }

@@ -42,6 +42,15 @@ public class PictureList implements Parcelable {
         this._arrayPictures.add(pic);
     }
 
+    public void addPicture(PictureList list){
+        if(this._arrayPictures == null){
+            this._arrayPictures = new ArrayList<Picture>(list.getList());
+        }else{
+            this._arrayPictures.addAll(list.getList());
+        }
+    }
+
+
     public void removePicture(){
 
     }

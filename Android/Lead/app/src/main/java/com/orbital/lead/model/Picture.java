@@ -135,6 +135,14 @@ public class Picture implements Parcelable {
         this._createdTime = value;
     }
 
+    public void setThumbnailUrl(String value) {
+        this._thumbnailUrl = value;
+    }
+
+    public void setActualUrl(String value) {
+        this._actualUrl = value;
+    }
+
     public void setIsFromFacebook(boolean value){
         this._fromFacebook = value;
     }

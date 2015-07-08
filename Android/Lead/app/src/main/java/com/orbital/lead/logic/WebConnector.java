@@ -36,19 +36,19 @@ public class WebConnector {
         conn.setDoInput(true);
         conn.setDoOutput(true);
 
-        Uri.Builder builder = new Uri.Builder()
-                .appendQueryParameter(Constant.URL_POST_PARAMETER_TAG_QUERY_TYPE, type);
+        Uri.Builder builder = new Uri.Builder();
+        builder.appendQueryParameter(Constant.URL_POST_PARAMETER_TAG_QUERY_TYPE, type);
 
         HashMap<String, String> mp = new HashMap<String, String>(mapParam);
         Iterator it = mp.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-
+            Map.Entry pair = (Map.Entry) it.next();
             builder.appendQueryParameter(pair.getKey().toString(), pair.getValue().toString());
         }
 
         String query = builder.build().getEncodedQuery();
-        //System.out.println("Webconnector query => " + query);
+        System.out.println("Webconnector query => " + query);
+
         OutputStream os = conn.getOutputStream();
         BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(os, "UTF-8"));
@@ -64,6 +64,24 @@ public class WebConnector {
         return stream;
 
     }
+
+
+    public static InputStream sendGetUrl(String urlString, String type) throws IOException{
+        URL url = new URL(urlString);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setReadTimeout(10000);
+        conn.setConnectTimeout(15000);
+        conn.setRequestMethod("GET");
+
+        conn.setDoInput(true);
+        conn.setDoOutput(false);
+        conn.connect();
+
+        // get the response stream
+        InputStream stream = conn.getInputStream();
+        return stream;
+    }
+
 
     public static InputStream downloadUrl(String urlString, String type, String username, String password) throws IOException {
         URL url = new URL(urlString);

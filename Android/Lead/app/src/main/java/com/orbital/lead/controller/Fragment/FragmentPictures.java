@@ -15,12 +15,14 @@ import android.widget.GridView;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.Activity.PictureActivity;
 import com.orbital.lead.controller.Activity.ViewPagerAdapter.PagerImageAdapter;
+import com.orbital.lead.controller.GridAdapter.GridAlbumsAdapter;
 import com.orbital.lead.controller.GridAdapter.GridPicturesAdapter;
 import com.orbital.lead.controller.GridAdapter.MultiChoiceModeListener;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Picture;
+import com.orbital.lead.model.PictureList;
 import com.orbital.lead.widget.WrapContentHeightViewPager;
 
 import java.util.ArrayList;
@@ -52,6 +54,8 @@ public class FragmentPictures extends Fragment {
 
     //private PictureActivity mPictureActivity;
     private GridView mGridView;
+    private GridPicturesAdapter mGridPicturesAdapter;
+    private PictureList mPictureList;
 
     /**
      * Use this factory method to create a new instance of
@@ -97,8 +101,18 @@ public class FragmentPictures extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_pictures, container, false);
 
-        this.initLogic();
-        this.initGridView(rootView);
+        this.setPictureList(this.mParamAlbum.getPictureList());
+
+        //if(!mParamAlbum.getIsFromFacebook()){
+            this.initLogic();
+            this.initGridView(rootView);
+
+        //}else{
+
+        //}
+
+
+
 
         return rootView;
     }
@@ -128,6 +142,11 @@ public class FragmentPictures extends Fragment {
         return this.mPictureActivity;
     }
     */
+    public void updateGridPicturesAdapter(PictureList list) {
+        this.getPictureList().getList().addAll(list.getList());
+        this.mGridPicturesAdapter.notifyDataSetChanged();
+    }
+
 
     private void initLogging(){
         this.mLogging = CustomLogging.getInstance();
@@ -137,43 +156,50 @@ public class FragmentPictures extends Fragment {
         this.mLogic = Logic.getInstance();
     }
 
-    /*
-    private void initActivity(Activity activity){
-        if(activity instanceof PictureActivity){
-            this.mPictureActivity = (PictureActivity) activity;
-        }
-    }
-    */
 
     private void initGridView(View v){
         this.mLogging.debug(TAG, "initGridView");
         this.mGridView = (GridView) v.findViewById(R.id.grid_album_picture);
         //getActivity(),
-        this.mGridView.setAdapter(new GridPicturesAdapter(this.mGridView, this.getParamAlbum().getPictureList().getList()));
+        if(this.mGridPicturesAdapter == null){
+            this.initGridPicturesAdapter();
+        }
+        this.mGridView.setAdapter(this.getGridPicturesAdapter());
         this.mGridView.setChoiceMode(GridView.CHOICE_MODE_MULTIPLE_MODAL);
         this.mGridView.setMultiChoiceModeListener(new MultiChoiceModeListener(this.getGridView()));
         this.mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mLogging.debug(TAG, "onItemSelected -> " + position);
-                String url = getParamAlbum().getPictureList().getList().get(position).getThumbnailUrl();
+                String url = getPictureList().getList().get(position).getThumbnailUrl();
                 mLogging.debug(TAG, "getThumbnailUrl -> " + url);
-                showDialogPicture(getActivity(), getParamAlbum().getPictureList().getList(), position);
+                showDialogPicture(getActivity(), getPictureList().getList(), position);
             }
         });
 
+    }
+
+    private void initGridPicturesAdapter(){
+        this.mGridPicturesAdapter = new GridPicturesAdapter(this.getPictureList());
     }
 
     private Album getParamAlbum(){
         return this.mParamAlbum;
     }
 
-    //private ArrayList<Picture> getParamPictureList() {
-    //    return this.mParamPictureList;
-    //}
+    private PictureList getPictureList() {
+        if(this.mPictureList == null) {
+            this.mPictureList = new PictureList();
+        }
+        return this.mPictureList;
+    }
 
     private GridView getGridView() {
         return this.mGridView;
+    }
+
+    private GridPicturesAdapter getGridPicturesAdapter() {
+        return this.mGridPicturesAdapter;
     }
 
     /*============= Display Dialogs =================*/
@@ -194,14 +220,13 @@ public class FragmentPictures extends Fragment {
         }
 
     }
-    /*
-    private Context getContext() {
-        return mContext;
-    }
-    */
 
     private Logic getLogic() {
         return this.mLogic;
+    }
+
+    private void setPictureList(PictureList list){
+        this.mPictureList = list;
     }
     /**
      * This interface must be implemented by activities that contain this
