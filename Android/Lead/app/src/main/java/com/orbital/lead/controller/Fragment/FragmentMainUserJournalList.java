@@ -9,6 +9,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ViewAnimator;
 
 import com.github.clans.fab.FloatingActionButton;
 import com.github.ksoichiro.android.observablescrollview.ObservableRecyclerView;
@@ -45,6 +48,9 @@ public class FragmentMainUserJournalList extends Fragment{
     private OnFragmentInteractionListener mListener;
 
    // private ObservableRecyclerView mRecyclerView;
+    private ViewAnimator mAnimatorJournalLoading;
+    private Animation inAnim;
+    private Animation outAnim;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mRecyclerAdapter;
     private FloatingActionButton mFab;
@@ -94,6 +100,9 @@ public class FragmentMainUserJournalList extends Fragment{
 
         this.initLogging();
         this.initLogic();
+        this.initAnimation();
+        this.initAnimatorJournalLoading(rootView);
+        this.setAnimationDisplay(1);
         this.initRecyclerAdapter(null);
         this.initRecyclerView(rootView);
         this.initFloatingActionButton(rootView);
@@ -167,6 +176,16 @@ public class FragmentMainUserJournalList extends Fragment{
         this.mLogging.debug(TAG, "updateJournalList");
         this.initRecyclerAdapter(list);
         this.refreshRecyclerView();
+
+        if(list != null && list.size() > 0){
+            this.setAnimationDisplay(0);
+        }else{
+            this.setAnimationDisplay(2);
+        }
+    }
+
+    public void showEmptyJournalListLayout(){
+        this.setAnimationDisplay(2);
     }
 
     private void initLogging(){
@@ -177,17 +196,16 @@ public class FragmentMainUserJournalList extends Fragment{
         this.mLogic = Logic.getInstance();
     }
 
-    /*
-    private void initMainActivity(Activity activity){
-        if(activity instanceof MainActivity){
-            this.mMainActivity = (MainActivity) activity;
-        }
+    private void initAnimation(){
+        this.inAnim = AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in);
+        this.outAnim = AnimationUtils.loadAnimation(getActivity(),android.R.anim.fade_out);
     }
 
-    private MainActivity getMainActivity(){
-        return this.mMainActivity;
+    private void initAnimatorJournalLoading(View v) {
+        this.mAnimatorJournalLoading = (ViewAnimator) v.findViewById(R.id.animator_load_journal_list);
+        this.mAnimatorJournalLoading.setInAnimation(inAnim);
+        this.mAnimatorJournalLoading.setOutAnimation(outAnim);
     }
-*/
 
     private void initRecyclerView(View v){
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -197,11 +215,6 @@ public class FragmentMainUserJournalList extends Fragment{
         this.mRecyclerView.addItemDecoration(new RecyclerDividerItemDecoration(getActivity(), RecyclerDividerItemDecoration.VERTICAL_LIST));
         this.mRecyclerView.setAdapter(this.getListAdapter());
 
-        /*
-        if(getMainActivity() instanceof ObservableScrollViewCallbacks){
-            this.mRecyclerView.setScrollViewCallbacks((ObservableScrollViewCallbacks) getMainActivity());
-        }
-        */
     }
 
     //ObservableRecyclerView
@@ -228,10 +241,6 @@ public class FragmentMainUserJournalList extends Fragment{
         });
     }
 
-    private RecyclerView.Adapter getListAdapter(){
-        return this.mRecyclerAdapter;
-    }
-
     private void initFloatingActionButton(View v){
         this.mFab = (FloatingActionButton) v.findViewById(R.id.fragment_journal_list_fab);
         this.mFab.setOnClickListener(new View.OnClickListener(){
@@ -240,6 +249,18 @@ public class FragmentMainUserJournalList extends Fragment{
                 mLogging.debug(TAG, "FAB is clicked");
             }
         });
+    }
+
+    private RecyclerView.Adapter getListAdapter(){
+        return this.mRecyclerAdapter;
+    }
+
+    private void setAnimationDisplay(int value){
+        this.mAnimatorJournalLoading.setDisplayedChild(value);
+    }
+
+    private ViewAnimator getAnimatorJournalLoading() {
+        return this.mAnimatorJournalLoading;
     }
 
 

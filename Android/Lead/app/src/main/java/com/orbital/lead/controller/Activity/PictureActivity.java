@@ -1,5 +1,6 @@
 package com.orbital.lead.controller.Activity;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -26,6 +27,8 @@ import com.orbital.lead.model.EnumFacebookQueryType;
 import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.PictureList;
 
+import java.io.IOException;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -37,6 +40,8 @@ public class PictureActivity extends BaseActivity implements
 
     public static final String OPEN_FRAGMENT_LIST_PICTURES = "0"; // fragment that shows a list of all albums
     public static final String OPEN_FRAGMENT_ALBUM = "1"; // fragment that shows all pictures of an album
+
+    private final int REQUEST_PICK_IMAGE_INTENT = 1;
 
     private String openType;
     private AlbumList mAlbumList;
@@ -323,7 +328,7 @@ public class PictureActivity extends BaseActivity implements
         return this.mPictureList;
     }
     */
-    public View getToolbar() {
+    private View getToolbar() {
         return this.mToolbarView;
     }
 
@@ -346,8 +351,18 @@ public class PictureActivity extends BaseActivity implements
     */
 
     @Override
-    public void onFragmentPicturesInteraction(Uri uri) {
+    public void onFragmentPicturesInteraction(int requestType) {
+        switch (requestType) {
+            case FragmentPictures.REQUEST_OPEN_INTENT_IMAGES:
+                // open up all images intent choices
+                this.openImagesIntent();
+                break;
 
+            case FragmentPictures.REQUEST_OPEN_FACEBOOK_ALBUM:
+                // open fragment album that contain all facebook albums
+                break;
+
+        }
     }
 
     @Override
@@ -368,6 +383,42 @@ public class PictureActivity extends BaseActivity implements
         }
     }
 
+
+    private void openImagesIntent() {
+        Intent intent = new Intent();
+        // Show only images, no videos or anything else
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+
+        this.getCustomLogging().debug(TAG, "openImagesIntent startActivityForResult");
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), this.REQUEST_PICK_IMAGE_INTENT);
+    }
+
+    /**
+     * onActivityResult is used to receive the result from Intent (images)
+     * **/
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == this.REQUEST_PICK_IMAGE_INTENT && resultCode == RESULT_OK
+                && data != null && data.getData() != null) {
+
+            Uri uri = data.getData();
+            this.getCustomLogging().debug(TAG, "onActivityResult uri string => " + uri.toString());
+            /*
+            try {
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+           */
+        }
+    }
+
+
+    /**
+     * onReceiveResult is used to receive the picture service result
+     * **/
     @Override
     public void onReceiveResult(int resultCode, Bundle resultData) {
         EnumPictureServiceType type = null;
@@ -389,7 +440,6 @@ public class PictureActivity extends BaseActivity implements
 
                         AlbumList list = getParser().parseJsonToAlbumList(jsonResult);
                         this.setAlbumList(list);
-
 
                         if(this.getAlbumList() !=  null){
                             this.getCustomLogging().debug(TAG, "onReceiveResult this.getAlbumList().size() => " + this.getAlbumList().size());

@@ -180,6 +180,10 @@ public class MainActivity extends BaseActivity
         this.getFragmentJournalList().updateJournalList(list);
     }
 
+    private void showFragmentEmptyJournalLayout() {
+        this.getFragmentJournalList().showEmptyJournalListLayout();
+    }
+
     private void updateCurrentUserUsingTagList(JournalList list){
         TagList tagList = new TagList();
         for(Journal j : list.getList()){
@@ -189,6 +193,7 @@ public class MainActivity extends BaseActivity
 
         this.getCurrentUser().setTagList(tagList);
     }
+
 
     /*
     private String getCurrentFacebookAccessTokenString() {
@@ -575,6 +580,7 @@ public class MainActivity extends BaseActivity
                             this.updateCurrentUserUsingTagList(list);
                         }else{
                             this.getCustomLogging().debug(TAG, "onReceiveResult list is null");
+                            this.showFragmentEmptyJournalLayout();
                         }
 
                         break;

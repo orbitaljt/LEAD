@@ -94,6 +94,7 @@ public class BaseActivity extends AppCompatActivity
         // update the main content by replacing fragments
         switch(position){
             case 0: // Profile
+                getLogic().displayProfileActivity(this);
                 break;
             case 1: // Albums
                 getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_ALBUM, null);

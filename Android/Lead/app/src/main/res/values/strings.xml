@@ -58,6 +58,16 @@
     <string name="dialog_editext_tag_hint">Tag name</string>
     <string name="dialog_editext_project_hint">Project name</string>
 
-    <string name="button_set_as_album_cover">Set Cover</string>
+    <string name="dialog_option_title">Select Media From</string>
+    <string name="dialog_option_gallery">Gallery</string>
+    <string name="dialog_option_facebook">Facebook</string>
 
+    <string name="button_set_as_album_cover">Set Cover</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+
+
+
+
+    <string name="no_journal_list_text_1">No Journal Entry</string>
+    <string name="no_journal_list_text_2">Click add to get started</string>
 </resources>

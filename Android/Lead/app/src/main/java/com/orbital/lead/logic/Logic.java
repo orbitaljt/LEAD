@@ -30,6 +30,7 @@ import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.Activity.EditSpecificJournalActivity;
 import com.orbital.lead.controller.Activity.PictureActivity;
+import com.orbital.lead.controller.Activity.ProfileActivity;
 import com.orbital.lead.controller.Activity.SpecificJournalActivity;
 import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.controller.Fragment.FragmentLogin;
@@ -224,6 +225,17 @@ public class Logic {
         //mBundle.putString(Constant.BUNDLE_PARAM_JOURNAL_ID, journal.getJournalID());
         //mBundle.putString(Constant.BUNDLE_PARAM_JOURNAL_IMAGE_URL, journal.getPictureCoverUrl());
         mBundle.putParcelable(Constant.BUNDLE_PARAM_JOURNAL, journal);
+
+        newIntent.putExtras(mBundle);
+        context.startActivity(newIntent);
+    }
+
+    public void displayProfileActivity(Context context){
+        Intent newIntent = new Intent(context, ProfileActivity.class);
+        Bundle mBundle = new Bundle();
+        //mBundle.putString(Constant.BUNDLE_PARAM_JOURNAL_ID, journal.getJournalID());
+        //mBundle.putString(Constant.BUNDLE_PARAM_JOURNAL_IMAGE_URL, journal.getPictureCoverUrl());
+        //mBundle.putParcelable(Constant.BUNDLE_PARAM_JOURNAL, journal);
 
         newIntent.putExtras(mBundle);
         context.startActivity(newIntent);

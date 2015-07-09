@@ -24,12 +24,64 @@
         android:scrollbars="vertical"
         style="@style/RecyclerViewJournalListStyle"/>
     -->
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_journal_list"
+    <ViewAnimator
+        android:id="@+id/animator_load_journal_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        style="@style/RecyclerViewStyle" />
+        android:background="@color/white"
+        android:animateFirstView="false" >
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_journal_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            style="@style/RecyclerViewStyle" />
+
+        <com.gc.materialdesign.views.ProgressBarCircularIndeterminate
+            android:id="@+id/progressBarLoading"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:background="@color/primary" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_journal" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/primary_dark"
+                android:textSize="@dimen/text_primary"
+                android:text="@string/no_journal_list_text_1" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/secondary_text"
+                android:textSize="@dimen/text_secondary"
+                android:text="@string/no_journal_list_text_2"/>
+
+        </LinearLayout>
+
+
+
+
+
+    </ViewAnimator>
 
     <com.github.clans.fab.FloatingActionButton
         android:id="@+id/fragment_journal_list_fab"

@@ -31,7 +31,7 @@
     <dimen name="btn_flat_min_width">88dp</dimen>
     <dimen name="btn_flat_min_height">36dp</dimen>
     <dimen name="btn_flat_padding">8dp</dimen>
-    <dimen name="btn_flat_margin">4dp</dimen>
+    <dimen name="btn_flat_margin">8dp</dimen>
 
 
     <dimen name="edit_text_height">48dp</dimen>

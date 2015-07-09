@@ -277,6 +277,40 @@
     </style>
 
 
+    <style name="dialogOptionImage">
+        <item name="android:layout_marginTop">16dp</item>
+    </style>
+
+    <style name="dialogOptionText">
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">24dp</item>
+        <item name="android:textSize">@dimen/text_primary</item>
+        <item name="android:textColor">@color/primary_text</item>
+    </style>
+
+    <style name="dialogOptionTitle">
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginLeft">16dp</item>
+        <item name="android:layout_marginRight">16dp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/primary_text</item>
+    </style>
+
+    <style name="dialogOptionContent">
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginLeft">16dp</item>
+        <item name="android:layout_marginRight">16dp</item>
+    </style>
+
+    <style name="profileRowLayout">
+        <item name="android:layout_marginLeft">16dp</item>
+        <item name="android:layout_marginRight">16dp</item>
+    </style>
+
+    <style name="profileEditTextStyle">
+        <item name="android:textSize">@dimen/text_secondary</item>
+        <item name="android:textColor">@color/secondary_text</item>
+    </style>
 
 
 </resources>

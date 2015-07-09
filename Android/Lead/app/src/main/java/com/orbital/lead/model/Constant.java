@@ -37,6 +37,7 @@ public class Constant {
     public static final String FRAGMENT_JOURNAL_LIST = "FragmentJournalList";
     public static final String FRAGMENT_PICTURES = "FragmentPictures";
     public static final String FRAGMENT_ALBUM = "FragmentAlbum";
+    public static final String FRAGMENT_PROFILE = "FragmentProfile";
 
 
     // URLs
