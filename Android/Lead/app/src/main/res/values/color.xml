@@ -30,6 +30,7 @@
 
 
     <!-- background color-->
+    <item name="background_lighter_grey" type="color">#CCCCCC</item>
     <item name="background_light_grey" type="color">#EEEEEE</item>
 
     <!-- Flat button -->

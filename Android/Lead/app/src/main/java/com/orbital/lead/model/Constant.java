@@ -15,6 +15,7 @@ public class Constant {
     public static final String TITLE_SPECIFIC_JOURNAL = "My Journal";
     public static final String TITLE_FRAGMENT_ALBUM = "Album";
     public static final String TITLE_FRAGMENT_PICTURES = "Pictures";
+    public static final String TITLE_FRAGMENT_PROFILE = "Profile";
 
     // Drawer List
     public static final String DRAWER_LIST_PROFILE_NAME = "Profile";
@@ -114,6 +115,7 @@ public class Constant {
     public static final String MESSAGE_JSON_COUNTRY_TAG = "country";
     public static final String MESSAGE_JSON_COUNTRY_CODE_TAG = "countryCode";
     public static final String MESSAGE_JSON_EMAIL_TAG = "email";
+    public static final String MESSAGE_JSON_CONTACT_TAG = "contact";
     public static final String MESSAGE_JSON_CREATED_DATE_TAG = "createdDate";
     public static final String MESSAGE_JSON_CREATED_TIME_TAG = "createdTime";
     public static final String MESSAGE_JSON_LAST_LOGIN_DATE_TAG = "lastLoginDate";

@@ -87,7 +87,7 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
             this.mTextTitle = (TextView) v.findViewById(R.id.text_view_title);
             this.mTextSubTitle = (TextView) v.findViewById(R.id.text_view_subtitle);
             this.initThumbnailImageView(v);
-            this.mLoadingSpinner = (ProgressBar) v.findViewById(R.id.loading_spinner);
+            //this.mLoadingSpinner = (ProgressBar) v.findViewById(R.id.loading_spinner);
             this.initViewAnimator(v);
         }
 

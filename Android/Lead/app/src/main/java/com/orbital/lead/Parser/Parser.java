@@ -82,6 +82,8 @@ public class Parser {
                 JSONObject detailObj = topObj.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
 
                 //detailObj.getString(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG),
+                //  detailObj.getString(Constant.MESSAGE_JSON_CITY_TAG),
+               // detailObj.getString(Constant.MESSAGE_JSON_STATE_TAG),
                 mUser = new User(detailObj.getString(Constant.MESSAGE_JSON_FACEBOOK_ID_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_LEAD_USER_ID_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_PICTURE_PROFILE_ID_TAG),
@@ -91,11 +93,10 @@ public class Parser {
                         detailObj.getString(Constant.MESSAGE_JSON_lAST_NAME_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_BIRTHDAY_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_ADDRESS_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_CITY_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_STATE_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_COUNTRY_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_EMAIL_TAG),
+                        detailObj.getString(Constant.MESSAGE_JSON_CONTACT_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_CREATED_DATE_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_LAST_LOGIN_DATE_TAG),
@@ -369,7 +370,6 @@ public class Parser {
     public String userObjectToJson(User user){
         JSONObject obj = new JSONObject();
         try{
-            //obj.put(Constant.MESSAGE_JSON_JOURNAL_LIST_ID_TAG, user.getJournalListID());
             obj.put(Constant.MESSAGE_JSON_FACEBOOK_ID_TAG, user.getFacebookID());
             obj.put(Constant.MESSAGE_JSON_PICTURE_PROFILE_ID_TAG, user.getProfilePictureID());
             obj.put(Constant.MESSAGE_JSON_FIRST_NAME_TAG, user.getFirstName());
@@ -378,14 +378,12 @@ public class Parser {
             obj.put(Constant.MESSAGE_JSON_BIRTHDAY_TAG, user.getBirthday());
             obj.put(Constant.MESSAGE_JSON_AGE_TAG, user.getAge());
             obj.put(Constant.MESSAGE_JSON_ADDRESS_TAG, user.getAddress());
-            obj.put(Constant.MESSAGE_JSON_CITY_TAG, user.getCity());
-            obj.put(Constant.MESSAGE_JSON_STATE_TAG, user.getState());
+            //obj.put(Constant.MESSAGE_JSON_CITY_TAG, user.getCity());
+            //obj.put(Constant.MESSAGE_JSON_STATE_TAG, user.getState());
             obj.put(Constant.MESSAGE_JSON_COUNTRY_TAG, user.getCountry());
             obj.put(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG, user.getCountryCode());
             obj.put(Constant.MESSAGE_JSON_EMAIL_TAG, user.getEmail());
-
-            mLogging.debug(TAG, "user.getLastName() => " + user.getLastName());
-            mLogging.debug(TAG, "user.getEmail() => " + user.getEmail());
+            obj.put(Constant.MESSAGE_JSON_CONTACT_TAG, user.getContact());
 
             return obj.toString();
 
@@ -447,6 +445,17 @@ public class Parser {
 
 
 
+    public boolean compareBothString(String a, String b){
+        if(isStringEmpty(a) && isStringEmpty(b)){
+            return true;
+        }
+
+        if(a.trim().toLowerCase().equals(b.trim().toLowerCase())){
+            return true;
+        }
+
+        return false;
+    }
 
     public int convertStringToInteger(String val){
         return Integer.parseInt(val);

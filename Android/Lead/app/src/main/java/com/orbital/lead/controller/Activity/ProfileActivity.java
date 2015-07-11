@@ -4,7 +4,6 @@ import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -13,9 +12,9 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.orbital.lead.R;
-import com.orbital.lead.controller.Fragment.FragmentAlbum;
 import com.orbital.lead.controller.Fragment.FragmentProfile;
 import com.orbital.lead.model.Constant;
+import com.orbital.lead.model.CurrentLoginUser;
 
 public class ProfileActivity extends BaseActivity
         implements FragmentProfile.OnFragmentInteractionListener {
@@ -38,9 +37,16 @@ public class ProfileActivity extends BaseActivity
         this.initToolbar();
         this.pushToolbarToActionbar();
         this.initToolbarTitle();
+        this.setToolbarTitle(Constant.TITLE_FRAGMENT_PROFILE);
         this.restoreCustomActionbar();
         this.displayFragmentProfile();
     }
+
+    @Override
+    public void setToolbarTitle(String title){
+        this.mToolbarTitle.setText(title);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -57,7 +63,8 @@ public class ProfileActivity extends BaseActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_done) {
+            this.saveUserProfile();
             return true;
         }
 
@@ -113,6 +120,41 @@ public class ProfileActivity extends BaseActivity
                     .replace(R.id.container, newFrag, name)
                     .commitAllowingStateLoss();
         }
+    }
+
+    private void saveUserProfile() {
+        if(mFragmentProfile.hasChanges()){
+            getCustomLogging().debug(TAG, "updateUserProfile there's changes made in fragment profile");
+            this.updateUserProfile();
+        }else {
+            getCustomLogging().debug(TAG, "updateUserProfile no changes made in fragment profile");
+        }
+    }
+
+    private void updateUserProfile(){
+
+            String newFirstName = this.mFragmentProfile.getNewFirstName();
+            String newMiddleName = this.mFragmentProfile.getNewMiddleName();
+            String newLastName = this.mFragmentProfile.getNewLastName();
+            String newBirthday = this.mFragmentProfile.getNewBirthday();
+            String newEmail = this.mFragmentProfile.getNewEmail();
+            String newContact = this.mFragmentProfile.getNewContact();
+            String newAddress = this.mFragmentProfile.getNewAddress();
+            String newCountry = this.mFragmentProfile.getNewCountry();
+
+            CurrentLoginUser.getUser().setFirstName(newFirstName);
+            CurrentLoginUser.getUser().setMiddleName(newMiddleName);
+            CurrentLoginUser.getUser().setLastName(newLastName);
+            CurrentLoginUser.getUser().setBirthday(newBirthday);
+            CurrentLoginUser.getUser().setEmail(newEmail);
+            CurrentLoginUser.getUser().setContact(newContact);
+            CurrentLoginUser.getUser().setAddress(newAddress);
+            CurrentLoginUser.getUser().setCountry(newCountry);
+
+            String detail = getParser().userObjectToJson(CurrentLoginUser.getUser());
+            getCustomLogging().debug(TAG, "updateUserProfile detail => " + detail);
+            getLogic().updateUserProfileDatabase(this, CurrentLoginUser.getUser().getUserID(), detail);
+
     }
 
 }

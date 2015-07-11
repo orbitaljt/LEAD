@@ -34,7 +34,8 @@ public class FormatDate {
                 return toDisplayDate(rawDate, format);
 
             case DISPLAY_DATE_TO_DATABASE_DATE:
-                return "";
+                mLogging.debug(TAG, "Convert display date to database date");
+                return toDatabaseDate(rawDate, format);
 
             case FACEBOOK_DATE_TO_DATABASE_DATE:
                 mLogging.debug(TAG, "Convert facebook date to database date");
@@ -97,6 +98,25 @@ public class FormatDate {
 
     private static String toDisplayDate(String rawDate, String format){
         DateFormat inputFormat = new SimpleDateFormat(DATABASE_FORMAT);
+        DateFormat outputFormat = new SimpleDateFormat(format);
+        Date parsed = new Date();
+        try
+        {
+            parsed = inputFormat.parse(rawDate);
+            String outputText = outputFormat.format(parsed);
+            return outputText;
+        }
+        catch (ParseException e)
+        {
+            mLogging.debug(TAG, "ParseException => " + e.getMessage());
+            e.printStackTrace();
+            return "";
+        }
+
+    }
+
+    private static String toDatabaseDate(String rawDate, String format){
+        DateFormat inputFormat = new SimpleDateFormat(DISPLAY_FORMAT);
         DateFormat outputFormat = new SimpleDateFormat(format);
         Date parsed = new Date();
         try

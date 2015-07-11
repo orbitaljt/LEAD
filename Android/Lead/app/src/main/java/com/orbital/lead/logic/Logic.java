@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.internal.view.menu.MenuBuilder;
 import android.support.v7.widget.PopupMenu;
@@ -52,6 +53,7 @@ import com.orbital.lead.model.User;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by joseph on 14/6/2015.
@@ -678,8 +680,9 @@ public class Logic {
 
 
     /*=========== POPUP MENU ===========*/
-    public void showPopUpMenu(final Context context, View v, final EnumDialogEditJournalType type, final String currentValue){
+    public void showJournalPopUpMenu(final Context context, View v, final EnumDialogEditJournalType type, final String currentValue){
         PopupMenu menu = new PopupMenu(context, v){
+
             @Override
             public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
                 switch (item.getItemId()) {
@@ -716,7 +719,46 @@ public class Logic {
     }
 
 
+    public void showCountryListPopUpMenu(final Context context, View v, ArrayList<String> countries){
+        PopupMenu menu = new PopupMenu(context, v){
+            @Override
+            public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
+                switch (item.getItemId()) {
 
+
+                    default:
+                        return super.onMenuItemSelected(menu, item);
+                }
+            }
+        };
+
+        for(String country : countries){
+            menu.getMenu().add(country);
+        }
+
+        menu.show();
+
+    }
+
+    public Rect locateView(View v)
+    {
+        int[] loc_int = new int[2];
+        if (v == null) return null;
+        try
+        {
+            v.getLocationOnScreen(loc_int);
+        } catch (NullPointerException npe)
+        {
+            //Happens when the view doesn't exist on screen anymore.
+            return null;
+        }
+        Rect location = new Rect();
+        location.left = loc_int[0];
+        location.top = loc_int[1];
+        location.right = location.left + v.getWidth();
+        location.bottom = location.top + v.getHeight();
+        return location;
+    }
 
     /*=========== ACCESS TO PREFERENCE ===========*/
 

@@ -113,7 +113,7 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             this.mImageOptions.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                   mLogic.showPopUpMenu(mContext, v, EnumDialogEditJournalType.EDIT_TAG, getTextTitle());
+                   mLogic.showJournalPopUpMenu(mContext, v, EnumDialogEditJournalType.EDIT_TAG, getTextTitle());
                 }
             });
         }

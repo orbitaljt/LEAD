@@ -19,13 +19,14 @@ public class User {
     private String _middleName = "";
     private String _birthday = "";
     private String _address = "";
-    private String _city = "";
-    private String _state = "";
+    //private String _city = "";
+    //private String _state = "";
     private String _country = "";
     private String _countryCode = "";
     private String _username = "";
     private String _password = "";
     private String _email = "";
+    private String _contact = "";
     private String _createdDate = "";
     private String _createdTime = "";
     private String _lastLoginDate = "";
@@ -41,8 +42,9 @@ public class User {
         this.initParser();
     }
 
+    //, String city, String state
     public User(String fID, String ID, String ppID, String ppType, String fName, String mName, String lName,
-                String birth, String addr, String city, String state, String country, String countryCode, String email,
+                String birth, String addr, String country, String countryCode, String email, String contact,
                 String createdDate, String createdTime, String lastLoginDate, String lastLoginTime, int age){
         this.initParser();
 
@@ -54,11 +56,12 @@ public class User {
         this._lastName = lName;
         this._birthday = birth;
         this._address = addr;
-        this._city = city;
-        this._state = state;
+        //this._city = city;
+        //this._state = state;
         this._country = country;
         this._countryCode = countryCode;
         this._email = email;
+        this._contact = contact;
         this._createdDate = createdDate;
         this._createdTime = createdTime;
         this._lastLoginDate = lastLoginDate;
@@ -117,6 +120,7 @@ public class User {
         return this._address;
     }
 
+    /*
     public String getCity(){
         return this._city;
     }
@@ -124,6 +128,7 @@ public class User {
     public String getState(){
         return this._state;
     }
+    */
 
     public String getCountry(){
         return this._country;
@@ -145,6 +150,9 @@ public class User {
         return this._email;
     }
 
+    public String getContact() {
+        return this._contact;
+    }
     /**
      * Get created date format yyyy-mm-dd
      * **/
@@ -231,10 +239,6 @@ public class User {
         this._address = val;
     }
 
-    public void setCity(String val){
-        this._city = val;
-    }
-
     public void setCountry(String val){
         this._country = val;
     }
@@ -255,6 +259,9 @@ public class User {
         this._email = val;
     }
 
+    public void setContact(String val) {
+        this._contact = val;
+    }
     /**
      * Set a new created date format yyyy-mm-dd
      * **/
