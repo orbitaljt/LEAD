@@ -1,5 +1,6 @@
 package com.orbital.lead.controller.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -20,12 +21,16 @@ import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.FacebookLogic;
 import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.AlbumList;
+import com.orbital.lead.model.CurrentLoginUser;
 
 import org.json.JSONObject;
 
 
 public class BaseActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+
+    protected final int REQUEST_PICK_IMAGE_INTENT = 1;
+    protected final int REQUEST_IMAGE_CAPTURE = 1337;
 
     private final String TAG = this.getClass().getSimpleName();
     /**
@@ -181,6 +186,20 @@ public class BaseActivity extends AppCompatActivity
         }
     }
 
+    protected void restoreDrawerHeaderValues() {
+        if(CurrentLoginUser.getUser() != null){
+            this.getNavigationDrawerFragment().setImageUserProfile(CurrentLoginUser.getUser().getProfilePicUrl());
+            this.getNavigationDrawerFragment().setTextUserName(CurrentLoginUser.getUser().getFirstName(),
+                                                                CurrentLoginUser.getUser().getMiddleName(),
+                                                                CurrentLoginUser.getUser().getLastName());
+            this.getNavigationDrawerFragment().setTextUserEmail(CurrentLoginUser.getUser().getEmail());
+        }else{
+            this.getNavigationDrawerFragment().setImageUserProfile("");
+        }
+
+    }
+
+
     protected void setToolbarTitle(String title){
         getSupportActionBar().setTitle(title);
     }
@@ -219,6 +238,26 @@ public class BaseActivity extends AppCompatActivity
         return this.mFacebookLogic;
     }
 
+
+    protected void openImagesIntent() {
+        Intent intent = new Intent();
+        // Show only images, no videos or anything else
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+
+        this.getCustomLogging().debug(TAG, "openImagesIntent startActivityForResult");
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), this.REQUEST_PICK_IMAGE_INTENT);
+    }
+
+    protected void openCameraIntent() {
+        Intent intent = new Intent(
+                android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            this.getCustomLogging().debug(TAG, "openCameraIntent startActivityForResult");
+            startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
     /*
     protected void setIsFacebookLogin(boolean val) {
         mLogging.debug(TAG, "setIsFacebookLogin to => " + val);

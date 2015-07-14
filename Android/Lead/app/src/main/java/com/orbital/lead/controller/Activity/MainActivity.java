@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import com.facebook.AccessToken;
 import com.orbital.lead.Parser.FormatDate;
 import com.orbital.lead.Parser.ParserFacebook;
 import com.orbital.lead.R;
@@ -17,15 +16,18 @@ import com.orbital.lead.controller.Fragment.FragmentDetail;
 import com.orbital.lead.controller.Fragment.FragmentMainUserJournalList;
 import com.orbital.lead.controller.Service.JournalReceiver;
 import com.orbital.lead.controller.Service.JournalService;
-import com.orbital.lead.logic.FacebookLogic;
+import com.orbital.lead.controller.Service.ProjectReceiver;
+import com.orbital.lead.controller.Service.ProjectService;
 import com.orbital.lead.model.Constant;
 
 
 import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumJournalServiceType;
+import com.orbital.lead.model.EnumProjectServiceType;
 import com.orbital.lead.model.FacebookUserObject;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.JournalList;
+import com.orbital.lead.model.ProjectList;
 import com.orbital.lead.model.TagList;
 import com.orbital.lead.model.User;
 
@@ -34,7 +36,8 @@ public class MainActivity extends BaseActivity
         implements
         FragmentMainUserJournalList.OnFragmentInteractionListener,
         FragmentDetail.OnFragmentInteractionListener,
-        JournalReceiver.Receiver {
+        JournalReceiver.Receiver,
+        ProjectReceiver.Receiver{
 //,ObservableScrollViewCallbacks
     private final String TAG = this.getClass().getSimpleName();
 
@@ -46,6 +49,7 @@ public class MainActivity extends BaseActivity
     //private FragmentMainUserJournalList mFragmentMainUserJournalList;
 
     private JournalReceiver mJournalReceiver;
+    private ProjectReceiver mProjectReceiver;
 
     private String currentFacebookUserID;
     private String currentLeadUserID;
@@ -81,6 +85,7 @@ public class MainActivity extends BaseActivity
 
 
         this.initJournalReceiver();
+        this.initProjectReceiver();
 
         Bundle getBundleExtra = getIntent().getExtras();
 
@@ -191,7 +196,7 @@ public class MainActivity extends BaseActivity
             this.getCustomLogging().debug(TAG, "updateCurrentUserUsingTagList copying tag");
         }
 
-        this.getCurrentUser().setTagList(tagList);
+        this.getCurrentUser().getTagMap().addTagList(tagList);
     }
 
 
@@ -492,6 +497,10 @@ public class MainActivity extends BaseActivity
         this.getCurrentUser().setJournalList(list);
     }
 
+    public void setProjectList(ProjectList list) {
+        this.getCurrentUser().setProjectList(list);
+    }
+
 
     public void setNavigationDrawerUserProfilePicture(String url){
         getCustomLogging().debug(TAG, "setNavigationDrawerUserProfilePicture using url => " + url);
@@ -533,10 +542,15 @@ public class MainActivity extends BaseActivity
     */
 
 
-    /*===================== Journal Intent Service & Receiver ================================*/
+    /*===================== Intent Service & Receiver ================================*/
     public void initJournalReceiver(){
-        mJournalReceiver = new JournalReceiver(new Handler());
-        mJournalReceiver.setReceiver(this);
+        this.mJournalReceiver = new JournalReceiver(new Handler());
+        this.mJournalReceiver.setReceiver(this);
+    }
+
+    public void initProjectReceiver() {
+        this.mProjectReceiver = new ProjectReceiver(new Handler());
+        this.mProjectReceiver.setReceiver(this);
     }
 
     public JournalReceiver getJournalReceiver(){
@@ -546,8 +560,19 @@ public class MainActivity extends BaseActivity
         return this.mJournalReceiver;
     }
 
+    public ProjectReceiver getProjectReceiver() {
+        if(this.mProjectReceiver == null){
+            this.initProjectReceiver();
+        }
+        return this.mProjectReceiver;
+    }
+
     public void getUserJournalList(){
         this.getLogic().getUserJournalList(this, this.getCurrentUser());
+    }
+
+    public void getAllProject() {
+        this.getLogic().getAllProject(this, "", "", "");
     }
 
     /**
@@ -555,26 +580,30 @@ public class MainActivity extends BaseActivity
      * **/
     @Override
     public void onReceiveResult(int resultCode, Bundle resultData) {
-        EnumJournalServiceType type = null;
+        EnumJournalServiceType journalServiceType = null;
+        EnumProjectServiceType projectServiceType = null;
         String jsonResult = "";
 
         switch (resultCode) {
             case JournalService.STATUS_RUNNING:
                 this.getCustomLogging().debug(TAG, "onReceiveResult -> JournalService.STATUS_RUNNING");
                 break;
+
+            case ProjectService.STATUS_RUNNING:
+                this.getCustomLogging().debug(TAG, "onReceiveResult -> ProjectService.STATUS_RUNNING");
+                break;
+
             case JournalService.STATUS_FINISHED:
                 this.getCustomLogging().debug(TAG, "onReceiveResult -> JournalService.STATUS_FINISHED");
-                type = (EnumJournalServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
+                journalServiceType = (EnumJournalServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
 
-                switch(type){
+                switch(journalServiceType){
                     case GET_ALL_JOURNAL:
                         jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
-
                         this.getCustomLogging().debug(TAG, "onReceiveResult GET_ALL_JOURNAL -> jsonResult => " + jsonResult);
                         JournalList list = this.getJournalListFromJson(jsonResult);
 
                         if(list != null){
-                            this.getCustomLogging().debug(TAG, "onReceiveResult list.size() => " + list.size());
                             this.setUserJournalList(list);
                             this.updateFragmentMainUserJournalList(list);
                             this.updateCurrentUserUsingTagList(list);
@@ -592,9 +621,33 @@ public class MainActivity extends BaseActivity
                 }
 
                 break;
-            case JournalService.STATUS_ERROR:
-                this.getCustomLogging().debug(TAG, "S3Service.STATUS_ERROR");
+
+
+            case ProjectService.STATUS_FINISHED:
+                this.getCustomLogging().debug(TAG, "onReceiveResult -> ProjectService.STATUS_FINISHED");
+                projectServiceType = (EnumProjectServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
+                switch (projectServiceType) {
+                    case GET_ALL_PROJECT:
+                        jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
+                        this.getCustomLogging().debug(TAG, "onReceiveResult GET_ALL_PROJECT -> jsonResult => " + jsonResult);
+                        ProjectList list = this.getProjectListFromJson(jsonResult);
+
+                        if(list != null) {
+                            this.setProjectList(list);
+                        }
+                        break;
+                }
                 break;
+
+
+            case JournalService.STATUS_ERROR:
+                this.getCustomLogging().debug(TAG, "JournalService.STATUS_ERROR");
+                break;
+
+            case ProjectService.STATUS_ERROR:
+                this.getCustomLogging().debug(TAG, "ProjectService.STATUS_ERROR");
+                break;
+
         }
 
     }
@@ -604,10 +657,14 @@ public class MainActivity extends BaseActivity
         return getParser().parseJsonToJournalList(json);
     }
 
+    public ProjectList getProjectListFromJson(String json) {
+        return getParser().parseJsonToProjectList(json);
+    }
 
     private FacebookUserObject getFacebookUserObject(String json) {
         return ParserFacebook.getFacebookUserObject(json);
     }
+
 
 
 

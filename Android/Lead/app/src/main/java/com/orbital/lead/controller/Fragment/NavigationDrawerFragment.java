@@ -66,6 +66,9 @@ public class NavigationDrawerFragment extends Fragment {
      */
     private android.support.v7.app.ActionBarDrawerToggle mDrawerToggle;
 
+
+
+
     private DrawerLayout mDrawerLayout;
     //private ListView mDrawerListView;
     private View mFragmentContainerView;
@@ -100,7 +103,8 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        this.initLogging();
+        this.mLogging.debug(TAG, "onCreate");
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -118,10 +122,9 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        this.mLogging.debug(TAG, "onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
 
-        this.initLogging();
         this.initDrawerListAdapter();
         this.initDrawerList(rootView);
         this.initImageHeader(rootView);
@@ -135,6 +138,7 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        this.mLogging.debug(TAG, "onActivityCreated");
         // Indicate that this fragment would like to influence the set of actions in the action bar.
         setHasOptionsMenu(true);
     }
@@ -266,6 +270,7 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        mLogging.debug(TAG, "onSaveInstanceState");
         outState.putInt(STATE_SELECTED_POSITION, mCurrentSelectedPosition);
     }
 
@@ -358,6 +363,9 @@ public class NavigationDrawerFragment extends Fragment {
                                     //holder.progressBar.setProgress(Math.round(100.0f * current / total));
                                 }
                             });
+        }else{
+            this.mDrawerUserProfileImage.destroyDrawingCache();
+            this.mDrawerUserProfileImage.setImageDrawable(getResources().getDrawable(R.drawable.ic_default_user));
         }
     }
 
@@ -423,7 +431,7 @@ public class NavigationDrawerFragment extends Fragment {
         //ActionBar actionBar = getActionBar();
         //actionBar.setDisplayShowTitleEnabled(true);
         //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        //actionBar.setTitle(R.string.app_name);
+        //actionBar.setName(R.string.app_name);
     }
 
     /*

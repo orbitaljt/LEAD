@@ -3,15 +3,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.orbital.lead.controller.Activity.SpecificJournalActivity">
 
-    <item android:id="@+id/action_edit_journal" android:title="@string/action_edit_journal"
+    <item android:id="@+id/action_edit_journal"
+        android:title="@string/action_edit_journal"
+        android:name="@string/action_edit_journal"
         android:icon="@drawable/ic_edit"
         app:showAsAction="always" android:orderInCategory="100"/>
 
-    <item android:id="@+id/action_publish_journal" android:title="@string/action_publish_journal"
+    <item android:id="@+id/action_publish_journal"
+        android:title="@string/action_publish_journal"
+        android:name="@string/action_publish_journal"
         app:showAsAction="always|withText" android:orderInCategory="200"/>
     <!--android:icon="@drawable/ic_edit" -->
 
-    <item android:id="@+id/action_delete_journal" android:title="@string/action_delete"
+    <item android:id="@+id/action_delete_journal"
+        android:title="@string/action_delete"
+        android:name="@string/action_delete"
         android:orderInCategory="300" app:showAsAction="never" />
 
 </menu>

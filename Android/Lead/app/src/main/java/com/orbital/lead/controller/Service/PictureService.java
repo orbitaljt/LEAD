@@ -19,9 +19,9 @@ import java.util.HashMap;
  * Created by joseph on 27/6/2015.
  */
 public class PictureService extends IntentService  {
-    public static final int STATUS_RUNNING = 0;
-    public static final int STATUS_FINISHED = 1;
-    public static final int STATUS_ERROR = -1;
+    public static final int STATUS_RUNNING = 900;
+    public static final int STATUS_FINISHED = 901;
+    public static final int STATUS_ERROR = -901;
     private final String TAG = this.getClass().getSimpleName();
 
     private CustomLogging mLogging;

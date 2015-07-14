@@ -16,7 +16,7 @@
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
             android:paddingBottom="@dimen/activity_vertical_margin"
-            tools:context="com.orbital.lead.controller.Activity.EditSpecificJournalActivity">
+            tools:context="com.orbital.lead.controller.Activity.AddNewSpecificJournalActivity">
 
 
             <RelativeLayout
@@ -29,8 +29,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentLeft="true"
-                    style="@style/editTextTitleStyle"
-                    android:text="this is a name"/>
+                    android:hint="Write your journal name here"
+                    style="@style/editTextTitleStyle" />
 
                 <View
                     android:id="@+id/line_view"
@@ -65,7 +65,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_marginLeft="8dp"
-                            android:hint="Click to add this journal date"
+                            android:hint="Add current journal date"
                             style="@style/SpecificJournalPage_Content_Tag_Project_Style" />
 
                     </TableRow>
@@ -84,7 +84,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_marginLeft="8dp"
-                            android:hint="Click to add tags"
+                            android:hint="Add tags"
                             style="@style/SpecificJournalPage_Content_Tag_Project_Style" />
 
                     </TableRow>
@@ -103,7 +103,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_marginLeft="8dp"
-                            android:hint="Click to add new Project"
+                            android:hint="Specify a project"
                             style="@style/SpecificJournalPage_Content_Tag_Project_Style" />
 
                     </TableRow>

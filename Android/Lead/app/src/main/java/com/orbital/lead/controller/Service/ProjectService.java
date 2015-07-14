@@ -12,6 +12,7 @@ import com.orbital.lead.logic.WebConnector;
 import com.orbital.lead.logic.s3.S3Logic;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.EnumJournalServiceType;
+import com.orbital.lead.model.EnumProjectServiceType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,28 +21,25 @@ import java.util.HashMap;
 /**
  * Created by joseph on 19/6/2015.
  */
-public class JournalService extends IntentService{
+public class ProjectService extends IntentService{
 
-    public static final int STATUS_RUNNING = 400;
-    public static final int STATUS_FINISHED = 401;
-    public static final int STATUS_ERROR = -401;
+    public static final int STATUS_RUNNING = 10000;
+    public static final int STATUS_FINISHED = 10001;
+    public static final int STATUS_ERROR = -1;
 
     private final String TAG = this.getClass().getSimpleName();
     private CustomLogging mLogging;
 
-    private S3Logic mS3Logic;
     private Parser mParser;
-    private LocalStorage mLocalStorage;
     private String userID;
-    private String journalID;
+    private String projectID;
     private String detail;
-    private String userProfilePicID;
     private String urlStreamStr;
-    private EnumJournalServiceType serviceType;
+    private EnumProjectServiceType serviceType;
     InputStream urlStream = null;
 
-    public JournalService() {
-        super(JournalService.class.getName());
+    public ProjectService() {
+        super(ProjectService.class.getName());
         this.initLogging();
     }
 
@@ -54,11 +52,9 @@ public class JournalService extends IntentService{
         HashMap<String, String> params;
         Bundle returnBundle = new Bundle();
 
-        this.initS3Logic();
         this.initParser();
-        this.initLocalStorage();
 
-        // get any extras that is passed from mainactivity
+        // get any extras that is passed from context
         // retrieve service type from extra
         // retrieve user id from extra
         final ResultReceiver receiver = intent.getParcelableExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG);
@@ -67,7 +63,7 @@ public class JournalService extends IntentService{
         }
 
         if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG) != null){
-            this.journalID = intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG);
+            this.projectID = intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG);
         }
 
         if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_DETAIL_TAG) != null){
@@ -76,9 +72,8 @@ public class JournalService extends IntentService{
 
 
         if(intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG) != null){
-            this.serviceType = (EnumJournalServiceType) intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
+            this.serviceType = (EnumProjectServiceType) intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
         }
-
 
 
         this.urlStreamStr = "";
@@ -92,15 +87,10 @@ public class JournalService extends IntentService{
             url = Constant.URL_CLIENT_SERVER;
 
             switch (this.getServiceType()){
-                case GET_ALL_JOURNAL:
-                    // get all journals
-                    // requires user ID and journal list ID
+                case GET_ALL_PROJECT:
+                    // get all project - no requirement
                     params = new HashMap<String, String>();
-                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, this.getUserID());
-
-                    mLogging.debug(TAG, "getUserID ->" + getUserID());
-
-                    this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_GET_USER_ALL_JOURNAL, params);
+                    this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_GET_ALL_PROJECT, params);
                     this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
 
                     returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
@@ -108,22 +98,14 @@ public class JournalService extends IntentService{
 
                     break;
 
-                case UPDATE_SPECIFIC_JOURNAL:
-                    // update 1 journal only
-                    params = new HashMap<String, String>();
-                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, this.getUserID());
-                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_JOURNAL_ID, this.getJournalID());
-                    params.put(Constant.URL_POST_PARAMETER_TAG_DETAIL, this.getDetail());
+                case ADD_NEW_PROJECT:
 
-                    this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_UPDATE_USER_JOURNAL, params);
-                    this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
-
-                    returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
-                    receiver.send(STATUS_FINISHED, returnBundle);
+                    break;
+                case UPDATE_SPECIFIC_PROJECT:
 
                     break;
 
-                case DELETE_SPECIFC_JOURNAL:
+                case DELETE_SPECIFC_PROJECT:
                     break;
 
                 default:
@@ -149,28 +131,21 @@ public class JournalService extends IntentService{
         this.mLogging = CustomLogging.getInstance();
     }
 
-    private void initS3Logic(){
-        this.mS3Logic = S3Logic.getInstance(this);
-    }
-
     private void initParser() { this.mParser = Parser.getInstance(); }
-
-    private void initLocalStorage() { this.mLocalStorage = LocalStorage.getInstance(); }
-
 
     private String getUserID() {
         return this.userID;
     }
 
-    private String getJournalID() {
-        return this.journalID;
+    private String getProjectID() {
+        return this.projectID;
     }
 
     private String getDetail() {
         return this.detail;
     }
 
-    private EnumJournalServiceType getServiceType(){
+    private EnumProjectServiceType getServiceType(){
         return this.serviceType;
     }
 

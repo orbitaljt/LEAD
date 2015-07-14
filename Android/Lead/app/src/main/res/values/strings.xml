@@ -16,6 +16,7 @@
     <string name="action_delete">Delete</string>
     <string name="action_done">Done</string>
     <string name="action_detail">Detail</string>
+    <string name="action_cancel">Cancel</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
@@ -35,6 +36,9 @@
     <string name="title_activity_specific_journal">SpecificJournalActivity</string>
     <string name="title_activity_picture">PictureActivity</string>
     <string name="title_activity_edit_specific_journal">EditSpecificJournalActivity</string>
+    <string name="title_activity_add_new_specific_journal">AddNewSpecificJournalActivity</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+
 
     <string name="dialog_toolbar_add_new_tag">Add New Tag</string>
     <string name="dialog_toolbar_add_new_project">Add New Project</string>
@@ -59,11 +63,13 @@
     <string name="dialog_editext_project_hint">Project name</string>
 
     <string name="dialog_option_title">Select Media From</string>
+    <string name="dialog_option_title_2">Select Picture From</string>
     <string name="dialog_option_gallery">Gallery</string>
     <string name="dialog_option_facebook">Facebook</string>
+    <string name="dialog_option_camera">Camera</string>
 
     <string name="button_set_as_album_cover">Set Cover</string>
-    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="profile_side_note">You have login as a facebook user. You can only edit your personal contact, address and country.</string>
 
 
 

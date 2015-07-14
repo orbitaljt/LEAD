@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 /**
@@ -31,6 +32,17 @@ public class TagList implements Parcelable{
         }
     };
 
+    public static TagList filterCheckedStatus(TagList list){
+        TagList filteredList = new TagList();
+        for(Tag tag : list.getList()){
+            if(tag.getIsChecked()){
+                filteredList.addTag(tag);
+            }
+        }
+        return filteredList;
+    }
+
+
 
     public TagList(){
         this.list = new ArrayList<Tag>();
@@ -39,6 +51,14 @@ public class TagList implements Parcelable{
     public void addTag(Tag newTag){
         if(this.list != null){
             this.list.add(newTag);
+        }
+        this.sort();
+    }
+
+    public void addList(TagList list) {
+        if(this.list != null){
+            this.list.addAll(list.getList());
+            this.sort();
         }
     }
 
@@ -65,12 +85,13 @@ public class TagList implements Parcelable{
 
     public void setList(ArrayList<Tag> newList){
         this.list = new ArrayList<Tag>(newList);
+        this.sort();
         newList = null;
     }
 
     public String toString() {
         if(this.isEmpty()) { return ""; }
-        if(this.size() == 1) { return this.list.get(1).getName().toString(); }
+        if(this.size() == 1) { return this.list.get(0).getName().toString(); }
 
         String str = "";
         for(int i=0; i<= this.size() - 2; i++){
@@ -81,7 +102,49 @@ public class TagList implements Parcelable{
         return str;
     }
 
-    private boolean isEmpty(){
+    public String getCheckedToString() {
+        ArrayList<String> checkedList = new ArrayList<String>();
+        for(Tag tag : this.list){
+            if(tag.getIsChecked()){
+                checkedList.add(tag.getName());
+            }
+        }
+
+        if(checkedList.size() <= 0) {
+            return "";
+
+        }else if(checkedList.size() == 1) {
+            return checkedList.get(0);
+
+        }else {
+            String str = "";
+            for(int i=0; i<= checkedList.size() - 2; i++){
+                str += checkedList.get(i) + ", "; //first to second last add with comma
+            }
+
+            str += checkedList.get(checkedList.size() - 1); //add the last element without comma
+
+            return str;
+        }
+    }
+
+    public void sort() {
+        Collections.sort(this.list);
+    }
+
+    public boolean compareEquality(TagList compareList) {
+        this.sort();
+        compareList.sort();
+
+        if(this.toString().equals(compareList.toString())){
+            return true;
+        }
+
+        return false;
+    }
+
+
+    private boolean isEmpty() {
         return this.size() == 0;
     }
 

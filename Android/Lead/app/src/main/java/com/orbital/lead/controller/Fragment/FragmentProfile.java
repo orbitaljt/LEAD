@@ -1,20 +1,21 @@
 package com.orbital.lead.controller.Fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.*;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
@@ -29,11 +30,12 @@ import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.logic.CustomLogging;
+import com.orbital.lead.logic.FacebookLogic;
 import com.orbital.lead.logic.Logic;
 import com.github.siyamed.shapeimageview.CircularImageView;
+import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
 
-import java.text.Format;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
@@ -48,6 +50,7 @@ import java.util.Locale;
  * create an instance of this fragment.
  */
 public class FragmentProfile extends Fragment {
+
     private final String TAG = this.getClass().getSimpleName();
 
     private static final String ARG_PARAM1 = "param1";
@@ -73,7 +76,10 @@ public class FragmentProfile extends Fragment {
     private TextView textBirthday;
     private DatePickerDialog datePickerDialog;
     private DatePickerDialog.OnDateSetListener datePickerListener;
+    private TextView textProfileNotice;
+    private ImageView imageCamera;
     private PopupWindow mPopupWindow;
+    private AlertDialog mDialogOption;
 
     private Animation inAnim;
     private Animation outAnim;
@@ -147,6 +153,8 @@ public class FragmentProfile extends Fragment {
         this.initEditTextAddress(rootView);
         this.initTextCountry(rootView);
         this.initTextBirthday(rootView);
+        this.initTextProfileNotice(rootView);
+        this.initImageCamera(rootView);
 
         this.generateCountryList();
 
@@ -160,7 +168,6 @@ public class FragmentProfile extends Fragment {
             this.currentContact = CurrentLoginUser.getUser().getContact();
             this.currentAddress = CurrentLoginUser.getUser().getAddress();
             this.currentCountry = CurrentLoginUser.getUser().getCountry();
-
 
             this.setProfileImage(CurrentLoginUser.getUser().getProfilePicUrl());
             this.setEditTextFirstName(this.currentFirstName);
@@ -177,6 +184,19 @@ public class FragmentProfile extends Fragment {
             this.birthYear = FormatDate.getYear(CurrentLoginUser.getUser().getBirthday(), FormatDate.DATABASE_FORMAT);
             this.birthMonth = FormatDate.getMonth(CurrentLoginUser.getUser().getBirthday(), FormatDate.DATABASE_FORMAT);
             this.birthDay = FormatDate.getDay(CurrentLoginUser.getUser().getBirthday(), FormatDate.DATABASE_FORMAT);
+
+
+            if(FacebookLogic.getInstance().getIsFacebookLogin()){
+                // user is login using facebook
+                this.disableViews(this.editTextFirstName);
+                this.disableViews(this.editTextMiddleName);
+                this.disableViews(this.editTextLastName);
+                this.disableViews(this.textBirthday);
+                this.disableViews(this.editTextEmail);
+                this.showProfileNotice();
+            }else{
+                this.hideProfileNotice();
+            }
 
         }
 
@@ -240,6 +260,7 @@ public class FragmentProfile extends Fragment {
 
 
     public boolean hasChanges(){
+        /*
         mLogging.debug(TAG, this.currentFirstName + " <=> " + getNewFirstName());
         mLogging.debug(TAG, currentMiddleName + " <=> " + getNewMiddleName());
         mLogging.debug(TAG, currentLastName + " <=> " + getNewLastName());
@@ -248,8 +269,8 @@ public class FragmentProfile extends Fragment {
         mLogging.debug(TAG, currentContact + " <=> " + getNewContact());
         mLogging.debug(TAG, currentAddress + " <=> " + getNewAddress());
         mLogging.debug(TAG, currentCountry + " <=> " + getNewCountry());
-
-        if (this.mParser.compareBothString(this.currentFirstName, this.getNewFirstName())
+        */
+        if(this.mParser.compareBothString(this.currentFirstName, this.getNewFirstName())
             && this.mParser.compareBothString(this.currentMiddleName, this.getNewMiddleName())
             && this.mParser.compareBothString(this.currentLastName, this.getNewLastName())
             && this.mParser.compareBothString(this.currentBirthday, this.getNewBirthday())
@@ -326,6 +347,21 @@ public class FragmentProfile extends Fragment {
             public void onClick(View v) {
                 // month in java starts from 0
                 showDatePickerDialog(birthYear, birthMonth, birthDay);
+            }
+        });
+    }
+
+    private void initTextProfileNotice(View v) {
+        this.textProfileNotice = (TextView) v.findViewById(R.id.text_profile_notice_for_facebook_user);
+    }
+
+    private void initImageCamera(View v) {
+        this.imageCamera = (ImageView) v.findViewById(R.id.image_camera);
+        this.imageCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // show dialog options
+                showAddPictureOptionsDialog();
             }
         });
     }
@@ -434,6 +470,19 @@ public class FragmentProfile extends Fragment {
         return countries;
     }
 
+    private void disableViews(View v){
+        v.setEnabled(false);
+        v.setFocusable(false);
+    }
+
+    private void showProfileNotice(){
+        this.textProfileNotice.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProfileNotice(){
+        this.textProfileNotice.setVisibility(View.GONE);
+    }
+
 
     /*=============== DIALOGS ==========*/
     private void initOnDateSetListener() {
@@ -464,6 +513,57 @@ public class FragmentProfile extends Fragment {
 
     private DatePickerDialog.OnDateSetListener getDatePickerListener(){
         return this.datePickerListener;
+    }
+
+    private void showAddPictureOptionsDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+
+        final View dialogView = inflater.inflate(R.layout.dialog_add_picture_options_layout, null);
+
+        TextView textTitle = (TextView) dialogView.findViewById(R.id.dialog_text_title);
+        LinearLayout optionGallery = (LinearLayout) dialogView.findViewById(R.id.option_gallery);
+        LinearLayout optionFacebook = (LinearLayout) dialogView.findViewById(R.id.option_facebook);
+        LinearLayout optionCamera = (LinearLayout) dialogView.findViewById(R.id.option_camera);
+
+        if(FacebookLogic.getInstance().getIsFacebookLogin()) { // not login using facebook
+            optionFacebook.setVisibility(View.INVISIBLE);
+        }
+
+        textTitle.setText(Constant.DIALOG_TITLE_SELECT_PHOTO);
+
+        builder.setView(dialogView);
+
+        this.mDialogOption = builder.create();
+        this.mDialogOption.setCanceledOnTouchOutside(true);
+        this.mDialogOption.setCancelable(true);
+        this.mDialogOption.show();
+
+        optionGallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDialogOption.dismiss();
+                mListener.onFragmentProfileInteraction(Constant.DIALOG_REQUEST_OPEN_INTENT_IMAGES);
+            }
+        });
+
+        optionCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDialogOption.dismiss();
+                mListener.onFragmentProfileInteraction(Constant.DIALOG_REQUEST_OPEN_INTENT_CAMERA);
+            }
+        });
+
+        optionFacebook.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDialogOption.dismiss();
+                mListener.onFragmentProfileInteraction(Constant.DIALOG_REQUEST_OPEN_FACEBOOK_ALBUM);
+            }
+        });
+
     }
 
 
@@ -503,13 +603,13 @@ public class FragmentProfile extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentProfileInteraction(Uri uri);
+        public void onFragmentProfileInteraction(int requestType);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onFragmentProfileInteraction(uri);
+            mListener.onFragmentProfileInteraction(0);
         }
     }
 

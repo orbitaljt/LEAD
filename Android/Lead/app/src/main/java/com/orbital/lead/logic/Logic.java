@@ -29,6 +29,7 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListe
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.R;
+import com.orbital.lead.controller.Activity.AddNewSpecificJournalActivity;
 import com.orbital.lead.controller.Activity.EditSpecificJournalActivity;
 import com.orbital.lead.controller.Activity.PictureActivity;
 import com.orbital.lead.controller.Activity.ProfileActivity;
@@ -38,6 +39,7 @@ import com.orbital.lead.controller.Fragment.FragmentLogin;
 import com.orbital.lead.controller.Activity.MainActivity;
 import com.orbital.lead.controller.Service.JournalService;
 import com.orbital.lead.controller.Service.PictureService;
+import com.orbital.lead.controller.Service.ProjectService;
 import com.orbital.lead.logic.Asynchronous.AsyncUploadImage;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfilePicture;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfile;
@@ -48,7 +50,10 @@ import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.EnumDialogEditJournalType;
 import com.orbital.lead.model.EnumJournalServiceType;
 import com.orbital.lead.model.EnumPictureServiceType;
+import com.orbital.lead.model.EnumProjectServiceType;
 import com.orbital.lead.model.Journal;
+import com.orbital.lead.model.Tag;
+import com.orbital.lead.model.TagList;
 import com.orbital.lead.model.User;
 
 import java.io.FileNotFoundException;
@@ -144,11 +149,19 @@ public class Logic {
 
     public void getUserJournalList(Context context, User currentUser){
         if(currentUser == null){
-            // profile picture not exist for the user
             this.getLogging().debug(TAG, "getUserJournalList => No journal list ID available.");
         }else{
             mLogging.debug(TAG, "getUserJournalList => Get journal list from web service");
-            this.executeJournalService(context, EnumJournalServiceType.GET_ALL_JOURNAL, currentUser, null);
+            this.executeJournalService(context, EnumJournalServiceType.GET_ALL_JOURNAL, currentUser, null, "");
+        }
+    }
+
+    public void updateUserJournal(Context context, User currentUser, Journal journal, String detail) {
+        if(currentUser == null){
+            this.getLogging().debug(TAG, "updateUserJournal => No journal list ID available.");
+        }else{
+            mLogging.debug(TAG, "updateUserJournal => update journal from web service");
+            this.executeJournalService(context, EnumJournalServiceType.UPDATE_SPECIFIC_JOURNAL, currentUser, journal, detail);
         }
     }
 
@@ -169,6 +182,12 @@ public class Logic {
             this.executePictureService(context, EnumPictureServiceType.GET_ALL_ALBUM, "", userID);
         }
     }
+
+    public void getAllProject(Context context, String projectID, String userID, String detail) {
+        mLogging.debug(TAG, "getAllProject");
+        executeProjectService(context, EnumProjectServiceType.GET_ALL_PROJECT, projectID, userID, detail);
+    }
+
 
     public void updateUserProfileDatabase(Context context, String userID, String detail){
         // detail in json string
@@ -229,6 +248,11 @@ public class Logic {
         mBundle.putParcelable(Constant.BUNDLE_PARAM_JOURNAL, journal);
 
         newIntent.putExtras(mBundle);
+        context.startActivity(newIntent);
+    }
+
+    public void displayAddNewJournalActivity(Context context) {
+        Intent newIntent = new Intent(context, AddNewSpecificJournalActivity.class);
         context.startActivity(newIntent);
     }
 
@@ -404,6 +428,8 @@ public class Logic {
                         ((MainActivity) mContext).setNavigationDrawerUserName();
                         ((MainActivity) mContext).setNavigationDrawerUserEmail();
                         ((MainActivity) mContext).getUserJournalList();
+                        ((MainActivity) mContext).getAllProject();
+
                     }
                     break;
 
@@ -538,29 +564,28 @@ public class Logic {
     }
 */
 
-    private void executeJournalService(Context mContext, EnumJournalServiceType serviceType, User currentUser, String journalID){
+    private void executeJournalService(Context mContext, EnumJournalServiceType serviceType, User currentUser, Journal journal, String detail){
         Intent intent = new Intent(Intent.ACTION_SYNC, null, mContext, JournalService.class);
 
         switch(serviceType){
             case GET_ALL_JOURNAL:
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, currentUser.getUserID()); // user ID
-                //intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_LIST_ID_TAG, currentUser.getJournalListID()); // journal list ID
                 break;
 
-            case GET_SPECIFIC_JOURNAL:
-                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG, journalID); // journal ID
+            case UPDATE_SPECIFIC_JOURNAL:
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, currentUser.getUserID()); // user ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG, journal.getJournalID()); // journal ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_DETAIL_TAG, detail); // detail
                 break;
         }
 
-
         intent.putExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG, serviceType);
 
-        if(mContext instanceof MainActivity){
+        if(mContext instanceof MainActivity) {
             intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((MainActivity) mContext).getJournalReceiver());
 
-        }else if(mContext instanceof SpecificJournalActivity){
-            intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((SpecificJournalActivity) mContext).getPictureReceiver());
-
+        }else if (mContext instanceof EditSpecificJournalActivity) {
+            intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((EditSpecificJournalActivity) mContext).getJournalReceiver());
         }
 
         mContext.startService(intent);
@@ -589,14 +614,28 @@ public class Logic {
         mContext.startService(intent);
     }
 
+    private void executeProjectService(Context mContext, EnumProjectServiceType serviceType, String projectID, String userID, String detail) {
+        Intent intent = new Intent(Intent.ACTION_SYNC, null, mContext, ProjectService.class);
+        switch(serviceType){
+            // get all project doesnt require any post parameters
+        }
+        intent.putExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG, serviceType);
+
+        if(mContext instanceof MainActivity){
+            intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((MainActivity) mContext).getProjectReceiver());
+        }
+
+        mContext.startService(intent);
+    }
+
 
     /*=========== DIALOGS WITH CUSTOM LAYOUT ===========*/
-    public void showEditTagProjectDialog(Context context, EnumDialogEditJournalType type, String editTextCurrentValue){
+    public void showAddTagProjectDialog(final Context context, final EnumDialogEditJournalType type, String editTextCurrentValue){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         final View dialogView = inflater.inflate(R.layout.dialog_add_new_layout, null);
-        EditText mEditText = (EditText) dialogView.findViewById(R.id.edit_text_add_new);
+        final EditText mEditText = (EditText) dialogView.findViewById(R.id.edit_text_add_new);
         TextView mToolbarTitle = (TextView) dialogView.findViewById(R.id.toolbar_text_title_add_new);
 
         switch(type){
@@ -610,6 +649,7 @@ public class Logic {
                 mEditText.setHint(context.getResources().getString(R.string.dialog_editext_project_hint));
                 break;
 
+            /*
             case EDIT_TAG:
                 mToolbarTitle.setText(context.getResources().getString(R.string.dialog_toolbar_edit_tag));
                 mEditText.setText(editTextCurrentValue);
@@ -619,26 +659,48 @@ public class Logic {
                 mToolbarTitle.setText(context.getResources().getString(R.string.dialog_toolbar_edit_project));
                 mEditText.setText(editTextCurrentValue);
                 break;
+
+            */
         }
 
         builder.setView(dialogView)
-                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
+            .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            switch (type) {
+                                case ADD_TAG:
+                                    if (!mParser.isStringEmpty(mEditText.getText().toString())) {
+                                        // not empty
+                                        if (context instanceof EditSpecificJournalActivity) {
+                                            Tag newTag = new Tag(mEditText.getText().toString());
+                                            ((EditSpecificJournalActivity) context).addTag(newTag);
+                                            ((EditSpecificJournalActivity) context).refreshRecyclerDialogTagAdapter();
+                                        }
+
+                                    }
+                                    break;
+
+                                case ADD_PROJECT:
+
+                            }
+                            dialog.dismiss();
+                        }
                     }
-                })
-                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                    }
-                });
+
+            )
+           .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+                       @Override
+                       public void onClick(DialogInterface dialog, int id) {
+                           dialog.dismiss();
+                       }
+                   }
+
+           );
 
         builder.create().show();
     }
 
-    public void showDeleteTagProjectDialog(final Context context, final EnumDialogEditJournalType type){
+    public void showDeleteTagProjectDialog(final Context context, final EnumDialogEditJournalType type, final String currentSelectedName){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -663,7 +725,15 @@ public class Logic {
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
+
+                        if (context instanceof EditSpecificJournalActivity) {
+
+                            mLogging.debug(TAG, "currentSelectedName => " + currentSelectedName);
+
+                            ((EditSpecificJournalActivity) context).removeTag(currentSelectedName);
+                            ((EditSpecificJournalActivity) context).refreshRecyclerDialogTagAdapter();
+                        }
+
                     }
                 })
                 .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
@@ -686,24 +756,26 @@ public class Logic {
             @Override
             public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
                 switch (item.getItemId()) {
+                    /*
                     case R.id.dialog_overflow_edit_journal_edit: // Edit the current row
                         switch(type){
                             case EDIT_TAG: //edit tag
-                                showEditTagProjectDialog(context, EnumDialogEditJournalType.EDIT_TAG, currentValue);
+                                showAddTagProjectDialog(context, EnumDialogEditJournalType.EDIT_TAG, currentValue);
                                 break;
                             case EDIT_PROJECT:
-                                showEditTagProjectDialog(context, EnumDialogEditJournalType.EDIT_PROJECT, currentValue);
+                                showAddTagProjectDialog(context, EnumDialogEditJournalType.EDIT_PROJECT, currentValue);
                                 break;
                         }
                         return true;
+                    */
 
                     case R.id.dialog_overflow_edit_journal_delete: // Delete the current row
                         switch(type){
                             case EDIT_TAG:
-                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_TAG);
+                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_TAG, currentValue);
                                 break;
                             case EDIT_PROJECT:
-                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_PROJECT);
+                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_PROJECT, currentValue);
                                 break;
                         }
                         return true;
@@ -762,10 +834,15 @@ public class Logic {
 
     /*=========== ACCESS TO PREFERENCE ===========*/
 
-    public String getHistoryTags(Context context){
-        mLogging.debug(TAG, "getHistoryTags");
+    public TagList retrieveUnusedTagList(Context context){
+        mLogging.debug(TAG, "retrieveUnusedTagList");
         try{
-            return this.mHistoryPref.getRecentTags(context);
+            String value = this.mHistoryPref.getUnusedTags(context);
+            if(!mParser.isStringEmpty(value)){
+                return mParser.parseJsonToUnusedTagList(value);
+            }
+
+            return null;
 
         }catch (FileNotFoundException e){
             mLogging.debug(TAG, "error -> " + e.getMessage());
@@ -776,6 +853,22 @@ public class Logic {
         }
 
         return null;
+    }
+
+    public void saveUnusedTagList(Context context, TagList list){
+        mLogging.debug(TAG, "saveUnusedTagList");
+        try{
+            String value = mParser.parseUnusedTagListToJson(list);
+            this.mHistoryPref.setUnusedTags(context, value);
+
+        }catch (FileNotFoundException e){
+            mLogging.debug(TAG, "error -> " + e.getMessage());
+            e.printStackTrace();
+        }catch (IOException e){
+            mLogging.debug(TAG, "error -> " + e.getMessage());
+            e.printStackTrace();
+        }
+
     }
 
 

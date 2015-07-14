@@ -26,6 +26,7 @@ import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.Journal;
+import com.orbital.lead.model.Project;
 import com.orbital.lead.widget.WideImageView;
 
 public class SpecificJournalActivity extends BaseActivity implements PictureReceiver.Receiver {
@@ -91,13 +92,16 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
             String[] dates = date.split(" ");
 
             this.setTextTag(this.getJournal().getTagList().toString());
-            //this.setTextProject();
             this.setTextDayDigit(dates[0]);
             this.setTextMonthYear(dates[1] + " " + dates[2]);
             this.setTextDayName(dates[3]);
             this.setTextTime(time);
             this.setTextTitle(this.getJournal().getTitle());
             this.setTextContent(this.getJournal().getContent());
+
+            Project project = CurrentLoginUser.getUser().getProjectList().findProject(this.getJournal().getProject().getProjectID());
+            this.setTextProject(project != null ? project.getName() : "");
+
 
             // run picture service first
             this.getLogic().getUserSpecificAlbum(this, this.getJournal().getAlbumID());
@@ -197,13 +201,6 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
     }
     */
 
-    private void restoreDrawerHeaderValues() {
-        this.getNavigationDrawerFragment().setImageUserProfile(CurrentLoginUser.getUser().getProfilePicUrl());
-        this.getNavigationDrawerFragment().setTextUserName(CurrentLoginUser.getUser().getFirstName(),
-                CurrentLoginUser.getUser().getMiddleName(),
-                CurrentLoginUser.getUser().getLastName());
-        this.getNavigationDrawerFragment().setTextUserEmail(CurrentLoginUser.getUser().getEmail());
-    }
 
     private void initImageJournalCover() {
         this.mImageJournalCover = (WideImageView) findViewById(R.id.image_journal_cover);
@@ -414,7 +411,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
 
                 break;
 
-            case JournalService.STATUS_ERROR:
+            case PictureService.STATUS_ERROR:
                 this.getCustomLogging().debug(TAG, "PictureService.STATUS_ERROR");
                 break;
         }

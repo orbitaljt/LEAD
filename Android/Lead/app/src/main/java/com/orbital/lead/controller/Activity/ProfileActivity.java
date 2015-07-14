@@ -1,5 +1,6 @@
 package com.orbital.lead.controller.Activity;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -40,6 +41,7 @@ public class ProfileActivity extends BaseActivity
         this.setToolbarTitle(Constant.TITLE_FRAGMENT_PROFILE);
         this.restoreCustomActionbar();
         this.displayFragmentProfile();
+        this.restoreDrawerHeaderValues(); // restore drawer values
     }
 
     @Override
@@ -51,7 +53,11 @@ public class ProfileActivity extends BaseActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_profile, menu);
+        if (!getNavigationDrawerFragment().isDrawerOpen()) {
+            getMenuInflater().inflate(R.menu.menu_profile, menu);
+            this.restoreCustomActionbar();
+        }
+
         return true;
     }
 
@@ -62,8 +68,11 @@ public class ProfileActivity extends BaseActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_done) {
+        if(id == android.R.id.home) {
+            onBackPressed();
+            return true;
+
+        }else if (id == R.id.action_done) {
             this.saveUserProfile();
             return true;
         }
@@ -72,10 +81,25 @@ public class ProfileActivity extends BaseActivity
     }
 
     @Override
-    public void onFragmentProfileInteraction(Uri uri) {
-
+    public void onBackPressed(){
+        super.onBackPressed();
     }
 
+    @Override
+    public void onFragmentProfileInteraction(int requestType) {
+        switch (requestType) {
+            case Constant.DIALOG_REQUEST_OPEN_INTENT_CAMERA:
+                this.openCameraIntent();
+                break;
+            case Constant.DIALOG_REQUEST_OPEN_INTENT_IMAGES:
+                this.openImagesIntent();
+                break;
+
+            case Constant.DIALOG_REQUEST_OPEN_FACEBOOK_ALBUM:
+                // open facebook album
+                break;
+        }
+    }
 
     private void initToolbar() {
         this.mToolbarView = findViewById(R.id.custom_toolbar);
@@ -154,6 +178,44 @@ public class ProfileActivity extends BaseActivity
             String detail = getParser().userObjectToJson(CurrentLoginUser.getUser());
             getCustomLogging().debug(TAG, "updateUserProfile detail => " + detail);
             getLogic().updateUserProfileDatabase(this, CurrentLoginUser.getUser().getUserID(), detail);
+
+    }
+
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        switch(requestCode) {
+            case REQUEST_PICK_IMAGE_INTENT:
+                if (resultCode == RESULT_OK
+                        && data != null && data.getData() != null) {
+
+                    Uri uri = data.getData();
+                    this.getCustomLogging().debug(TAG, "onActivityResult REQUEST_PICK_IMAGE_INTENT uri string => " + uri.toString());
+                    /*
+                    try {
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                   */
+                }
+                break;
+
+            case REQUEST_IMAGE_CAPTURE:
+                if (resultCode == RESULT_OK
+                        && data != null && data.getData() != null) {
+                    Uri uri = data.getData();
+                    this.getCustomLogging().debug(TAG, "onActivityResult REQUEST_IMAGE_CAPTURE uri string => " + uri.toString());
+
+
+                }
+
+                break;
+
+
+        }
 
     }
 

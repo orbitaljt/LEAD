@@ -12,6 +12,7 @@ public class Journal implements Parcelable {
     // each journal has an album
     private Parser mParser;
     private Album album;
+    private Project project;
     private TagList tagList;
     private String journalID;
     private String pictureCoverID;
@@ -51,6 +52,7 @@ public class Journal implements Parcelable {
         dest.writeString(this.createdTime);
         dest.writeInt(this.isPublished ? 1 : 0);
         dest.writeParcelable(this.album, flags);
+        dest.writeParcelable(this.project, flags);
         dest.writeParcelable(this.tagList, flags);
     }
 
@@ -62,6 +64,8 @@ public class Journal implements Parcelable {
             return new Journal[size];
         }
     };
+
+    public Journal() {}
 
     public Journal(String jID, String picCoverID, String picCoverType, String albumID,
                    String title, String content, String cc, String jDate, String jTime, String lastModDate, String lastModTime,
@@ -84,11 +88,42 @@ public class Journal implements Parcelable {
         this.isPublished = this.getParser().convertStringToBoolean(isPub);
     }
 
+    public Journal(Journal j) {
+        this.journalID = j.getJournalID();
+        this.pictureCoverID = j.getPictureCoverID();
+        this.pictureCoverType = j.getPictureCoverType();
+        this.albumID = j.getAlbumID();
+        this.title = j.getTitle();
+        this.content = j.getContent();
+        this.countryCode = j.getCountryCode();
+        this.journalDate = j.getJournalDate();
+        this.journalTime = j.getJournalTime();
+        this.lastModifiedDate = j.getLastModifiedDate();
+        this.lastModifiedTime = j.getLastModifiedTime();
+        this.createdDate = j.getCreatedDate();
+        this.createdTime = j.getCreatedTime();
+        this.isPublished = j.getIsPublished();
+        this.album = j.getAlbum();
+        this.project = j.getProject();
+        this.tagList = j.getTagList();
+
+    }
+
     public Album getAlbum(){
         return this.album;
     }
 
+    public Project getProject() {
+        if(this.project == null) {
+            this.project = new Project();
+        }
+        return this.project;
+    }
+
     public TagList getTagList() {
+        if(this.tagList == null){
+            this.tagList = new TagList();
+        }
         return this.tagList;
     }
 
@@ -152,8 +187,15 @@ public class Journal implements Parcelable {
         this.album = album;
     }
 
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
     public void setTagList(TagList list) {
-        this.tagList = list;
+        if(this.tagList == null){
+            this.tagList = new TagList();
+        }
+        this.tagList.setList(list.getList());
     }
 
     public void setJournalID(String val){
@@ -236,6 +278,7 @@ public class Journal implements Parcelable {
         this.createdTime = pc.readString();
         this.isPublished = (pc.readInt() == 0) ? false : true;
         this.album = (Album) pc.<Album> readParcelable(Album.class.getClassLoader());
+        this.project = (Project) pc.<Project> readParcelable(Project.class.getClassLoader());
         this.tagList = (TagList) pc.<TagList> readParcelable(TagList.class.getClassLoader());
     }
 

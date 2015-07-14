@@ -7,14 +7,30 @@
     android:layout_height="56dp"
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
-    android:stretchColumns="0"
-    android:shrinkColumns="0"
+    android:stretchColumns="1"
+    android:shrinkColumns="1"
     android:background="@color/white">
 
     <TableRow
         android:id="@+id/tableRowProject"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" >
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <ImageView
+                android:id="@+id/image_selected"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:src="@mipmap/ic_selected" />
+
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="fill_parent"

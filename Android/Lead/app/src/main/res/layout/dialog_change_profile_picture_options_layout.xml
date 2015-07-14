@@ -15,12 +15,11 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/dialog_text_title"
+            android:id="@+id/textTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/dialog_option_title"
+            android:text="@string/dialog_option_title_2"
             style="@style/dialogOptionTitle"/>
-
 
     </LinearLayout>
     
@@ -28,34 +27,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/titleArea"
-        android:weightSum="3"
+        android:weightSum="2"
         style="@style/dialogOptionContent">
 
         <TableRow android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:id="@+id/option_camera"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:layout_gravity="center_horizontal"
-                    android:src="@drawable/option_camera"
-                    style="@style/dialogOptionImage"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:text="@string/dialog_option_camera"
-                    style="@style/dialogOptionText"/>
-
-            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/option_gallery"
@@ -82,7 +58,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/option_facebook"
+                android:id="@+id/option_camera"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -92,14 +68,14 @@
                     android:layout_width="64dp"
                     android:layout_height="64dp"
                     android:layout_gravity="center_horizontal"
-                    android:src="@drawable/option_facebook"
+                    android:src="@drawable/option_camera"
                     style="@style/dialogOptionImage"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/dialog_option_facebook"
+                    android:text="@string/dialog_option_camera"
                     style="@style/dialogOptionText"/>
 
             </LinearLayout>

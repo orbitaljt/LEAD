@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <uses-feature android:name="android.hardware.camera"></uses-feature>
     <!--
      To retrieve OAuth 2.0 tokens or invalidate tokens to disconnect a user. This disconnect
      option is required to comply with the Google+ Sign-In developer policies
@@ -48,6 +49,7 @@
         <service android:name=".controller.Service.PictureService" />
         <service android:name=".controller.Service.S3Service" />
         <service android:name=".controller.Service.JournalService" />
+        <service android:name=".controller.Service.ProjectService" />
 
         <activity
             android:name=".controller.Activity.SpecificJournalActivity"
@@ -61,6 +63,10 @@
         <activity
             android:name=".controller.Activity.EditSpecificJournalActivity"
             android:label="@string/title_activity_edit_specific_journal" >
+        </activity>
+        <activity
+            android:name=".controller.Activity.AddNewSpecificJournalActivity"
+            android:label="@string/title_activity_add_new_specific_journal" >
         </activity>
         <activity
             android:name=".controller.Activity.ProfileActivity"

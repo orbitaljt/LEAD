@@ -246,7 +246,8 @@ public class FragmentMainUserJournalList extends Fragment{
         this.mFab.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                mLogging.debug(TAG, "FAB is clicked");
+                //mLogging.debug(TAG, "FAB is clicked");
+                mLogic.displayAddNewJournalActivity(getActivity());
             }
         });
     }

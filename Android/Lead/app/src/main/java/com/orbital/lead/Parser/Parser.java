@@ -13,6 +13,8 @@ import com.orbital.lead.model.JournalList;
 import com.orbital.lead.model.Message;
 import com.orbital.lead.model.Picture;
 import com.orbital.lead.model.PictureList;
+import com.orbital.lead.model.Project;
+import com.orbital.lead.model.ProjectList;
 import com.orbital.lead.model.Tag;
 import com.orbital.lead.model.TagList;
 import com.orbital.lead.model.User;
@@ -172,8 +174,62 @@ public class Parser {
                             journalObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG),
                             journalObj.getString(Constant.MESSAGE_JSON_IS_PUBLISHED_TAG));
 
+                    String projectID = journalObj.getString(Constant.MESSAGE_JSON_PROJECT_ID_TAG);
+                    Project project = new Project();
+                    project.setProjectID(projectID);
+
                     mJournal.setTagList(tagList);
+                    mJournal.setProject(project);
+
                     list.addJournal(mJournal);
+
+                }
+            }
+
+            return list;
+
+        } catch (JSONException e){
+            mLogging.debug(TAG, "error => " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public ProjectList parseJsonToProjectList(String json){
+        ProjectList list = null;
+        try {
+            mLogging.debug(TAG, "parseJsonToProjectList");
+            JSONObject topObj = new JSONObject(json);
+            String code = topObj.getString(Constant.MESSAGE_JSON_CODE_TAG);
+            String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
+
+            Message mMessage = new Message(code, msg);
+            if(this.getMessageType(mMessage) == EnumMessageType.SUCCESS){
+                list = new ProjectList();
+
+                JSONArray detailArray = topObj.getJSONArray(Constant.MESSAGE_JSON_DETAIL_TAG);
+
+                for(int i=0; i < detailArray.length(); i++) {
+                    JSONObject projectObj = detailArray.getJSONObject(i);
+
+                    Project mProject = new Project(projectObj.getString(Constant.MESSAGE_JSON_PROJECT_ID_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_USER_ID_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_NAME_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_CONTENT_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_COUNTRY_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_DATE_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_TIME_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_CREATED_DATE_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_PROJECT_START_DATE_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_PROJECT_START_TIME_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_PROJECT_END_DATE_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_PROJECT_END_TIME_TAG),
+                            projectObj.getString(Constant.MESSAGE_JSON_PROJECT_YEAR_TAG));
+
+
+                    list.addProject(mProject);
 
                 }
             }
@@ -221,11 +277,11 @@ public class Parser {
                     Picture picElement = new Picture(picObj.getString(Constant.MESSAGE_JSON_USER_ID_TAG),
                                         picObj.getString(Constant.MESSAGE_JSON_PICTURE_ID_TAG),
                                         picObj.getString(Constant.MESSAGE_JSON_PICTURE_TYPE_TAG));
-                    picElement.setTitle(picObj.getString(Constant.MESSAGE_JSON_TITLE_TAG));
+                    picElement.setName(picObj.getString(Constant.MESSAGE_JSON_TITLE_TAG));
                     picElement.setDescription(picObj.getString(Constant.MESSAGE_JSON_DESCRIPTION_TAG));
                     picElement.setCreatedDate(picObj.getString(Constant.MESSAGE_JSON_CREATED_DATE_TAG));
                     picElement.setCreatedTime(picObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG));
-                    picElement.setTagList(pictureTagList);
+                    picElement.setTagMap(pictureTagList);
 
                     pList.addPicture(picElement);
                     */
@@ -351,9 +407,10 @@ public class Parser {
         try {
             for(int i=0; i < tagArray.length(); i++) {
                 JSONObject tagObj = tagArray.getJSONObject(i);
-                String tagID = tagObj.getString(Constant.MESSAGE_JSON_TAGS_ID_TAG);
-                String tagName = tagObj.getString(Constant.MESSAGE_JSON_TAGS_NAME_TAG);
-                Tag tag = new Tag(tagID, tagName, true);
+                String id  = tagObj.getString(Constant.MESSAGE_JSON_ID_TAG);
+                String tagID = tagObj.getString(Constant.MESSAGE_JSON_TAG_ID_TAG);
+                String tagName = tagObj.getString(Constant.MESSAGE_JSON_TAG_NAME_TAG);
+                Tag tag = new Tag(id, tagID, tagName, true);
 
                 tagList.addTag(tag);
             }
@@ -366,6 +423,102 @@ public class Parser {
             return null;
         }
     }
+
+    public TagList parseJsonToUnusedTagList(String json){
+        // format -> [{“tagName”:”xxxx”}, {“tagName”:yyyy},….]
+        TagList tagList = new TagList();
+        try {
+            JSONArray tagArray = new JSONArray(json);
+            for(int i=0; i < tagArray.length(); i++) {
+                JSONObject tagObj = tagArray.getJSONObject(i);
+                String tagName = tagObj.getString(Constant.MESSAGE_JSON_TAG_NAME_TAG);
+
+                Tag tag = new Tag(tagName); // all these tags are unused, means not checked, no IDs
+                tagList.addTag(tag);
+            }
+
+            return tagList;
+
+        } catch (JSONException e){
+            mLogging.debug(TAG, "parseJsonToUnsedTagList error => " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+    public String parseUnusedTagListToJson(TagList list) {
+        try {
+            JSONArray tagArray = new JSONArray();
+            if(list != null) {
+                for(Tag tag : list.getList()) {
+                    JSONObject tagObj = new JSONObject();
+                    tagObj.put(Constant.MESSAGE_JSON_TAG_NAME_TAG, tag.getName());
+
+                    tagArray.put(tagObj);
+                }
+
+                return tagArray.toString();
+
+            }else{
+                return "";
+            }
+
+
+        } catch (JSONException e){
+            mLogging.debug(TAG, "parseJsonToUnsedTagList error => " + e.getMessage());
+            e.printStackTrace();
+            return "";
+        }
+
+
+    }
+
+    public String updateJournalDetailToJson(Journal journal) {
+        JSONObject root = new JSONObject();
+
+        try{
+            root.put(Constant.MESSAGE_JSON_TITLE_TAG, journal.getTitle());
+            root.put(Constant.MESSAGE_JSON_CONTENT_TAG, journal.getContent());
+            root.put(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG, journal.getCountryCode());
+            root.put(Constant.MESSAGE_JSON_JOURNAL_DATE_TAG, journal.getJournalDate());
+            root.put(Constant.MESSAGE_JSON_JOURNAL_TIME_TAG, journal.getJournalTime());
+            root.put(Constant.MESSAGE_JSON_CREATED_DATE_TAG, journal.getCreatedDate());
+            root.put(Constant.MESSAGE_JSON_CREATED_TIME_TAG, journal.getCreatedTime());
+            root.put(Constant.MESSAGE_JSON_IS_PUBLISHED_TAG, journal.getIsPublished());
+
+            JSONArray tagArray = new JSONArray();
+            JSONArray removeTagArray = new JSONArray();
+            for(Tag tag : journal.getTagList().getList()){
+
+                JSONObject tagObj = new JSONObject();
+                tagObj.put(Constant.MESSAGE_JSON_ID_TAG, tag.getTempID());
+                tagObj.put(Constant.MESSAGE_JSON_TAG_ID_TAG, tag.getID());
+                tagObj.put(Constant.MESSAGE_JSON_TAG_NAME_TAG, tag.getName());
+
+                if(tag.getIsChecked()){
+                    // true, means still under the journal
+                    tagArray.put(tagObj);
+                }else{
+                    removeTagArray.put(tagObj);
+                }
+
+            }
+
+            root.put(Constant.MESSAGE_JSON_TAGS_TAG, tagArray);
+            root.put(Constant.MESSAGE_JSON_REMOVE_TAGS_TAG, removeTagArray);
+
+            return root.toString();
+
+        } catch (JSONException e){
+            mLogging.debug(TAG, "userObjectToJson error => " + e.getMessage());
+            e.printStackTrace();
+            return "";
+        }
+
+    }
+
+
 
     public String userObjectToJson(User user){
         JSONObject obj = new JSONObject();

@@ -35,8 +35,9 @@ public class User {
     private boolean isFacebook = false;
     private boolean isLead = false;
 
+    private ProjectList mProjectList;
     private JournalList mJournalList;
-    private TagList mTagList; //list of tags that are currently using across all journals
+    private TagMap mTagMap; //list of tags that are currently using across all journals
 
     public User(){
         this.initParser();
@@ -69,7 +70,9 @@ public class User {
         this._age = age;
         this._profilePicType = getParser().getPictureType(ppType);
         this._profilePicUrl = getParser().createPictureNormalUrl(this._profilePicID,
-                                                this._profilePicType.toString(), this._userID);
+                this._profilePicType.toString(), this._userID);
+
+        this.mTagMap = new TagMap();
     }
 
     // Get
@@ -185,11 +188,20 @@ public class User {
         return this._age;
     }
 
+    public ProjectList getProjectList() {
+        return this.mProjectList;
+    }
+
     public JournalList getJournalList(){
         return this.mJournalList;
     }
 
-    public TagList getTagList() { return this.mTagList; }
+    public TagMap getTagMap() {
+        if(this.mTagMap == null){
+            this.mTagMap = new TagMap();
+        }
+        return this.mTagMap;
+    }
 
     // Set
     public void setFacebookAccessToken(AccessToken at) {
@@ -294,11 +306,15 @@ public class User {
         this._age = val;
     }
 
+    public void setProjectList(ProjectList list) {
+        this.mProjectList = list;
+    }
+
     public void setJournalList(JournalList list){
         this.mJournalList = list;
     }
 
-    public void setTagList(TagList list) { this.mTagList = list; }
+    public void setTagMap(TagMap map) { this.mTagMap = map; }
 
     private void initParser(){
         this.mParser = Parser.getInstance();

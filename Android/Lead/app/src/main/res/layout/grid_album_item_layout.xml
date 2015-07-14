@@ -48,7 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/gridAlbumContentTextStyle"
-            android:text="Album title 1"/>
+            android:text="Album name 1"/>
 
         <TextView
             android:id="@+id/text_album_subtitle"

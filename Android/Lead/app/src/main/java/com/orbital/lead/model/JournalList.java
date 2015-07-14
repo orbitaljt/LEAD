@@ -41,6 +41,26 @@ public class JournalList {
             initArray();
         return this.mJournalArray;
     }
+
+    public void updateJournalContent(Journal updatedJournal) {
+        Iterator<Journal> iter = this.getList().iterator();
+        while (iter.hasNext()) {
+            Journal j = iter.next();
+            if(j.getJournalID().equals(updatedJournal.getJournalID())){
+                j.setTagList(updatedJournal.getTagList());
+                j.setTitle(updatedJournal.getTitle());
+                j.setContent(updatedJournal.getContent());
+                j.setJournalDate(updatedJournal.getJournalDate());
+                j.setAlbum(updatedJournal.getAlbum());
+                j.setIsPublished(updatedJournal.getIsPublished());
+                j.setCountryCode(updatedJournal.getCountryCode());
+                j.setLastModifiedDate(updatedJournal.getLastModifiedDate());
+                j.setLastModifiedTime(updatedJournal.getLastModifiedTime());
+                j.setPictureCoverID(updatedJournal.getPictureCoverID());
+            }
+        }
+    }
+
     private void initArray(){
         this.mJournalArray = new ArrayList<Journal>();
     }

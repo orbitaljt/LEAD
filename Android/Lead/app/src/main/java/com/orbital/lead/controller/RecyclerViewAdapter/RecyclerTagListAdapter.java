@@ -12,6 +12,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 
+import com.gc.materialdesign.views.CheckBox;
 import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.R;
 import com.orbital.lead.logic.CustomLogging;
@@ -19,6 +20,7 @@ import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.EnumDialogEditJournalType;
 import com.orbital.lead.model.Tag;
 import com.orbital.lead.model.TagList;
+import com.orbital.lead.model.TagMap;
 
 
 /**
@@ -36,6 +38,8 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private Logic mLogic;
     private Context mContext;
 
+    private TagMap recentTagMap;
+    private TagList mUsedTagList;
     private TagList mTagList;
 
     private Animation inAnim;
@@ -56,6 +60,7 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         //private ProgressBar mLoadingSpinner;
         private ViewAnimator mAnimator;
 
+        private int pos;
         private boolean isChecked;
 
         @Override
@@ -68,17 +73,17 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         public ListContentHolder(View v){
             super(v);
             this.initTableRowTag(v);
+            this.initCheckBox(v);
             this.initTextTag(v);
             this.initImageOption(v);
-            this.mCheckBox = (com.gc.materialdesign.views.CheckBox) v.findViewById(R.id.checkBox);
 
         }
 
-        public String getTextTitle() {
+        public String getTextTag() {
             return this.mTextTag.getText().toString();
         }
 
-        public void setTextTagName(String val){
+        public void setTextTag(String val){
             this.mTextTag.setText(val);
         }
 
@@ -94,8 +99,24 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
         }
 
+        public void setPosition(int pos) {
+            this.pos = pos;
+        }
+
         private void initTableRowTag(View v){
             this.mTableRowTag = (TableRow) v.findViewById(R.id.tableRowTag);
+        }
+
+        private void initCheckBox(View v){
+            this.mCheckBox = (com.gc.materialdesign.views.CheckBox) v.findViewById(R.id.checkBox);
+            this.mCheckBox.setOncheckListener(new CheckBox.OnCheckListener() {
+                @Override
+                public void onCheck(CheckBox checkBox, boolean b) {
+                    isChecked = b;
+                    mLogging.debug(TAG, "mCheckBox onCheck Set " + pos + " to " + b);
+                    setCurrentTagCheckedStatus(pos, b);
+                }
+            });
         }
 
         private void initTextTag(View v){
@@ -104,6 +125,8 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 @Override
                 public void onClick(View v) {
                     setTagChecked(!isChecked);
+                    mLogging.debug(TAG, "mTextTag onClick Set " + pos + " to " + !isChecked);
+                    setCurrentTagCheckedStatus(pos, !isChecked);
                 }
             });
         }
@@ -113,7 +136,7 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             this.mImageOptions.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                   mLogic.showJournalPopUpMenu(mContext, v, EnumDialogEditJournalType.EDIT_TAG, getTextTitle());
+                   mLogic.showJournalPopUpMenu(mContext, v, EnumDialogEditJournalType.EDIT_TAG, getTextTag());
                 }
             });
         }
@@ -126,15 +149,18 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
 
 
+
     }
 
     //MainActivity activity, View headerView,
-    public RecyclerTagListAdapter(TagList overallTaglist, TagList currentUsedTagList){
+    public RecyclerTagListAdapter(TagList currentUsedTagList, TagMap recentTagMap){
         this.initLogging();
         this.initLogic();
         this.initParser();
         //this.setHeaderView(headerView);
-        this.setCurrentUsedTagList(currentUsedTagList);
+        this.setUsedTagList(currentUsedTagList);
+        this.setRecentTagMap(recentTagMap);
+        this.initCompliedTagList();
     }
 
     @Override
@@ -158,21 +184,13 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(holder instanceof ListContentHolder){
             //position = position - 1;
-            if(this.getTagList() != null){
-                /*
-                final Journal j = this.getTagList().get(position);
-                String title = j.getTitle();
-                String pictureCoverID = j.getPictureCoverID();
-                String pictureCoverType = j.getPictureCoverType().toString();
-                String journalDate = FormatDate.parseDate(j.getJournalDate(), FormatDate.DATABASE_DATE_TO_DISPLAY_DATE, FormatDate.DISPLAY_FORMAT);
-                String journalTime = FormatTime.parseTime(j.getJournalTime(), FormatTime.DATABASE_TIME_TO_DISPLAY_TIME);
-                String userID = this.getCurrentUser().getUserID();
-                String pictureUrl = mParser.createPictureCoverUrl(pictureCoverID, pictureCoverType, userID);
-                */
-                Tag mTag = this.getTagList().getList().get(position);
+            if(this.getCompliedTagList() != null){
 
-                ((ListContentHolder) holder).setTextTagName(mTag.getName());
+                Tag mTag = this.getCompliedTagList().getList().get(position);
+
+                ((ListContentHolder) holder).setTextTag(mTag.getName());
                 ((ListContentHolder) holder).setTagChecked(mTag.getIsChecked());
+                ((ListContentHolder) holder).setPosition(position);
 
             }
         }
@@ -188,14 +206,10 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             count++;
         }
 
-        if(this.getTagList() != null){
-            count += this.getTagList().size();
-        }
-
         return count;
         */
-        if(this.getTagList() != null){
-            return this.getTagList().size();
+        if(this.getCompliedTagList() != null){
+            return this.getCompliedTagList().size();
         }
         return 0;
     }
@@ -243,9 +257,39 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
     */
 
+    private void initCompliedTagList() {
+        this.mTagList = new TagList();
 
-    private void setCurrentUsedTagList(TagList list){
-        this.mTagList = list;
+        // all currently used tags compile together with the unused tags
+
+        //mLogging.debug(TAG, "================== copy all Tag List into hashmap ==================");
+        for(Tag tag : this.getUsedTagList().getList()){
+            this.getRecentTagMap().setValue(tag.getName(), tag.getIsChecked());
+            //mLogging.debug(TAG, tag.getName() + " => " + tag.getIsChecked());
+        }
+
+        /*
+        mLogging.debug(TAG, "================== getRecentTagMap Tag List ==================");
+        for (Tag tag : getRecentTagMap().getTagList().getList()) {
+            mLogging.debug(TAG, tag.getName() + " => " + tag.getIsChecked());
+        }
+        */
+
+        // display all tags based on the compiled tag map
+        this.mTagList.setList(this.getRecentTagMap().getTagList().getList());
+    }
+
+    private void setUsedTagList(TagList list){
+        this.mUsedTagList = list;
+    }
+
+
+    private void setRecentTagMap(TagMap map) {
+        this.recentTagMap = new TagMap(map.getMap());
+    }
+
+    private void setCurrentTagCheckedStatus(int position, boolean val) {
+        this.getCompliedTagList().getList().get(position).setIsChecked(val);
     }
 
     private Parser getParser(){
@@ -256,8 +300,16 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         return this.mContext;
     }
 
-    private TagList getTagList(){
+    private TagList getUsedTagList(){
+        return this.mUsedTagList;
+    }
+
+    public TagList getCompliedTagList() {
         return this.mTagList;
+    }
+
+    public TagMap getRecentTagMap(){
+        return this.recentTagMap;
     }
 
     private void initAnimation(){

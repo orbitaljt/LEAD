@@ -41,6 +41,10 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
     private Animation inAnim;
     private Animation outAnim;
 
+    private Project storeInitSelectedProject;
+
+    private String selectedProjectID;
+
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
         public HeaderViewHolder(View v) {
             super(v);
@@ -52,10 +56,12 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
         private TableRow mTableRowProject;
         private TextView mTextProject;
         private ImageView mImageOptions;
+        private ImageView mImageSelected;
         //private ProgressBar mLoadingSpinner;
         private ViewAnimator mAnimator;
 
-        private boolean isChecked;
+        private boolean isSelect;
+        private int pos;
 
         @Override
         public void onClick(View v) {
@@ -68,6 +74,7 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
             super(v);
             this.initTableRowProject(v);
             this.initTextProjectTitle(v);
+            this.initImageSelected(v);
             this.initImageOption(v);
         }
 
@@ -79,6 +86,31 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
             this.mTextProject.setText(val);
         }
 
+        public void setPosition(int pos) {
+            this.pos = pos;
+        }
+
+        public void setIsSelected(boolean val) {
+            this.isSelect = val;
+        }
+
+        public void toggleImageSelected(boolean selected){
+            if(selected){
+                mLogging.debug(TAG, "Position " + pos + " image show");
+                this.showImageSelected();
+            }else{
+                mLogging.debug(TAG, "Position " + pos + " image hide");
+                this.hideImageSelected();
+            }
+        }
+
+        public void showImageSelected(){
+            this.mImageSelected.setVisibility(View.VISIBLE);
+        }
+
+        public void hideImageSelected(){
+            this.mImageSelected.setVisibility(View.INVISIBLE);
+        }
 
         private void initTableRowProject(View v){
             this.mTableRowProject = (TableRow) v.findViewById(R.id.tableRowProject);
@@ -90,8 +122,18 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
                 @Override
                 public void onClick(View v) {
                     // select as this project
+                    isSelect = !isSelect;
+                    mLogging.debug(TAG, "mTextProject onClick => " + isSelect);
+                    toggleImageSelected(isSelect);
+
+                    selectCurrentProject(pos, isSelect);
+
                 }
             });
+        }
+
+        private void initImageSelected(View v) {
+            this.mImageSelected = (ImageView) v.findViewById(R.id.image_selected);
         }
 
         private void initImageOption(View v){
@@ -104,15 +146,24 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
             });
         }
 
+
+
     }
 
     //MainActivity activity, View headerView,
-    public RecyclerProjectListAdapter(ProjectList list){
+    public RecyclerProjectListAdapter(ProjectList list, String selectedProjectID){
         this.initLogging();
         this.initLogic();
         this.initParser();
-        //this.setHeaderView(headerView);
         this.setProjectList(list);
+
+        for(Project p : this.getProjectList().getList()) {
+            if(p.getProjectID().equals(selectedProjectID)){
+                p.setIsSelected(true);
+            }
+        }
+
+       // this.setSelectedProjectID(selectedProjectID);
     }
 
     @Override
@@ -121,37 +172,31 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
         this.mContext = parent.getContext();
         this.initAnimation();
 
-        //if(viewType == VIEW_TYPE_HEADER){
-        //    return new HeaderViewHolder(mHeaderView);
-        //}else{
         View v = LayoutInflater.from(this.mContext).inflate(R.layout.recycler_list_row_project_layout, parent, false);
-        // set the view's size, margins, paddings and layout parameters
         ListContentHolder vh = new ListContentHolder(v);
         return vh;
-        //}
 
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(holder instanceof ListContentHolder){
-            //position = position - 1;
+
             if(this.getProjectList() != null){
-                /*
-                final Journal j = this.getProjectList().get(position);
-                String title = j.getTitle();
-                String pictureCoverID = j.getPictureCoverID();
-                String pictureCoverType = j.getPictureCoverType().toString();
-                String journalDate = FormatDate.parseDate(j.getJournalDate(), FormatDate.DATABASE_DATE_TO_DISPLAY_DATE, FormatDate.DISPLAY_FORMAT);
-                String journalTime = FormatTime.parseTime(j.getJournalTime(), FormatTime.DATABASE_TIME_TO_DISPLAY_TIME);
-                String userID = this.getCurrentUser().getUserID();
-                String pictureUrl = mParser.createPictureCoverUrl(pictureCoverID, pictureCoverType, userID);
-                */
                 Project mProject = this.getProjectList().getList().get(position);
+                ((ListContentHolder) holder).setTextProjectTitle(mProject.getName());
+                ((ListContentHolder) holder).setPosition(position);
+                ((ListContentHolder) holder).setIsSelected(mProject.getIsSelected());
+                ((ListContentHolder) holder).toggleImageSelected(mProject.getIsSelected());
 
-                mLogging.debug(TAG, "mProject.getTitle() => " + mProject.getTitle());
-
-                ((ListContentHolder) holder).setTextProjectTitle(mProject.getTitle());
+                /*
+                if(mProject.getProjectID().equals(this.getSelectedProjectID())){
+                    ((ListContentHolder) holder).showImageSelected();
+                    storeInitSelectedProject = mProject;
+                }else{
+                    ((ListContentHolder) holder).hideImageSelected();
+                }
+                */
 
             }
         }
@@ -161,18 +206,6 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
 
     @Override
     public int getItemCount() {
-        /*
-        int count = 0;
-        if(mHeaderView != null){
-            count++;
-        }
-
-        if(this.getProjectList() != null){
-            count += this.getProjectList().size();
-        }
-
-        return count;
-        */
         if(this.getProjectList() != null){
             return this.getProjectList().size();
         }
@@ -185,17 +218,22 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
         return 0;
     }
 
-
-
     public interface OnItemClickListener {
         public void onItemClick(View view, int position);
     }
-
 
     public void setOnItemClickListener(final OnItemClickListener listener){
         this.mItemClickListener = listener;
     }
 
+    public Project getSelectedProject() {
+        for(Project p : this.getProjectList().getList()) {
+            if(p.getIsSelected()){
+                return p;
+            }
+        }
+        return null;
+    }
 
     private void initParser(){
         this.mParser = Parser.getInstance();
@@ -210,21 +248,17 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
     }
 
 
-    /*
-    private void setMainActivity(MainActivity activity){
-        this.activity = activity;
-    }
-    */
-
-    /*
-    private void setHeaderView(View v){
-        this.mHeaderView = v;
-    }
-    */
 
     private void setProjectList(ProjectList list){
-        this.mProjectList = list;
+        this.mProjectList = new ProjectList();
+        this.mProjectList.addList(list);
     }
+
+    /*
+    private void setSelectedProjectID(String val) {
+        this.selectedProjectID = val;
+    }
+    */
 
     private Parser getParser(){
         return this.mParser;
@@ -238,9 +272,30 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
         return this.mProjectList;
     }
 
+    private String getSelectedProjectID() {
+        return this.selectedProjectID;
+    }
+
     private void initAnimation(){
         this.inAnim = AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in);
         this.outAnim = AnimationUtils.loadAnimation(getContext(),android.R.anim.fade_out);
     }
+
+    private void selectCurrentProject(int position, boolean val) {
+        for(int i=0; i< this.getProjectList().size(); i++){
+            if(i != position){
+                this.getProjectList().getList().get(i).setIsSelected(false);
+            }else{
+                if(val){
+                    this.getProjectList().getList().get(i).setIsSelected(val);
+                }else{
+                    this.getProjectList().getList().get(i).setIsSelected(false);
+                }
+            }
+        }
+        this.notifyDataSetChanged();
+    }
+
+
 
 }

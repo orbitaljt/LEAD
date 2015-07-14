@@ -112,7 +112,7 @@ public class PictureActivity extends BaseActivity implements
                 case PictureActivity.OPEN_FRAGMENT_LIST_PICTURES:
                     this.getCustomLogging().debug(TAG, "PictureActivity.OPEN_FRAGMENT_LIST_PICTURES");
 
-                    if(this.getFacebookLogic().getIsFacebookLogin()){
+                    if(this.getFacebookLogic().getIsFacebookLogin() && this.getSelectedAlbum() != null){
                         this.getFacebookLogic().sendGraphRequest(this,
                                                 EnumFacebookQueryType.GET_ALL_ALBUM_PICTURES,
                                                 this.getSelectedAlbum().getAlbumID());
@@ -353,12 +353,16 @@ public class PictureActivity extends BaseActivity implements
     @Override
     public void onFragmentPicturesInteraction(int requestType) {
         switch (requestType) {
-            case FragmentPictures.REQUEST_OPEN_INTENT_IMAGES:
+            case Constant.DIALOG_REQUEST_OPEN_INTENT_IMAGES:
                 // open up all images intent choices
                 this.openImagesIntent();
                 break;
 
-            case FragmentPictures.REQUEST_OPEN_FACEBOOK_ALBUM:
+            case Constant.DIALOG_REQUEST_OPEN_INTENT_CAMERA:
+
+                break;
+
+            case Constant.DIALOG_REQUEST_OPEN_FACEBOOK_ALBUM:
                 // open fragment album that contain all facebook albums
                 break;
 
@@ -383,17 +387,6 @@ public class PictureActivity extends BaseActivity implements
         }
     }
 
-
-    private void openImagesIntent() {
-        Intent intent = new Intent();
-        // Show only images, no videos or anything else
-        intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-
-        this.getCustomLogging().debug(TAG, "openImagesIntent startActivityForResult");
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), this.REQUEST_PICK_IMAGE_INTENT);
-    }
 
     /**
      * onActivityResult is used to receive the result from Intent (images)
@@ -454,7 +447,7 @@ public class PictureActivity extends BaseActivity implements
 
                 break;
 
-            case JournalService.STATUS_ERROR:
+            case PictureService.STATUS_ERROR:
                 this.getCustomLogging().debug(TAG, "PictureService.STATUS_ERROR");
                 break;
         }

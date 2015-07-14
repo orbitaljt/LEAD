@@ -3,18 +3,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.orbital.lead.controller.Activity.EditSpecificJournalActivity">
 
-    <item android:id="@+id/action_done" android:title="@string/action_done"
+    <item android:id="@+id/action_done"
+        android:title="@string/action_done"
+        android:name="@string/action_done"
         android:icon="@drawable/ic_done"
         android:orderInCategory="100" app:showAsAction="always" />
 
-    <item android:id="@+id/action_image" android:title="@string/action_image"
+    <item android:id="@+id/action_image"
+        android:title="@string/action_image"
+        android:name="@string/action_image"
         android:icon="@drawable/ic_image"
         android:orderInCategory="200" app:showAsAction="always" />
 
-    <item android:id="@+id/action_detail" android:title="@string/action_detail"
+    <item android:id="@+id/action_detail"
+        android:title="@string/action_detail"
+        android:name="@string/action_detail"
         android:icon="@drawable/ic_info"
         android:orderInCategory="300" app:showAsAction="always" />
 
-    <item android:id="@+id/action_delete" android:title="@string/action_delete"
+    <item android:id="@+id/action_delete"
+        android:title="@string/action_delete"
+        android:name="@string/action_delete"
         android:orderInCategory="400" app:showAsAction="never" />
 </menu>

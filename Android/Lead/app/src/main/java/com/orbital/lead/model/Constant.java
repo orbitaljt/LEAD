@@ -16,6 +16,7 @@ public class Constant {
     public static final String TITLE_FRAGMENT_ALBUM = "Album";
     public static final String TITLE_FRAGMENT_PICTURES = "Pictures";
     public static final String TITLE_FRAGMENT_PROFILE = "Profile";
+    public static final String TITLE_ADD_NEW_JOURNAL = "New Journal";
 
     // Drawer List
     public static final String DRAWER_LIST_PROFILE_NAME = "Profile";
@@ -81,10 +82,11 @@ public class Constant {
     public static final String TYPE_UPDATE_USER_PROFILE = "302";
     public static final String TYPE_CREATE_USER_PROFILE = "303";
     public static final String TYPE_GET_USER_ALL_JOURNAL = "400";
-    public static final String TYPE_GET_USER_SPECIFIC_JOURNAL = "401";
+    public static final String TYPE_UPDATE_USER_JOURNAL = "401";
     public static final String TYPE_GET_USER_PICTURE = "900";
     public static final String TYPE_GET_USER_SPECIFIC_ALBUM = "901";
     public static final String TYPE_GET_USER_ALL_ALBUM = "902";
+    public static final String TYPE_GET_ALL_PROJECT = "1000";
     public static final String TYPE_UPLOAD_IMAGE_URL = "2000";
     public static final String TYPE_FACEBOOK = "1";
 
@@ -94,6 +96,7 @@ public class Constant {
     public static final String PICTURE_QUERY_QUANTITY_ALL = "all";
 
     // Message json tag {'code'='', 'message':''}
+    public static final String MESSAGE_JSON_ID_TAG = "id";
     public static final String MESSAGE_JSON_CODE_TAG = "code";
     public static final String MESSAGE_JSON_MESSAGE_TAG = "message";
     public static final String MESSAGE_JSON_USER_ID_TAG = "userID"; //only appear if login successfully
@@ -136,8 +139,17 @@ public class Constant {
     public static final String MESSAGE_JSON_IS_PUBLISHED_TAG = "isPublished";
     public static final String MESSAGE_JSON_LIST_OF_PICTURES_TAG = "listOfPictures";
     public static final String MESSAGE_JSON_TAGS_TAG = "tags";
-    public static final String MESSAGE_JSON_TAGS_ID_TAG = "tagID";
-    public static final String MESSAGE_JSON_TAGS_NAME_TAG = "tagName";
+    public static final String MESSAGE_JSON_REMOVE_TAGS_TAG = "removeTags";
+    public static final String MESSAGE_JSON_TAG_ID_TAG = "tagID";
+    public static final String MESSAGE_JSON_TAG_NAME_TAG = "tagName";
+    public static final String MESSAGE_JSON_PROJECT_ID_TAG = "projectID";
+    public static final String MESSAGE_JSON_PROJECT_START_DATE_TAG = "projectStartDate";
+    public static final String MESSAGE_JSON_PROJECT_START_TIME_TAG = "projectStartTime";
+    public static final String MESSAGE_JSON_PROJECT_END_DATE_TAG = "projectEndDate";
+    public static final String MESSAGE_JSON_PROJECT_END_TIME_TAG = "projectEndTime";
+    public static final String MESSAGE_JSON_PROJECT_YEAR_TAG = "projectYear";
+    public static final String MESSAGE_JSON_NAME_TAG = "name";
+
 
     public static final String MESSAGE_JSON_JOURNAL_CONTENT_ID_TAG = "journalContentID";
     public static final String MESSAGE_JSON_JOURNAL_QUESTION_ID_TAG = "journalQuestionID";
@@ -204,6 +216,7 @@ public class Constant {
     public static final String INTENT_SERVICE_EXTRA_RECEIVER_TAG = "receiver";
     public static final String INTENT_SERVICE_EXTRA_USER_ID_TAG = "uid";
     public static final String INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG = "jid";
+    public static final String INTENT_SERVICE_EXTRA_DETAIL_TAG = "detail";
     //public static final String INTENT_SERVICE_EXTRA_USER_JOURNAL_LIST_ID_TAG = "jlid";
     public static final String INTENT_SERVICE_EXTRA_USER_PROFILE_PICTURE_ID_TAG = "u_profile_pic_id";
     public static final String INTENT_SERVICE_EXTRA_USER_PROFILE_PICTURE_FILENAME_TAG = "u_profile_pic_filename";
@@ -241,13 +254,23 @@ public class Constant {
     public static final String STORAGE_APPLICATION_PICTURE_FOLDER_PATH = STORAGE_SLASH + STORAGE_APPLICATION_NAME + STORAGE_SLASH + STORAGE_MEDIA_NAME + STORAGE_SLASH + STORAGE_PICTURE_NAME + STORAGE_SLASH;
 
 
+    // Dialog title
+    public static final String DIALOG_TITLE_ADD_PHOTO = "Add Photo";
+    public static final String DIALOG_TITLE_SELECT_PHOTO = "Select Photo";
+
+    public static final int DIALOG_REQUEST_OPEN_INTENT_IMAGES = 1;
+    public static final int DIALOG_REQUEST_OPEN_INTENT_CAMERA = 2;
+    public static final int DIALOG_REQUEST_OPEN_FACEBOOK_ALBUM = 3;
+
+
     // Formatting Strings
     public static final String DUMMY_NUMBER = "[num]";
     public static final String STRING_NUMBER_OF_PICTURES_FORMAT = "All Photos ([num])";
 
 
-    // Setting
+    // History
     public static final String PREFERENCE_HISTORY_RECENT_TAG_FILE_NAME = "recent_tag.txt";
+    public static final String PREFERENCE_JSON_TAG_NAME_TAG = "name";
 
 
 

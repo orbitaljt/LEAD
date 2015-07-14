@@ -27,6 +27,7 @@ import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.FacebookLogic;
 import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.Album;
+import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.Picture;
 import com.orbital.lead.model.PictureList;
 import com.orbital.lead.widget.WrapContentHeightViewPager;
@@ -42,9 +43,6 @@ import java.util.ArrayList;
  * create an instance of this fragment.
  */
 public class FragmentPictures extends Fragment {
-    public static final int REQUEST_OPEN_INTENT_IMAGES = 1;
-    public static final int REQUEST_OPEN_FACEBOOK_ALBUM = 2;
-
     private final String TAG = this.getClass().getSimpleName();
 
     private static final String ARG_ALBUM = "album";
@@ -108,7 +106,10 @@ public class FragmentPictures extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_pictures, container, false);
 
-        this.setPictureList(this.mParamAlbum.getPictureList());
+        if(this.mParamAlbum != null){
+            this.setPictureList(this.mParamAlbum.getPictureList());
+        }
+
 
         //if(!mParamAlbum.getIsFromFacebook()){
             this.initLogic();
@@ -270,6 +271,7 @@ public class FragmentPictures extends Fragment {
 
             LinearLayout optionGallery = (LinearLayout) dialogView.findViewById(R.id.option_gallery);
             LinearLayout optionFacebook = (LinearLayout) dialogView.findViewById(R.id.option_facebook);
+            LinearLayout optionCamera = (LinearLayout) dialogView.findViewById(R.id.option_camera);
 
             if(!this.getFacebookLogic().getIsFacebookLogin()) { // not login using facebook
                 optionFacebook.setVisibility(View.INVISIBLE);
@@ -286,15 +288,24 @@ public class FragmentPictures extends Fragment {
                 @Override
                 public void onClick(View v) {
                     mDialogOption.dismiss();
-                    mListener.onFragmentPicturesInteraction(FragmentPictures.REQUEST_OPEN_INTENT_IMAGES);
+                    mListener.onFragmentPicturesInteraction(Constant.DIALOG_REQUEST_OPEN_INTENT_IMAGES);
                 }
             });
+
+            optionCamera.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mDialogOption.dismiss();
+                    mListener.onFragmentPicturesInteraction(Constant.DIALOG_REQUEST_OPEN_INTENT_CAMERA);
+                }
+            });
+
 
             optionFacebook.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mDialogOption.dismiss();
-                    mListener.onFragmentPicturesInteraction(FragmentPictures.REQUEST_OPEN_FACEBOOK_ALBUM);
+                    mListener.onFragmentPicturesInteraction(Constant.DIALOG_REQUEST_OPEN_FACEBOOK_ALBUM);
                 }
             });
 

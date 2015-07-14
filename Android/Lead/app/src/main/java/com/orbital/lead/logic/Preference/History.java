@@ -43,12 +43,12 @@ public class History {
         return mHistory;
     }
 
-    public String getRecentTags(Context context) throws FileNotFoundException, IOException {
+    public String getUnusedTags(Context context) throws FileNotFoundException, IOException {
         String value = this.getStringFromFile(context, Constant.PREFERENCE_HISTORY_RECENT_TAG_FILE_NAME);
         return value;
     }
 
-    public void setRecentTags(Context context, String value) throws FileNotFoundException, IOException {
+    public void setUnusedTags(Context context, String value) throws FileNotFoundException, IOException {
         this.setStringToFile(context, Constant.PREFERENCE_HISTORY_RECENT_TAG_FILE_NAME, value);
     }
 
