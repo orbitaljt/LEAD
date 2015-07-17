@@ -32,6 +32,17 @@ public class JournalList {
         return getList().get(position);
     }
 
+    public Journal get(String journalID) {
+        Iterator<Journal> iter = this.getList().iterator();
+        while (iter.hasNext()) {
+            Journal j = iter.next();
+            if(j.getJournalID().equals(journalID)){
+                return j;
+            }
+        }
+        return null;
+    }
+
     public int size(){
         return this.mJournalArray.size();
     }

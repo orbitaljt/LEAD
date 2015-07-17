@@ -174,8 +174,12 @@ public class Parser {
                             journalObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG),
                             journalObj.getString(Constant.MESSAGE_JSON_IS_PUBLISHED_TAG));
 
-                    String projectID = journalObj.getString(Constant.MESSAGE_JSON_PROJECT_ID_TAG);
+                    JSONObject projectObj = journalObj.getJSONObject(Constant.MESSAGE_JSON_PROJECT_TAG);
+                    String projectJournalRelationID = projectObj.getString(Constant.MESSAGE_JSON_PROJECT_JOURNAL_RELATION_ID_TAG);
+                    String projectID = projectObj.getString(Constant.MESSAGE_JSON_PROJECT_ID_TAG);
+
                     Project project = new Project();
+                    project.setProjectJournalRelationID(projectJournalRelationID);
                     project.setProjectID(projectID);
 
                     mJournal.setTagList(tagList);
@@ -485,7 +489,7 @@ public class Parser {
             root.put(Constant.MESSAGE_JSON_JOURNAL_TIME_TAG, journal.getJournalTime());
             root.put(Constant.MESSAGE_JSON_CREATED_DATE_TAG, journal.getCreatedDate());
             root.put(Constant.MESSAGE_JSON_CREATED_TIME_TAG, journal.getCreatedTime());
-            root.put(Constant.MESSAGE_JSON_IS_PUBLISHED_TAG, journal.getIsPublished());
+            root.put(Constant.MESSAGE_JSON_IS_PUBLISHED_TAG, this.convertBooleanToString(journal.getIsPublished()));
 
             JSONArray tagArray = new JSONArray();
             JSONArray removeTagArray = new JSONArray();
@@ -505,8 +509,15 @@ public class Parser {
 
             }
 
-            root.put(Constant.MESSAGE_JSON_TAGS_TAG, tagArray);
-            root.put(Constant.MESSAGE_JSON_REMOVE_TAGS_TAG, removeTagArray);
+            root.put(Constant.MESSAGE_JSON_TAGS_TAG, tagArray); // tags to be added
+            root.put(Constant.MESSAGE_JSON_REMOVE_TAGS_TAG, removeTagArray); // tags to be removed
+
+
+            JSONObject projectObj = new JSONObject();
+            projectObj.put(Constant.MESSAGE_JSON_PROJECT_JOURNAL_RELATION_ID_TAG, journal.getProject().getProjectJournalRelationID());
+            projectObj.put(Constant.MESSAGE_JSON_PROJECT_ID_TAG, journal.getProject().getProjectID());
+
+            root.put(Constant.MESSAGE_JSON_PROJECT_TAG, projectObj); // current assigned project
 
             return root.toString();
 

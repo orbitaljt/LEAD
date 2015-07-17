@@ -1,6 +1,8 @@
 package com.orbital.lead.controller.Activity;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,7 +32,9 @@ import com.orbital.lead.model.Project;
 import com.orbital.lead.widget.WideImageView;
 
 public class SpecificJournalActivity extends BaseActivity implements PictureReceiver.Receiver {
+    public static final int START_EDIT_SPECIFIC_JOURNAL_ACTIVITY = 1;
     private final String TAG = this.getClass().getSimpleName();
+
 
     private Context mContext;
     private View mToolbarView;
@@ -82,35 +86,11 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         if (getBundleExtra != null) {
 
             this.setJournal((Journal) getBundleExtra.getParcelable(Constant.BUNDLE_PARAM_JOURNAL));
-            this.setImageJournalCover(this.getParser().createPictureCoverUrl(this.getJournal().getPictureCoverID(),
-                                    this.getJournal().getPictureCoverType().toString(),
-                                    CurrentLoginUser.getUser().getUserID()));
-
-
-            String time = FormatTime.parseTime(this.getJournal().getJournalTime(), FormatTime.DATABASE_TIME_TO_DISPLAY_TIME); // HH:mm
-            String date = FormatDate.parseDate(this.getJournal().getJournalDate(), FormatDate.DATABASE_DATE_TO_DISPLAY_DATE, FormatDate.DISPLAY_FULL_FORMAT); // dd MMMM yyyy cccc
-            String[] dates = date.split(" ");
-
-            this.setTextTag(this.getJournal().getTagList().toString());
-            this.setTextDayDigit(dates[0]);
-            this.setTextMonthYear(dates[1] + " " + dates[2]);
-            this.setTextDayName(dates[3]);
-            this.setTextTime(time);
-            this.setTextTitle(this.getJournal().getTitle());
-            this.setTextContent(this.getJournal().getContent());
-
-            Project project = CurrentLoginUser.getUser().getProjectList().findProject(this.getJournal().getProject().getProjectID());
-            this.setTextProject(project != null ? project.getName() : "");
-
-
-            // run picture service first
-            this.getLogic().getUserSpecificAlbum(this, this.getJournal().getAlbumID());
+            this.setJournalDetails(this.getJournal());
 
         } else {
             getCustomLogging().debug(TAG, "No bundle extra from getIntent()");
         }
-
-        //this.setImageJournalCover(this.getJournalCoverUrl());
 
     }
 
@@ -150,6 +130,32 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         return false;
         //return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        getCustomLogging().debug(TAG, "onRestoreInstanceState");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getCustomLogging().debug(TAG, "onResume");
+    }
+
+    @Override
+        public void onPause() {
+        super.onPause();
+        getCustomLogging().debug(TAG, "onPause");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        getCustomLogging().debug(TAG, "onSaveInstanceState");
+        outState.putString(Constant.BUNDLE_PARAM_JOURNAL_ID, this.getJournal().getJournalID()); // save current journal ID
+    }
+
 
     private void restoreCustomActionbar(){
         // disable the home button and onClick to open navigation drawer
@@ -194,12 +200,6 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         }
         return this.mPictureReceiver;
     }
-
-    /*
-    public void getUserSpecificJournal(String journalID){
-        this.getLogic().getUserSpecificJournal(this, journalID);
-    }
-    */
 
 
     private void initImageJournalCover() {
@@ -263,6 +263,31 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
     private void initTextContent(){
         this.mTextContent = (TextView) findViewById(R.id.text_journal_content);
     }
+
+    private void setJournalDetails(Journal displayJournal) {
+        this.setImageJournalCover(this.getParser().createPictureCoverUrl(displayJournal.getPictureCoverID(),
+                displayJournal.getPictureCoverType().toString(),
+                CurrentLoginUser.getUser().getUserID()));
+
+        String time = FormatTime.parseTime(displayJournal.getJournalTime(), FormatTime.DATABASE_TIME_TO_DISPLAY_TIME); // HH:mm
+        String date = FormatDate.parseDate(displayJournal.getJournalDate(), FormatDate.DATABASE_DATE_TO_DISPLAY_DATE, FormatDate.DISPLAY_FULL_FORMAT); // dd MMMM yyyy cccc
+        String[] dates = date.split(" ");
+
+        this.setTextTag(displayJournal.getTagList().toString());
+        this.setTextDayDigit(dates[0]);
+        this.setTextMonthYear(dates[1] + " " + dates[2]);
+        this.setTextDayName(dates[3]);
+        this.setTextTime(time);
+        this.setTextTitle(displayJournal.getTitle());
+        this.setTextContent(displayJournal.getContent());
+
+        Project project = CurrentLoginUser.getUser().getProjectList().findProject(displayJournal.getProject().getProjectID());
+        this.setTextProject(project != null ? project.getName() : "");
+
+        // run picture service first
+        this.getLogic().getUserSpecificAlbum(this, displayJournal.getAlbumID());
+    }
+
 
     private void setContext(Context context) {
         this.mContext = context;
@@ -378,6 +403,37 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
     private void displayEditSpecificJournal() {
         this.getLogic().displayEditSpecificJournalActivity(this, this.getJournal());
     }
+
+    private void refreshJournal(String journalID){
+        Journal updatedJournal = CurrentLoginUser.getUser().getJournalList().get(journalID);
+        if(updatedJournal != null) {
+            this.setJournalDetails(updatedJournal);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch(requestCode){
+            case START_EDIT_SPECIFIC_JOURNAL_ACTIVITY :
+                if(resultCode == Activity.RESULT_OK){
+                    Bundle b = data.getExtras();
+                    if (b != null) {
+                        String journalID = b.getString(Constant.BUNDLE_PARAM_JOURNAL);
+                        boolean refresh = b.getBoolean(Constant.BUNDLE_PARAM_JOURNAL_TOGGLE_REFRESH);
+
+                        if(refresh) {
+                            refreshJournal(journalID);
+                        }
+                    }
+                }
+                break;
+        }
+    }
+
+
+
 
     @Override
     public void onReceiveResult(int resultCode, Bundle resultData) {

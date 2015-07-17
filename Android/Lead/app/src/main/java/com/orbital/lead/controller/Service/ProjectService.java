@@ -70,7 +70,6 @@ public class ProjectService extends IntentService{
             this.detail = intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_DETAIL_TAG);
         }
 
-
         if(intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG) != null){
             this.serviceType = (EnumProjectServiceType) intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
         }

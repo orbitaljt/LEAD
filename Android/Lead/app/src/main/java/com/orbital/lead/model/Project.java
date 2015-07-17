@@ -8,7 +8,8 @@ import android.os.Parcelable;
  */
 public class Project implements Parcelable {
 
-    private String id = "";
+    private String projectJournalRelationID = "";
+    private String projectID = "";
     private String createdByUserID = "";
     private String name = "";
     private String content = "";
@@ -22,7 +23,7 @@ public class Project implements Parcelable {
     private String projectStartTime = "";
     private String projectEndDate = "";
     private String projectEndTime = "";
-    private String projectYear;
+    private String projectYear = "";
     private boolean isSelected = false;
 
     @Override
@@ -32,7 +33,8 @@ public class Project implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.id);
+        dest.writeString(this.projectJournalRelationID);
+        dest.writeString(this.projectID);
         dest.writeString(this.createdByUserID);
         dest.writeString(this.name);
         dest.writeString(this.content);
@@ -66,7 +68,8 @@ public class Project implements Parcelable {
                    String countryCode, String lastModifiedDate, String lastModifiedTime,
                    String createdDate, String createdTime, String projectStartDate,String projectStartTime,
                    String projectEndDate, String projectEndTime, String projectYear) {
-        this.id = id;
+
+        this.projectID = id;
         this.createdByUserID = userID;
         this.name = name;
         this.content = content;
@@ -84,8 +87,31 @@ public class Project implements Parcelable {
         this.isSelected = false;
     }
 
+    public Project(Project project){
+        this.projectID = project.getProjectID();
+        this.createdByUserID = project.getCreatedByUserID();
+        this.name = project.getName();
+        this.content = project.getContent();
+        this.country = project.getCountry();
+        this.countryCode = project.getCountryCode();
+        this.lastModifiedDate = project.getLastModifiedDate();
+        this.lastModifiedTime = project.getLastModifiedTime();
+        this.createdDate = project.getCreatedDate();
+        this.createdTime = project.getCreatedTime();
+        this.projectStartDate = project.getProjectStartDate();
+        this.projectStartTime = project.getProjectStartTime();
+        this.projectEndDate = project.getProjectEndDate();
+        this.projectEndTime = project.getProjectEndTime();
+        this.projectYear = project.getProjectYear();
+        this.isSelected = project.getIsSelected();
+    }
+
+    public String getProjectJournalRelationID() {
+        return this.projectJournalRelationID;
+    }
+
     public String getProjectID() {
-        return this.id;
+        return this.projectID;
     }
 
     public String getCreatedByUserID() {
@@ -152,8 +178,12 @@ public class Project implements Parcelable {
         this.createdByUserID = val;
     }
 
+    public void setProjectJournalRelationID(String val) {
+        this.projectJournalRelationID = val;
+    }
+
     public void setProjectID(String val) {
-        this.id = val;
+        this.projectID = val;
     }
 
     public void setName(String name) {
@@ -209,7 +239,8 @@ public class Project implements Parcelable {
     }
 
     private Project(Parcel pc){
-        this.id = pc.readString();
+        this.projectJournalRelationID = pc.readString();
+        this.projectID = pc.readString();
         this.createdByUserID =  pc.readString();
         this.name =  pc.readString();
         this.content =  pc.readString();

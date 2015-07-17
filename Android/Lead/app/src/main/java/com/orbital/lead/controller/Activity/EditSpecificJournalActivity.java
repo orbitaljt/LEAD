@@ -1,9 +1,11 @@
 package com.orbital.lead.controller.Activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
@@ -36,8 +38,6 @@ import com.orbital.lead.model.Tag;
 import com.orbital.lead.model.TagList;
 import com.orbital.lead.model.TagMap;
 
-import java.util.ArrayList;
-
 public class EditSpecificJournalActivity extends BaseActivity implements
         JournalReceiver.Receiver{
 
@@ -65,12 +65,21 @@ public class EditSpecificJournalActivity extends BaseActivity implements
     private RecyclerView.Adapter mRecyclerDialogProjectAdapter;
     private JournalReceiver mJournalReceiver;
 
-    private String currentTitle = "";
-    private String currentContent = "";
-    private String currentTags = "";
-    private String currentProject = "";
-    private String currentJournalDate = "";
-    private TagList currentTagList;
+    private String storeTitle = "";
+    private String storeContent = "";
+    private String storeTags = "";
+    private String storeJournalDate = "";
+    private TagList storeTagList = null;
+    private Project storeProject = null;
+    private ProjectList storeProjectList = null;
+
+    private String newTitle = "";
+    private String newContent = "";
+    private String newTags = "";
+    private String newJournalDate = "";
+    private TagList newTagList = null;
+    private Project newProject = null;
+    private ProjectList newProjectList = null;
 
     private int mYear;
     private int mMonth;
@@ -85,7 +94,6 @@ public class EditSpecificJournalActivity extends BaseActivity implements
         this.setContext(this);
         this.initToolbar();
         this.pushToolbarToActionbar();
-        //this.restoreActionBar();
         this.restoreCustomActionbar();
         this.restoreDrawerHeaderValues();
 
@@ -104,31 +112,41 @@ public class EditSpecificJournalActivity extends BaseActivity implements
 
             this.setJournal((Journal) getBundleExtra.getParcelable(Constant.BUNDLE_PARAM_JOURNAL));
 
-            this.currentTitle = this.getJournal().getTitle();
-            this.currentContent = this.getJournal().getContent();
-            this.currentTags = this.getJournal().getTagList().getCheckedToString();
-            this.currentJournalDate = this.getJournal().getJournalDate();
+            this.storeTitle = this.getJournal().getTitle();
+            this.storeContent = this.getJournal().getContent();
+            this.storeTags = this.getJournal().getTagList().getCheckedToString();
+            this.storeJournalDate = this.getJournal().getJournalDate();
 
-            Project project = CurrentLoginUser.getUser().getProjectList().findProject(this.getJournal().getProject().getProjectID());
-            this.currentProject = project != null ? project.getName() : "" ;
-            this.currentTagList = new TagList();
-            this.currentTagList.addList(this.getJournal().getTagList());
+            this.storeProjectList = CurrentLoginUser.getUser().getProjectList();
+            this.storeProject =  this.storeProjectList.findProject(this.getJournal().getProject().getProjectID());
+            this.storeTagList = new TagList();
+            this.storeTagList.addList(this.getJournal().getTagList());
 
-            getCustomLogging().debug(TAG, "getJournal().getTagList().size() => " + getJournal().getTagList().size());
-            getCustomLogging().debug(TAG, "currentTagList.size() => " + currentTagList.size());
+            this.newTitle = this.storeTitle;
+            this.newContent = this.storeContent;
+            this.newTags = this.storeTags;
+            this.newJournalDate = this.storeJournalDate;
+            this.newProjectList = new ProjectList();
+            this.newProjectList.setList(this.storeProjectList);
+            this.newProject = this.storeProject;
+            this.newTagList = new TagList();
+            this.newTagList.addList(this.storeTagList);
+
+            //getCustomLogging().debug(TAG, "getJournal().getTagList().size() => " + getJournal().getTagList().size());
+            //getCustomLogging().debug(TAG, "storeTagList.size() => " + storeTagList.size());
 
 
-            this.setEditTextTitle(this.currentTitle);
-            this.setEditTextContent(this.currentContent);
-            this.setTextTag(this.currentTags);
-            this.setTextProject(this.currentProject);
-            this.setTextJournalDate(FormatDate.parseDate(this.currentJournalDate,
+            this.setEditTextTitle(this.storeTitle);
+            this.setEditTextContent(this.storeContent);
+            this.setTextTag(this.storeTags);
+            this.setTextProject(this.storeProject != null ? this.storeProject.getName() : "");
+            this.setTextJournalDate(FormatDate.parseDate(this.storeJournalDate,
                                                         FormatDate.DATABASE_DATE_TO_DISPLAY_DATE,
                                                         FormatDate.DISPLAY_FORMAT));
 
-            this.mYear = FormatDate.getYear(this.currentJournalDate, FormatDate.DATABASE_FORMAT);
-            this.mMonth = FormatDate.getMonth(this.currentJournalDate, FormatDate.DATABASE_FORMAT);
-            this.mDay = FormatDate.getDay(this.currentJournalDate, FormatDate.DATABASE_FORMAT);
+            this.mYear = FormatDate.getYear(this.storeJournalDate, FormatDate.DATABASE_FORMAT);
+            this.mMonth = FormatDate.getMonth(this.storeJournalDate, FormatDate.DATABASE_FORMAT);
+            this.mDay = FormatDate.getDay(this.storeJournalDate, FormatDate.DATABASE_FORMAT);
         }
 
     }
@@ -175,6 +193,17 @@ public class EditSpecificJournalActivity extends BaseActivity implements
         }
         return false;
     }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        intent.putExtra(Constant.BUNDLE_PARAM_JOURNAL_ID, this.getJournal().getJournalID());
+        intent.putExtra(Constant.BUNDLE_PARAM_JOURNAL_TOGGLE_REFRESH, true);
+        setResult(Activity.RESULT_OK, intent);
+        finish();
+        super.onBackPressed();
+    }
+
 
 
     public void addTag(Tag newTag) {
@@ -286,7 +315,7 @@ public class EditSpecificJournalActivity extends BaseActivity implements
         this.mTextTag.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showTagDialog(currentTagList, getRecentTagMap());
+                showTagDialog(newTagList, getRecentTagMap());
             }
         });
     }
@@ -296,7 +325,7 @@ public class EditSpecificJournalActivity extends BaseActivity implements
         this.mTextProject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showProjectDialog(CurrentLoginUser.getUser().getProjectList());
+                showProjectDialog(newProjectList);
             }
         });
     }
@@ -324,7 +353,7 @@ public class EditSpecificJournalActivity extends BaseActivity implements
     }
 
     private void initRecyclerProjectAdapter(ProjectList list){
-        this.mRecyclerDialogProjectAdapter = new RecyclerProjectListAdapter(list, this.getJournal().getProject().getProjectID());
+        this.mRecyclerDialogProjectAdapter = new RecyclerProjectListAdapter(list, this.newProject.getProjectID());
         /*
         ((RecyclerTagListAdapter) mRecyclerDialogTagAdapter).setOnItemClickListener(new RecyclerTagListAdapter.OnItemClickListener() {
             @Override
@@ -375,26 +404,50 @@ public class EditSpecificJournalActivity extends BaseActivity implements
         this.recentTagMap.addTagList(list);
     }
 
-    private String getNewTitle() {
+    private void setNewTitle(String val) {
+        this.newTitle = val;
+    }
+
+    private void setNewContent(String val) {
+        this.newContent = val;
+    }
+
+    private void setNewJournalDate(String val) {
+        this.newJournalDate = val;
+    }
+
+    private void setNewTags(String val) {
+        this.newTags = val;
+    }
+
+    private void setNewTagList(TagList list) {
+        this.newTagList = list;
+    }
+
+    private void setNewProject(Project project) {
+        this.newProject = project;
+    }
+
+    private String getEditTextTitle() {
         return this.mEditTextTitle.getText().toString();
     }
 
-    private String getNewJournalDate() {
+    private String getTextJournalDate() {
         String displayDate = this.mTextJournalDate.getText().toString();
         String databaseDate = FormatDate.parseDate(displayDate, FormatDate.DISPLAY_DATE_TO_DATABASE_DATE, FormatDate.DATABASE_FORMAT);
 
         return databaseDate;
     }
 
-    private String getNewTags() {
+    private String getTextTags() {
        return this.mTextTag.getText().toString();
     }
 
-    private String getNewProject() {
+    private String getTextProject() {
         return this.mTextProject.getText().toString();
     }
 
-    private String getNewContent() {
+    private String getEditTextContent() {
         return this.mEditTextContent.getText().toString();
     }
 
@@ -402,12 +455,17 @@ public class EditSpecificJournalActivity extends BaseActivity implements
         return this.recentTagMap;
     }
 
-
     private void updateRecentTagMap(TagList list) {
         for(Tag tag : list.getList()) {
             recentTagMap.setValue(tag.getName(), tag.getIsChecked());
         }
     }
+
+    /*
+    private void updateProject(Project project) {
+        this.getJournal().setProject(project);
+    }
+    */
 
     private void saveJournal() {
         if(hasChanges()){
@@ -418,44 +476,58 @@ public class EditSpecificJournalActivity extends BaseActivity implements
         }
     }
 
-    private void updateJournal() {
 
-        this.getJournal().setTitle(this.currentTitle);
-        this.getJournal().setContent(this.currentContent);
-        this.getJournal().setJournalDate(this.currentJournalDate);
-        //this.getJournal().setProject(this.currentProject);
-        this.getJournal().setTagList(this.currentTagList);
-
-        String detail = getParser().updateJournalDetailToJson(this.getJournal());
-
-        getCustomLogging().debug(TAG, "detail ==> " + detail);
-
-        getLogic().updateUserJournal(this, CurrentLoginUser.getUser(), getJournal(), detail);
-
-    }
 
     private boolean hasChanges(){
 
-        getCustomLogging().debug(TAG, this.currentTitle + " <=> " + getNewTitle());
-        getCustomLogging().debug(TAG, currentContent + " <=> " + getNewContent());
-        getCustomLogging().debug(TAG, currentTags + " <=> " + getNewTags());
-        getCustomLogging().debug(TAG, currentProject + " <=> " + getNewProject());
-        getCustomLogging().debug(TAG, currentJournalDate + " <=> " + getNewJournalDate());
+        //getCustomLogging().debug(TAG, "newTitle <=> " + newTitle);
+        //getCustomLogging().debug(TAG, "newContent <=> " + newContent);
+        //getCustomLogging().debug(TAG, "newJournalDate <=> " + newJournalDate);
+        getCustomLogging().debug(TAG, "newProject.getName() <=> " + newProject.getName());
+        getCustomLogging().debug(TAG, "newTagList.toString <=> " + newTagList.toString());
 
 
-        if (this.getParser().compareBothString(this.currentTitle, this.getNewTitle())
-                && this.getParser().compareBothString(this.currentContent, this.getNewContent())
-                && this.getParser().compareBothString(this.currentTags, this.getNewTags())
-                && this.getParser().compareBothString(this.currentProject, this.getNewProject())
-                && this.getParser().compareBothString(this.currentJournalDate, this.getNewJournalDate())){
+        getCustomLogging().debug(TAG, this.storeTitle + " <=> " + getEditTextTitle());
+        getCustomLogging().debug(TAG, storeContent + " <=> " + getEditTextContent());
+        getCustomLogging().debug(TAG, storeTags + " <=> " + getTextTags());
+        getCustomLogging().debug(TAG, storeProject.getName() + " <=> " + getTextProject());
+        getCustomLogging().debug(TAG, storeJournalDate + " <=> " + getTextJournalDate());
+
+
+        if (this.getParser().compareBothString(this.storeTitle, this.getEditTextTitle())
+                && this.getParser().compareBothString(this.storeContent, this.getEditTextContent())
+                && this.getParser().compareBothString(this.storeTags, this.getTextTags())
+                && this.getParser().compareBothString(this.storeProject.getName(), this.getTextProject())
+                && this.getParser().compareBothString(this.storeJournalDate, this.getTextJournalDate())){
 
             return false; // no changes as all are the same
         }
         return true;
     }
 
-    private void setProject(Project project) {
-        this.getJournal().setProject(project);
+    private void updateJournal() {
+
+        this.getJournal().setTitle(this.newTitle);
+        this.getJournal().setContent(this.newContent);
+        this.getJournal().setJournalDate(this.newJournalDate);
+
+        String currentProjectJournalRelationID = this.getJournal().getProject().getProjectJournalRelationID();
+        this.newProject.setProjectJournalRelationID(currentProjectJournalRelationID);
+
+        this.getJournal().setProject(this.newProject);
+        this.getJournal().setTagList(this.newTagList);
+
+        String detail = getParser().updateJournalDetailToJson(this.getJournal());
+
+        getCustomLogging().debug(TAG, "detail ==> " + detail);
+
+        this.updateCurrentUserJournalList();
+        this.getLogic().updateUserJournal(this, CurrentLoginUser.getUser(), getJournal(), detail);
+
+    }
+
+    private void updateCurrentUserJournalList(){
+        CurrentLoginUser.getUser().getJournalList().updateJournalContent(this.getJournal());
     }
 
 
@@ -502,14 +574,14 @@ public class EditSpecificJournalActivity extends BaseActivity implements
                        updateRecentTagMap(list); // update tag map
 
                        // update all tags checked status that belongs to the current tag list from tag map
-                       for (Tag t : currentTagList.getList()) {
+                       for (Tag t : newTagList.getList()) {
                            boolean value = getRecentTagMap().getMap().get(t.getName());
                            t.setIsChecked(value);
                        }
 
-                       setTextTag(currentTagList.getCheckedToString()); // update the tag text, show only all checked tags
+                       setTextTag(newTagList.getCheckedToString()); // update the tag text, show only all checked tags
+                       setNewTagList(newTagList);
 
-                       dialog.dismiss();
                    }
                });
 
@@ -521,6 +593,10 @@ public class EditSpecificJournalActivity extends BaseActivity implements
         LayoutInflater inflater = this.getLayoutInflater();
 
         final View dialogView = inflater.inflate(R.layout.dialog_project, null);
+
+        for(Project p : projectList.getList()){
+            getCustomLogging().debug(TAG, "showProjectDialog projectList => " + p.getName() + " => " + p.getIsSelected() + " => " + p);
+        }
 
         this.initRecyclerProjectAdapter(projectList);
         this.initDialogProjectRecyclerView(dialogView);
@@ -538,8 +614,15 @@ public class EditSpecificJournalActivity extends BaseActivity implements
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         Project selectedProject = ((RecyclerProjectListAdapter) getRecyclerDialogProjectAdapter()).getSelectedProject();
-                        setProject(selectedProject);
+
+                        newProject = selectedProject;
+
+                        newProjectList.resetList();
+                        newProjectList.updateProject(selectedProject);
+
                         setTextProject(selectedProject != null ? selectedProject.getName() : "");
+                        setNewProject(selectedProject); // update the new project
+
                     }
                 });
 

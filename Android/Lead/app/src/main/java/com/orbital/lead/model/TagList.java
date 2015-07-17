@@ -132,18 +132,6 @@ public class TagList implements Parcelable{
         Collections.sort(this.list);
     }
 
-    public boolean compareEquality(TagList compareList) {
-        this.sort();
-        compareList.sort();
-
-        if(this.toString().equals(compareList.toString())){
-            return true;
-        }
-
-        return false;
-    }
-
-
     private boolean isEmpty() {
         return this.size() == 0;
     }

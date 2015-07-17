@@ -142,7 +142,9 @@ public class Constant {
     public static final String MESSAGE_JSON_REMOVE_TAGS_TAG = "removeTags";
     public static final String MESSAGE_JSON_TAG_ID_TAG = "tagID";
     public static final String MESSAGE_JSON_TAG_NAME_TAG = "tagName";
+    public static final String MESSAGE_JSON_PROJECT_TAG = "project";
     public static final String MESSAGE_JSON_PROJECT_ID_TAG = "projectID";
+    public static final String MESSAGE_JSON_PROJECT_JOURNAL_RELATION_ID_TAG = "projectJournalRelationID";
     public static final String MESSAGE_JSON_PROJECT_START_DATE_TAG = "projectStartDate";
     public static final String MESSAGE_JSON_PROJECT_START_TIME_TAG = "projectStartTime";
     public static final String MESSAGE_JSON_PROJECT_END_DATE_TAG = "projectEndDate";
@@ -211,6 +213,7 @@ public class Constant {
     public static final String BUNDLE_PARAM_OPEN_FRAGMENT_TYPE = "open_type";
     public static final String BUNDLE_PARAM_ALBUM = "album";
     public static final String BUNDLE_PARAM_PICTURE_LIST = "plist";
+    public static final String BUNDLE_PARAM_JOURNAL_TOGGLE_REFRESH = "journal_refresh"; // value is true or false
 
     // Intent Service Extra tag name
     public static final String INTENT_SERVICE_EXTRA_RECEIVER_TAG = "receiver";

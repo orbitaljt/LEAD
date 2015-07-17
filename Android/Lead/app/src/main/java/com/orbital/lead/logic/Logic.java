@@ -248,7 +248,10 @@ public class Logic {
         mBundle.putParcelable(Constant.BUNDLE_PARAM_JOURNAL, journal);
 
         newIntent.putExtras(mBundle);
-        context.startActivity(newIntent);
+        if(context instanceof SpecificJournalActivity){
+            ((SpecificJournalActivity) context).startActivityForResult(newIntent, SpecificJournalActivity.START_EDIT_SPECIFIC_JOURNAL_ACTIVITY);
+        }
+        //context.startActivity(newIntent);
     }
 
     public void displayAddNewJournalActivity(Context context) {

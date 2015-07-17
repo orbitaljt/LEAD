@@ -229,7 +229,7 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
     public Project getSelectedProject() {
         for(Project p : this.getProjectList().getList()) {
             if(p.getIsSelected()){
-                return p;
+                return new Project(p);
             }
         }
         return null;
@@ -251,7 +251,7 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
 
     private void setProjectList(ProjectList list){
         this.mProjectList = new ProjectList();
-        this.mProjectList.addList(list);
+        this.mProjectList.setList(list);
     }
 
     /*

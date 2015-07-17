@@ -2,6 +2,7 @@ package com.orbital.lead.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.ListIterator;
 
 /**
  * Created by joseph on 30/6/2015.
@@ -20,12 +21,15 @@ public class ProjectList {
         this.list.add(project);
     }
 
-    public void addList(ProjectList list){
+    public void setList(ProjectList list){
+        this.list = new ArrayList<Project>(list.getList());
+        /*
         if(this.list == null){
             this.initArrayList();
         }
 
         this.list.addAll(list.getList());
+        */
     }
 
     public void removeProject(String name){
@@ -47,6 +51,37 @@ public class ProjectList {
             }
         }
         return null;
+    }
+
+    public void resetList() {
+        Iterator<Project> iter = this.list.iterator();
+        while (iter.hasNext()) {
+            Project p = iter.next();
+            p.setIsSelected(false);
+        }
+    }
+
+    public void updateProject(Project updatedProject) {
+
+        ListIterator<Project> iter = this.list.listIterator();
+        while (iter.hasNext()) {
+            Project p = iter.next();
+            if(p.getProjectID().equals(updatedProject.getProjectID())){
+                p.setIsSelected(updatedProject.getIsSelected());
+            }
+        }
+
+        /*
+        System.out.println(" updatedProject.getIsSelected() => " + updatedProject.getIsSelected());
+        System.out.println("=============updating========");
+
+        int index = this.list.indexOf(updatedProject);
+        this.list.set(index, updatedProject);
+
+        System.out.println("index => " + index);
+        System.out.println(" updatedProject.getName() => " + updatedProject.getName());
+        System.out.println(" updatedProject.getIsSelected() => " + updatedProject.getIsSelected());
+        */
     }
 
 
