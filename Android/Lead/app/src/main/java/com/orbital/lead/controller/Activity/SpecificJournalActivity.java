@@ -153,7 +153,6 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         getCustomLogging().debug(TAG, "onSaveInstanceState");
-        outState.putString(Constant.BUNDLE_PARAM_JOURNAL_ID, this.getJournal().getJournalID()); // save current journal ID
     }
 
 
@@ -273,7 +272,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         String date = FormatDate.parseDate(displayJournal.getJournalDate(), FormatDate.DATABASE_DATE_TO_DISPLAY_DATE, FormatDate.DISPLAY_FULL_FORMAT); // dd MMMM yyyy cccc
         String[] dates = date.split(" ");
 
-        this.setTextTag(displayJournal.getTagList().toString());
+        this.setTextTag(displayJournal.getTagList().getCheckedToString());
         this.setTextDayDigit(dates[0]);
         this.setTextMonthYear(dates[1] + " " + dates[2]);
         this.setTextDayName(dates[3]);
@@ -405,9 +404,16 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
     }
 
     private void refreshJournal(String journalID){
+
+        for(Journal journal : CurrentLoginUser.getUser().getJournalList().getList()) {
+            getCustomLogging().debug(TAG, "refreshJournal journal => " + journal.getTitle() + " => " + journal.getProject());
+        }
+
+
         Journal updatedJournal = CurrentLoginUser.getUser().getJournalList().get(journalID);
         if(updatedJournal != null) {
             this.setJournalDetails(updatedJournal);
+            this.setJournal(updatedJournal);
         }
     }
 
@@ -420,11 +426,14 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
                 if(resultCode == Activity.RESULT_OK){
                     Bundle b = data.getExtras();
                     if (b != null) {
-                        String journalID = b.getString(Constant.BUNDLE_PARAM_JOURNAL);
+                        String journalID = b.getString(Constant.BUNDLE_PARAM_JOURNAL_ID);
                         boolean refresh = b.getBoolean(Constant.BUNDLE_PARAM_JOURNAL_TOGGLE_REFRESH);
 
+                        getCustomLogging().debug(TAG, "onActivityResult journalID => " + journalID);
+                        getCustomLogging().debug(TAG, "onActivityResult refresh => " + refresh);
+
                         if(refresh) {
-                            refreshJournal(journalID);
+                            this.refreshJournal(journalID);
                         }
                     }
                 }

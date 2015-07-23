@@ -44,7 +44,7 @@ import com.orbital.lead.logic.Asynchronous.AsyncUploadImage;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfilePicture;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfile;
 import com.orbital.lead.logic.LocalStorage.LocalStorage;
-import com.orbital.lead.logic.Preference.History;
+import com.orbital.lead.logic.Preference.Preference;
 import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.EnumDialogEditJournalType;
@@ -52,8 +52,10 @@ import com.orbital.lead.model.EnumJournalServiceType;
 import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.EnumProjectServiceType;
 import com.orbital.lead.model.Journal;
+import com.orbital.lead.model.ProjectList;
 import com.orbital.lead.model.Tag;
 import com.orbital.lead.model.TagList;
+import com.orbital.lead.model.TagSet;
 import com.orbital.lead.model.User;
 
 import java.io.FileNotFoundException;
@@ -73,14 +75,14 @@ public class Logic {
     private Parser mParser;
     private LocalStorage mStorageLogic;
     private CustomLogging mLogging;
-    private History mHistoryPref;
+    private Preference mPref;
 
     private Logic(){} // private constructor to prevent creating new instance
 
     public static Logic getInstance(){
         mLogic.initLogging();
         mLogic.initParser();
-        mLogic.initHistoryPreference();
+        mLogic.initPreference();
         mLogic.initLocalStorageLogic();
         return mLogic;
     }
@@ -321,9 +323,9 @@ public class Logic {
         }
     }
 
-    private void initHistoryPreference() {
-        if(this.mHistoryPref == null) {
-            this.mHistoryPref = History.getInstance();
+    private void initPreference() {
+        if(this.mPref == null) {
+            this.mPref = Preference.getInstance();
         }
     }
 
@@ -684,7 +686,7 @@ public class Logic {
                                     break;
 
                                 case ADD_PROJECT:
-
+                                    break;
                             }
                             dialog.dismiss();
                         }
@@ -703,7 +705,7 @@ public class Logic {
         builder.create().show();
     }
 
-    public void showDeleteTagProjectDialog(final Context context, final EnumDialogEditJournalType type, final String currentSelectedName){
+    public void showDeleteTagProjectDialog(final Context context, final EnumDialogEditJournalType type, final TagList tagList, final int position){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -731,10 +733,16 @@ public class Logic {
 
                         if (context instanceof EditSpecificJournalActivity) {
 
-                            mLogging.debug(TAG, "currentSelectedName => " + currentSelectedName);
+                            mLogging.debug(TAG, "showDeleteTagProjectDialog tagList.getList().get(position).getName() => " + tagList.getList().get(position).getName());
 
-                            ((EditSpecificJournalActivity) context).removeTag(currentSelectedName);
-                            ((EditSpecificJournalActivity) context).refreshRecyclerDialogTagAdapter();
+                            switch (type) {
+                                case DELETE_TAG:
+                                    ((EditSpecificJournalActivity) context).removeTag(tagList.getList().get(position));
+                                    ((EditSpecificJournalActivity) context).refreshRecyclerDialogTagAdapter();
+                                case DELETE_PROJECT:
+                                    break;
+                            }
+
                         }
 
                     }
@@ -753,7 +761,7 @@ public class Logic {
 
 
     /*=========== POPUP MENU ===========*/
-    public void showJournalPopUpMenu(final Context context, View v, final EnumDialogEditJournalType type, final String currentValue){
+    public void showJournalPopUpMenu(final Context context, View v, final EnumDialogEditJournalType type, final TagList tagList, final ProjectList projectList, final int position){
         PopupMenu menu = new PopupMenu(context, v){
 
             @Override
@@ -775,10 +783,10 @@ public class Logic {
                     case R.id.dialog_overflow_edit_journal_delete: // Delete the current row
                         switch(type){
                             case EDIT_TAG:
-                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_TAG, currentValue);
+                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_TAG, tagList, position);
                                 break;
                             case EDIT_PROJECT:
-                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_PROJECT, currentValue);
+                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_PROJECT, tagList, position);
                                 break;
                         }
                         return true;
@@ -836,13 +844,26 @@ public class Logic {
     }
 
     /*=========== ACCESS TO PREFERENCE ===========*/
+    public void addPreferenceTagSet(Context context, TagSet addSet) {
+        mLogging.debug(TAG, "addPreferenceTagSet start");
+        TagSet currentSet = this.retrievePreferenceTagSet(context);
+        if(currentSet != null) {
+            currentSet.add(addSet);
+            this.savePreferenceTagSet(context, currentSet);
+        }else{
+            this.savePreferenceTagSet(context, addSet);
+        }
 
-    public TagList retrieveUnusedTagList(Context context){
-        mLogging.debug(TAG, "retrieveUnusedTagList");
+        mLogging.debug(TAG, "addPreferenceTagSet done");
+    }
+
+    public TagSet retrievePreferenceTagSet(Context context){
+        mLogging.debug(TAG, "retrievePreferenceTagSet");
         try{
-            String value = this.mHistoryPref.getUnusedTags(context);
+            String value = this.mPref.getTags(context);
+            mLogging.debug(TAG, "retrievePreferenceTagSet value => " + value);
             if(!mParser.isStringEmpty(value)){
-                return mParser.parseJsonToUnusedTagList(value);
+                return mParser.parseJsonToTagSet(value);
             }
 
             return null;
@@ -858,11 +879,12 @@ public class Logic {
         return null;
     }
 
-    public void saveUnusedTagList(Context context, TagList list){
-        mLogging.debug(TAG, "saveUnusedTagList");
+    public void savePreferenceTagSet(Context context, TagSet set){
+        mLogging.debug(TAG, "savePreferenceTagSet");
         try{
-            String value = mParser.parseUnusedTagListToJson(list);
-            this.mHistoryPref.setUnusedTags(context, value);
+            String value = mParser.parseTagSetToJson(set);
+            mLogging.debug(TAG, "savePreferenceTagSet value => " + value);
+            this.mPref.setTags(context, value);
 
         }catch (FileNotFoundException e){
             mLogging.debug(TAG, "error -> " + e.getMessage());
@@ -873,6 +895,8 @@ public class Logic {
         }
 
     }
+
+
 
 
 

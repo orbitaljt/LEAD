@@ -141,7 +141,7 @@ public class RecyclerProjectListAdapter extends RecyclerView.Adapter<RecyclerVie
             this.mImageOptions.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mLogic.showJournalPopUpMenu(mContext, v, EnumDialogEditJournalType.EDIT_PROJECT, getTextTitle());
+                    mLogic.showJournalPopUpMenu(mContext, v, EnumDialogEditJournalType.EDIT_PROJECT, null, getProjectList(), pos);
                 }
             });
         }

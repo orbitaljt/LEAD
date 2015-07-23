@@ -24,7 +24,6 @@ import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumDialogEditJournalType;
 import com.orbital.lead.model.Journal;
-import com.orbital.lead.model.Project;
 import com.orbital.lead.model.ProjectList;
 import com.orbital.lead.model.Tag;
 import com.orbital.lead.model.TagList;
@@ -80,7 +79,7 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
         this.initTextProject();
         this.initOnDateSetListener();
 
-        getLogic().retrieveUnusedTagList(this);
+        getLogic().retrievePreferenceTagSet(this);
 
         Bundle getBundleExtra = getIntent().getExtras();
         if (getBundleExtra != null) {
@@ -243,7 +242,7 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
     private void initRecyclerDialogTagAdapter(TagList currentUsedTagList){
         getCustomLogging().debug(TAG, "initRecyclerDialogTagAdapter");
         //this.mRecyclerDialogTagAdapter = new RecyclerJournalListAdapter(headerView, list, CurrentLoginUser.getUser());
-        this.mRecyclerDialogTagAdapter = new RecyclerTagListAdapter(currentUsedTagList, null);
+        this.mRecyclerDialogTagAdapter = new RecyclerTagListAdapter(currentUsedTagList);
         /*
         ((RecyclerTagListAdapter) mRecyclerDialogTagAdapter).setOnItemClickListener(new RecyclerTagListAdapter.OnItemClickListener() {
             @Override
@@ -384,7 +383,7 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
 
 
     private TagList initRecentHistoryTagList(){
-        //String tags = getLogic().retrieveUnusedTagList(this);
+        //String tags = getLogic().retrievePreferenceTagSet(this);
         return null;
     }
 

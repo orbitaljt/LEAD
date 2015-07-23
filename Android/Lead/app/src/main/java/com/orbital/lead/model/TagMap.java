@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public class TagMap implements Parcelable {
 
-    private HashMap<String, Boolean> map;
+    private HashMap<String, Tag> map;
 
 
     @Override
@@ -23,9 +23,9 @@ public class TagMap implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(map.size()); // write the size first
-        for(Map.Entry<String, Boolean> entry : map.entrySet()){
+        for(Map.Entry<String, Tag> entry : map.entrySet()){
             dest.writeString(entry.getKey());
-            dest.writeInt(entry.getValue() ? 1 : 0);
+            dest.writeParcelable(entry.getValue(), flags);
         }
     }
 
@@ -50,12 +50,15 @@ public class TagMap implements Parcelable {
         }
     }
 
-    public TagMap(HashMap<String, Boolean> map) {
+    public TagMap(HashMap<String, Tag> map) {
         this.initTagMap(map);
     }
 
     public void addTagList(TagList list) {
-        this.initTagMap();
+        if(this.map == null) {
+            this.initTagMap();
+        }
+
         if(list != null){
             for(Tag tag : list.getList()) {
                 this.addTag(tag);
@@ -68,20 +71,19 @@ public class TagMap implements Parcelable {
         if(this.map == null) {
             this.initTagMap();
         }
-        this.setValue(tag.getName(), false);
+        this.setValue(tag.getName(), tag);
     }
 
     public TagList getTagList() {
         TagList list = new TagList();
-        for(Map.Entry<String, Boolean> entry : map.entrySet()){
-            Tag tag = new Tag(entry.getKey());
-            tag.setIsChecked(entry.getValue());
+        for(Map.Entry<String, Tag> entry : map.entrySet()){
+            Tag tag = new Tag(entry.getValue());
             list.addTag(tag);
         }
         return list;
     }
 
-    public HashMap<String, Boolean> getMap() {
+    public HashMap<String, Tag> getMap() {
         return this.map;
     }
 
@@ -89,19 +91,22 @@ public class TagMap implements Parcelable {
         return this.map.containsKey(name);
     }
 
-    public void setValue(String key, boolean value){
+    public void setValue(String key, Tag value){
+        if(this.map == null) {
+            this.initTagMap();
+        }
         this.map.put(key, value);
     }
 
     private void initTagMap() {
-        this.map = new HashMap<String, Boolean>();
+        this.map = new HashMap<String, Tag>();
     }
 
-    private void initTagMap(HashMap<String, Boolean> map) {
+    private void initTagMap(HashMap<String, Tag> map) {
         if(map == null){
            this.initTagMap();
         }else{
-            this.map = new HashMap<String, Boolean>(map);
+            this.map = new HashMap<String, Tag>(map);
         }
 
     }
@@ -111,7 +116,7 @@ public class TagMap implements Parcelable {
         int size = pc.readInt();
         for(int i = 0; i < size; i++){
             String key = pc.readString();
-            boolean value = (pc.readInt() == 0) ? false : true;
+            Tag value = (Tag) pc.<Tag> readParcelable(Tag.class.getClassLoader());
             map.put(key,value);
         }
     }

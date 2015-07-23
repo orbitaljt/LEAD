@@ -53,7 +53,7 @@ public class JournalList {
         return this.mJournalArray;
     }
 
-    public void updateJournalContent(Journal updatedJournal) {
+    public void updateJournal(Journal updatedJournal) {
         Iterator<Journal> iter = this.getList().iterator();
         while (iter.hasNext()) {
             Journal j = iter.next();
@@ -68,12 +68,26 @@ public class JournalList {
                 j.setLastModifiedDate(updatedJournal.getLastModifiedDate());
                 j.setLastModifiedTime(updatedJournal.getLastModifiedTime());
                 j.setPictureCoverID(updatedJournal.getPictureCoverID());
+                j.setProject(updatedJournal.getProject());
             }
         }
+    }
+
+    public TagSet getAllTags() {
+        return this.retrieveAllJournalTags();
     }
 
     private void initArray(){
         this.mJournalArray = new ArrayList<Journal>();
     }
 
+    private TagSet retrieveAllJournalTags() {
+        TagSet set = new TagSet();
+        Iterator<Journal> iter = this.getList().iterator();
+        while (iter.hasNext()) {
+            Journal j = iter.next();
+            set.add(j.getTagList());
+        }
+        return set;
+    }
 }

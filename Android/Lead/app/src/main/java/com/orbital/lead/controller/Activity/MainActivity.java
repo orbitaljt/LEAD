@@ -29,6 +29,7 @@ import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.JournalList;
 import com.orbital.lead.model.ProjectList;
 import com.orbital.lead.model.TagList;
+import com.orbital.lead.model.TagSet;
 import com.orbital.lead.model.User;
 
 
@@ -189,14 +190,9 @@ public class MainActivity extends BaseActivity
         this.getFragmentJournalList().showEmptyJournalListLayout();
     }
 
-    private void updateCurrentUserUsingTagList(JournalList list){
-        TagList tagList = new TagList();
-        for(Journal j : list.getList()){
-            tagList.getList().addAll(j.getTagList().getList()); //copy all tags into new taglist
-            this.getCustomLogging().debug(TAG, "updateCurrentUserUsingTagList copying tag");
-        }
-
-        this.getCurrentUser().getTagMap().addTagList(tagList);
+    private TagSet getAllJournalTags(JournalList list) {
+        TagSet set = list.getAllTags();
+        return set;
     }
 
 
@@ -606,7 +602,7 @@ public class MainActivity extends BaseActivity
                         if(list != null){
                             this.setUserJournalList(list);
                             this.updateFragmentMainUserJournalList(list);
-                            this.updateCurrentUserUsingTagList(list);
+                            this.getLogic().addPreferenceTagSet(this, this.getAllJournalTags(list)); // get all journals tags and save to tag file
                         }else{
                             this.getCustomLogging().debug(TAG, "onReceiveResult list is null");
                             this.showFragmentEmptyJournalLayout();

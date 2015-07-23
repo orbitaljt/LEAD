@@ -17,6 +17,7 @@ import com.orbital.lead.model.Project;
 import com.orbital.lead.model.ProjectList;
 import com.orbital.lead.model.Tag;
 import com.orbital.lead.model.TagList;
+import com.orbital.lead.model.TagSet;
 import com.orbital.lead.model.User;
 
 import org.json.JSONArray;
@@ -407,6 +408,12 @@ public class Parser {
     }
 
     public TagList parseJsonToTagList(JSONArray tagArray){
+
+        if(tagArray == null) {
+            mLogging.debug(TAG, "parseJsonToTagList tagArray is null");
+            return null;
+        }
+
         TagList tagList = new TagList();
         try {
             for(int i=0; i < tagArray.length(); i++) {
@@ -428,36 +435,36 @@ public class Parser {
         }
     }
 
-    public TagList parseJsonToUnusedTagList(String json){
+    public TagSet parseJsonToTagSet(String json){
         // format -> [{“tagName”:”xxxx”}, {“tagName”:yyyy},….]
-        TagList tagList = new TagList();
+        TagSet set = new TagSet();
         try {
             JSONArray tagArray = new JSONArray(json);
             for(int i=0; i < tagArray.length(); i++) {
                 JSONObject tagObj = tagArray.getJSONObject(i);
                 String tagName = tagObj.getString(Constant.MESSAGE_JSON_TAG_NAME_TAG);
 
-                Tag tag = new Tag(tagName); // all these tags are unused, means not checked, no IDs
-                tagList.addTag(tag);
+                set.add(tagName);
             }
 
-            return tagList;
+            return set;
 
         } catch (JSONException e){
-            mLogging.debug(TAG, "parseJsonToUnsedTagList error => " + e.getMessage());
+            mLogging.debug(TAG, "parseJsonToTagSet error => " + e.getMessage());
             e.printStackTrace();
             return null;
         }
 
     }
 
-    public String parseUnusedTagListToJson(TagList list) {
+    public String parseTagSetToJson(TagSet set) {
+        // format -> [{“tagName”:”xxxx”}, {“tagName”:yyyy},….]
         try {
             JSONArray tagArray = new JSONArray();
-            if(list != null) {
-                for(Tag tag : list.getList()) {
+            if(set != null) {
+                for(String tagName : set.getList()) {
                     JSONObject tagObj = new JSONObject();
-                    tagObj.put(Constant.MESSAGE_JSON_TAG_NAME_TAG, tag.getName());
+                    tagObj.put(Constant.MESSAGE_JSON_TAG_NAME_TAG, tagName);
 
                     tagArray.put(tagObj);
                 }
@@ -470,7 +477,7 @@ public class Parser {
 
 
         } catch (JSONException e){
-            mLogging.debug(TAG, "parseJsonToUnsedTagList error => " + e.getMessage());
+            mLogging.debug(TAG, "parseTagSetToJson error => " + e.getMessage());
             e.printStackTrace();
             return "";
         }
@@ -478,7 +485,7 @@ public class Parser {
 
     }
 
-    public String updateJournalDetailToJson(Journal journal) {
+    public String updateJournalDetailToJson(Journal journal, TagList deleteTagList) {
         JSONObject root = new JSONObject();
 
         try{
@@ -503,11 +510,25 @@ public class Parser {
                 if(tag.getIsChecked()){
                     // true, means still under the journal
                     tagArray.put(tagObj);
-                }else{
+                }else if(!tag.getIsChecked() && !isStringEmpty(tag.getID())){
+                    // not checked and has tag ID
                     removeTagArray.put(tagObj);
                 }
 
             }
+
+            if(deleteTagList != null) {
+                for(Tag tag : deleteTagList.getList()) {
+                    JSONObject tagObj = new JSONObject();
+                    tagObj.put(Constant.MESSAGE_JSON_ID_TAG, tag.getTempID());
+                    tagObj.put(Constant.MESSAGE_JSON_TAG_ID_TAG, tag.getID());
+                    tagObj.put(Constant.MESSAGE_JSON_TAG_NAME_TAG, tag.getName());
+
+                    removeTagArray.put(tagObj);
+                }
+            }
+
+
 
             root.put(Constant.MESSAGE_JSON_TAGS_TAG, tagArray); // tags to be added
             root.put(Constant.MESSAGE_JSON_REMOVE_TAGS_TAG, removeTagArray); // tags to be removed
@@ -529,6 +550,35 @@ public class Parser {
 
     }
 
+    public String parseJsonToJournalID(String response) {
+        try{
+            JSONObject root = new JSONObject(response);
+            JSONObject detailObj = root.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
+
+            return detailObj.getString(Constant.MESSAGE_JSON_JOURNAL_ID_TAG);
+
+        } catch (JSONException e){
+            mLogging.debug(TAG, "parseJsonToJournalID error => " + e.getMessage());
+            e.printStackTrace();
+            return "";
+        }
+
+    }
+
+    public JSONArray parseJsonToTagArray(String response) {
+        try{
+            JSONObject root = new JSONObject(response);
+            JSONObject detailObj = root.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
+
+            return detailObj.getJSONArray(Constant.MESSAGE_JSON_TAGS_TAG);
+
+        } catch (JSONException e){
+            mLogging.debug(TAG, "parseJsonToTagArray error => " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+
+    }
 
 
     public String userObjectToJson(User user){

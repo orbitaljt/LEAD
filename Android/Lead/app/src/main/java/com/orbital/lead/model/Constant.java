@@ -142,6 +142,7 @@ public class Constant {
     public static final String MESSAGE_JSON_REMOVE_TAGS_TAG = "removeTags";
     public static final String MESSAGE_JSON_TAG_ID_TAG = "tagID";
     public static final String MESSAGE_JSON_TAG_NAME_TAG = "tagName";
+    public static final String MESSAGE_JSON_TAG_IS_CHECKED_TAG = "isChecked";
     public static final String MESSAGE_JSON_PROJECT_TAG = "project";
     public static final String MESSAGE_JSON_PROJECT_ID_TAG = "projectID";
     public static final String MESSAGE_JSON_PROJECT_JOURNAL_RELATION_ID_TAG = "projectJournalRelationID";
@@ -151,7 +152,6 @@ public class Constant {
     public static final String MESSAGE_JSON_PROJECT_END_TIME_TAG = "projectEndTime";
     public static final String MESSAGE_JSON_PROJECT_YEAR_TAG = "projectYear";
     public static final String MESSAGE_JSON_NAME_TAG = "name";
-
 
     public static final String MESSAGE_JSON_JOURNAL_CONTENT_ID_TAG = "journalContentID";
     public static final String MESSAGE_JSON_JOURNAL_QUESTION_ID_TAG = "journalQuestionID";
