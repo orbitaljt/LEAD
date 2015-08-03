@@ -50,10 +50,15 @@ public class PictureList implements Parcelable {
         }
     }
 
-
-    public void removePicture(){
-
+    public void overrideList(PictureList list) {
+        if(this._arrayPictures == null){
+            this._arrayPictures = new ArrayList<Picture>(list.getList());
+        }else{
+            this._arrayPictures.clear();
+            this._arrayPictures.addAll(list.getList());
+        }
     }
+
 
     public ArrayList<Picture> getList(){
         return this._arrayPictures;

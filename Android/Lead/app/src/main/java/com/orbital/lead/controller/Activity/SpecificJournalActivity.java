@@ -20,7 +20,6 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import com.orbital.lead.Parser.FormatDate;
 import com.orbital.lead.Parser.FormatTime;
 import com.orbital.lead.R;
-import com.orbital.lead.controller.Service.JournalService;
 import com.orbital.lead.controller.Service.PictureReceiver;
 import com.orbital.lead.controller.Service.PictureService;
 import com.orbital.lead.model.Album;
@@ -32,7 +31,7 @@ import com.orbital.lead.model.Project;
 import com.orbital.lead.widget.WideImageView;
 
 public class SpecificJournalActivity extends BaseActivity implements PictureReceiver.Receiver {
-    public static final int START_EDIT_SPECIFIC_JOURNAL_ACTIVITY = 1;
+    //public static final int START_EDIT_SPECIFIC_JOURNAL_ACTIVITY = 1;
     private final String TAG = this.getClass().getSimpleName();
 
 
@@ -89,7 +88,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
             this.setJournalDetails(this.getJournal());
 
         } else {
-            getCustomLogging().debug(TAG, "No bundle extra from getIntent()");
+            getLogging().debug(TAG, "No bundle extra from getIntent()");
         }
 
     }
@@ -117,7 +116,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
 
         //noinspection SimplifiableIfStatement
         if(id == android.R.id.home) {
-            getCustomLogging().debug(TAG, "onOptionsItemSelected");
+            getLogging().debug(TAG, "onOptionsItemSelected");
             onBackPressed();
             return true;
         }else if (id == R.id.action_edit_journal){
@@ -134,25 +133,25 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        getCustomLogging().debug(TAG, "onRestoreInstanceState");
+        getLogging().debug(TAG, "onRestoreInstanceState");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        getCustomLogging().debug(TAG, "onResume");
+        getLogging().debug(TAG, "onResume");
     }
 
     @Override
         public void onPause() {
         super.onPause();
-        getCustomLogging().debug(TAG, "onPause");
+        getLogging().debug(TAG, "onPause");
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        getCustomLogging().debug(TAG, "onSaveInstanceState");
+        getLogging().debug(TAG, "onSaveInstanceState");
     }
 
 
@@ -173,7 +172,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
             @Override
             public void onClick(View v) {
                 //onBackPressed();
-                getCustomLogging().debug(TAG, "mToolbarView setNavigationOnClickListener onClick");
+                getLogging().debug(TAG, "mToolbarView setNavigationOnClickListener onClick");
             }
         });
     }
@@ -206,9 +205,9 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         this.mImageJournalCover.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getCustomLogging().debug(TAG, "mImageJournalCover onClick");
+                getLogging().debug(TAG, "mImageJournalCover onClick");
                 if(getAlbum() != null){
-                    getLogic().displayPictureActivity(getContext(), PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, getAlbum());
+                    getLogic().displayPictureActivity(getContext(), PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, getAlbum(), getJournal().getJournalID());
                 }
             }
         });
@@ -223,9 +222,9 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         this.mTextPictureCount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getCustomLogging().debug(TAG, "mTextPictureCount onClick");
+                getLogging().debug(TAG, "mTextPictureCount onClick");
                 if(getAlbum() != null){
-                    getLogic().displayPictureActivity(getContext(), PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, getAlbum());
+                    getLogic().displayPictureActivity(getContext(), PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, getAlbum(), getJournal().getJournalID());
                 }
             }
         });
@@ -280,7 +279,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         this.setTextTitle(displayJournal.getTitle());
         this.setTextContent(displayJournal.getContent());
 
-        Project project = CurrentLoginUser.getUser().getProjectList().findProject(displayJournal.getProject().getProjectID());
+        Project project = getCurrentUser().getProjectList().findProject(displayJournal.getProject().getProjectID());
         this.setTextProject(project != null ? project.getName() : "");
 
         // run picture service first
@@ -297,6 +296,8 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         //.error(R.drawable.image_blank_picture)
         //.transform(new RoundedTransformation(10, 0))
         if(!this.getParser().isStringEmpty(url)){
+            this.getLogic().showPicture(this, mAnimator, this.getImageJournalCover(), url);
+            /*
             ImageLoader.getInstance()
                     .displayImage(url, this.getImageJournalCover(), this.getCustomApplication().getDisplayImageOptions(),
                             new SimpleImageLoadingListener(){
@@ -304,33 +305,33 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
                                 public void onLoadingStarted(String imageUri, View view) {
                                     //holder.progressBar.setProgress(0);
                                     //holder.progressBar.setVisibility(View.VISIBLE);
-                                    getCustomLogging().debug(TAG, "onLoadingStarted");
+                                    getLogging().debug(TAG, "onLoadingStarted");
                                 }
 
                                 @Override
                                 public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
                                     //holder.progressBar.setVisibility(View.GONE);
-                                    getCustomLogging().debug(TAG, "onLoadingFailed");
+                                    getLogging().debug(TAG, "onLoadingFailed");
                                     mAnimator.setDisplayedChild(2);
                                 }
 
                                 @Override
                                 public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
                                     //holder.progressBar.setVisibility(View.GONE);
-                                    getCustomLogging().debug(TAG, "onLoadingComplete");
+                                    getLogging().debug(TAG, "onLoadingComplete");
                                     mAnimator.setDisplayedChild(0);
                                 }
                             },
                             new ImageLoadingProgressListener() {
                                 @Override
                                 public void onProgressUpdate(String imageUri, View view, int current, int total) {
-                                    getCustomLogging().debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
+                                    getLogging().debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
                                     //holder.progressBar.setProgress(Math.round(100.0f * current / total));
                                 }
                             });
-
+               */
         }else{
-            getCustomLogging().debug(TAG, "setImageJournalCover -> Picture URL is empty");
+            getLogging().debug(TAG, "setImageJournalCover -> Picture URL is empty");
             mAnimator.setDisplayedChild(2);
         }
     }
@@ -406,7 +407,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
     private void refreshJournal(String journalID){
 
         for(Journal journal : CurrentLoginUser.getUser().getJournalList().getList()) {
-            getCustomLogging().debug(TAG, "refreshJournal journal => " + journal.getTitle() + " => " + journal.getProject());
+            getLogging().debug(TAG, "refreshJournal journal => " + journal.getTitle() + " => " + journal.getProject());
         }
 
 
@@ -429,8 +430,8 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
                         String journalID = b.getString(Constant.BUNDLE_PARAM_JOURNAL_ID);
                         boolean refresh = b.getBoolean(Constant.BUNDLE_PARAM_JOURNAL_TOGGLE_REFRESH);
 
-                        getCustomLogging().debug(TAG, "onActivityResult journalID => " + journalID);
-                        getCustomLogging().debug(TAG, "onActivityResult refresh => " + refresh);
+                        getLogging().debug(TAG, "onActivityResult journalID => " + journalID);
+                        getLogging().debug(TAG, "onActivityResult refresh => " + refresh);
 
                         if(refresh) {
                             this.refreshJournal(journalID);
@@ -451,17 +452,17 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
 
         switch (resultCode) {
             case PictureService.STATUS_RUNNING:
-                this.getCustomLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_RUNNING");
+                this.getLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_RUNNING");
                 break;
 
             case PictureService.STATUS_FINISHED:
-                this.getCustomLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_FINISHED");
+                this.getLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_FINISHED");
                 type = (EnumPictureServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
 
                 switch(type){
                     case GET_SPECIFIC_ALBUM:
                         jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
-                        this.getCustomLogging().debug(TAG, "onReceiveResult GET_SPECIFIC_ALBUM -> jsonResult => " + jsonResult);
+                        this.getLogging().debug(TAG, "onReceiveResult GET_SPECIFIC_ALBUM -> jsonResult => " + jsonResult);
 
                         Album album = this.getParser().parseJsonToSpecificAlbum(jsonResult);
 
@@ -477,7 +478,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
                 break;
 
             case PictureService.STATUS_ERROR:
-                this.getCustomLogging().debug(TAG, "PictureService.STATUS_ERROR");
+                this.getLogging().debug(TAG, "PictureService.STATUS_ERROR");
                 break;
         }
     }

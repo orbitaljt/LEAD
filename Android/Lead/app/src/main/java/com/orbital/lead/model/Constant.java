@@ -61,12 +61,13 @@ public class Constant {
     public static final String URL_POST_PARAMETER_TAG_PASSWORD = "pw";
     public static final String URL_POST_PARAMETER_TAG_USER_ID = "uid";
     public static final String URL_POST_PARAMETER_TAG_FACEBOOK_USER_ID = "fb_uid";
-    public static final String URL_POST_PARAMETER_TAG_USER_ALBUM_ID = "aid";
+    public static final String URL_POST_PARAMETER_TAG_ALBUM_ID = "aid";
     public static final String URL_POST_PARAMETER_TAG_PICTURE_QUERY_QUANTITY = "pic_qq";
     //public static final String URL_POST_PARAMETER_TAG_USER_JOURNAL_LIST_ID = "jlid";
     public static final String URL_POST_PARAMETER_TAG_USER_JOURNAL_ID = "jid";
     public static final String URL_POST_PARAMETER_TAG_DETAIL = "detail";
     public static final String URL_POST_PARAMETER_TAG_URL = "url";
+    public static final String URL_POST_PARAMETER_TAG_BASE_64 = "base64";
     public static final String URL_POST_PARAMETER_TAG_FILE_NAME = "filename";
     public static final String URL_POST_PARAMETER_TAG_FILE_TYPE = "filetype";
     public static final String URL_POST_PARAMETER_TAG_FROM_FACEBOOK = "from_fb";
@@ -81,13 +82,16 @@ public class Constant {
     public static final String TYPE_GET_USER_PROFILE_USING_FACEBOOK = "301";
     public static final String TYPE_UPDATE_USER_PROFILE = "302";
     public static final String TYPE_CREATE_USER_PROFILE = "303";
-    public static final String TYPE_GET_USER_ALL_JOURNAL = "400";
-    public static final String TYPE_UPDATE_USER_JOURNAL = "401";
+    public static final String TYPE_GET_ALL_JOURNAL = "400";
+    public static final String TYPE_UPDATE_JOURNAL = "401";
+    public static final String TYPE_INSERT_NEW_JOURNAL = "402";
+    public static final String TYPE_GET_NEW_JOURNAL_ALBUM_ID = "403";
     public static final String TYPE_GET_USER_PICTURE = "900";
     public static final String TYPE_GET_USER_SPECIFIC_ALBUM = "901";
     public static final String TYPE_GET_USER_ALL_ALBUM = "902";
     public static final String TYPE_GET_ALL_PROJECT = "1000";
-    public static final String TYPE_UPLOAD_IMAGE_URL = "2000";
+    public static final String TYPE_UPLOAD_PROFILE_IMAGE_URL = "2000";
+    public static final String TYPE_UPLOAD_IMAGE = "2001";
     public static final String TYPE_FACEBOOK = "1";
 
 
@@ -105,8 +109,6 @@ public class Constant {
     public static final String MESSAGE_JSON_LEAD_USER_ID_TAG = "leadUserID";
     public static final String MESSAGE_JSON_PICTURE_PROFILE_ID_TAG = "pictureProfileID";
     public static final String MESSAGE_JSON_PICTURE_PROFILE_TYPE_TAG = "pictureProfileType";
-   // public static final String MESSAGE_JSON_JOURNAL_LIST_ID_TAG = "journalListID";
-   // public static final String MESSAGE_JSON_EXPERIENCE_LIST_TAG = "experienceListID";
     public static final String MESSAGE_JSON_FIRST_NAME_TAG = "firstName";
     public static final String MESSAGE_JSON_MIDDLE_NAME_TAG = "middleName";
     public static final String MESSAGE_JSON_lAST_NAME_TAG = "lastName";
@@ -152,6 +154,7 @@ public class Constant {
     public static final String MESSAGE_JSON_PROJECT_END_TIME_TAG = "projectEndTime";
     public static final String MESSAGE_JSON_PROJECT_YEAR_TAG = "projectYear";
     public static final String MESSAGE_JSON_NAME_TAG = "name";
+    public static final String MESSAGE_JSON_ALBUM_TAG = "album";
 
     public static final String MESSAGE_JSON_JOURNAL_CONTENT_ID_TAG = "journalContentID";
     public static final String MESSAGE_JSON_JOURNAL_QUESTION_ID_TAG = "journalQuestionID";
@@ -214,6 +217,7 @@ public class Constant {
     public static final String BUNDLE_PARAM_ALBUM = "album";
     public static final String BUNDLE_PARAM_PICTURE_LIST = "plist";
     public static final String BUNDLE_PARAM_JOURNAL_TOGGLE_REFRESH = "journal_refresh"; // value is true or false
+    public static final String BUNDLE_PARAM_JOURNAL_LIST_TOGGLE_REFRESH = "journal_list_refresh"; // value is true or false
 
     // Intent Service Extra tag name
     public static final String INTENT_SERVICE_EXTRA_RECEIVER_TAG = "receiver";
@@ -225,6 +229,7 @@ public class Constant {
     public static final String INTENT_SERVICE_EXTRA_USER_PROFILE_PICTURE_FILENAME_TAG = "u_profile_pic_filename";
     public static final String INTENT_SERVICE_EXTRA_TYPE_TAG = "type";
     public static final String INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG = "aid";
+    public static final String INTENT_SERVICE_EXTRA_UPLOAD_FILE_PATH_TAG = "file_path";
 
     // intent service return result to main UI
     public static final String INTENT_SERVICE_RESULT_DOWNLOAD_STATUS_TAG = "download_status";
@@ -232,6 +237,7 @@ public class Constant {
     public static final String INTENT_SERVICE_RESULT_DOWNLOAD_FAILURE_VALUE = "failure";
     public static final String INTENT_SERVICE_RESULT_DOWNLOAD_PROFILE_PICTURE_FILENAME_TAG = "download_u_profile_pic_filename";
     public static final String INTENT_SERVICE_RESULT_JSON_STRING_TAG = "json";
+    public static final String INTENT_SERVICE_RESULT_UPLOAD_FILE_PROGRESS_VALUE_TAG = "progress_value";
 
     // Amazon S3
     public static final String AWS_S3_BUCKET_NAME = "leadimage";
@@ -269,7 +275,7 @@ public class Constant {
     // Formatting Strings
     public static final String DUMMY_NUMBER = "[num]";
     public static final String STRING_NUMBER_OF_PICTURES_FORMAT = "All Photos ([num])";
-
+    public static final String STRING_UPDATE_PROGRESS_FORMAT = "[num]% Uploaded";
 
     // History
     public static final String PREFERENCE_HISTORY_RECENT_TAG_FILE_NAME = "recent_tag.txt";

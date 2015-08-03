@@ -184,7 +184,8 @@ public class Journal implements Parcelable {
     }
 
     public void setAlbum(Album album) {
-        this.album = album;
+        this.album = null;
+        this.album = new Album(album);
     }
 
     public void setProject(Project project) {

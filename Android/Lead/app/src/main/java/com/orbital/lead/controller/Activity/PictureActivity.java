@@ -1,8 +1,11 @@
 package com.orbital.lead.controller.Activity;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -16,7 +19,6 @@ import android.widget.TextView;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.Fragment.FragmentAlbum;
 import com.orbital.lead.controller.Fragment.FragmentPictures;
-import com.orbital.lead.controller.Service.JournalService;
 import com.orbital.lead.controller.Service.PictureReceiver;
 import com.orbital.lead.controller.Service.PictureService;
 import com.orbital.lead.model.Album;
@@ -26,8 +28,6 @@ import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumFacebookQueryType;
 import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.PictureList;
-
-import java.io.IOException;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -41,11 +41,10 @@ public class PictureActivity extends BaseActivity implements
     public static final String OPEN_FRAGMENT_LIST_PICTURES = "0"; // fragment that shows a list of all albums
     public static final String OPEN_FRAGMENT_ALBUM = "1"; // fragment that shows all pictures of an album
 
-    private final int REQUEST_PICK_IMAGE_INTENT = 1;
-
     private String openType;
     private AlbumList mAlbumList;
     private Album mAlbum;
+    private String journalID;
     //private ArrayList<Picture> mPictureList;
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
@@ -56,6 +55,7 @@ public class PictureActivity extends BaseActivity implements
     private TextView mToolbarTitle;
 
     private PictureReceiver mPictureReceiver;
+    private Bitmap resultBitmap;
 
 
     @Override
@@ -64,7 +64,7 @@ public class PictureActivity extends BaseActivity implements
 
         getLayoutInflater().inflate(R.layout.activity_picture, getBaseFrameLayout());
 
-        this.getCustomLogging().debug(TAG, "onCreate");
+        this.getLogging().debug(TAG, "onCreate");
         this.initPictureReceiver();
         this.initFragmentManager();
         this.initToolbar();
@@ -79,9 +79,13 @@ public class PictureActivity extends BaseActivity implements
                 this.setOpenFragmentType(getBundleExtra.getString(Constant.BUNDLE_PARAM_OPEN_FRAGMENT_TYPE));
             }
 
+            if(getBundleExtra.getString(Constant.BUNDLE_PARAM_JOURNAL_ID) != null){
+                this.setJournalID(getBundleExtra.getString(Constant.BUNDLE_PARAM_JOURNAL_ID));
+            }
+
+
             if(getBundleExtra.getParcelable(Constant.BUNDLE_PARAM_ALBUM)!= null) {
                 this.setSelectedAlbum((Album) getBundleExtra.getParcelable(Constant.BUNDLE_PARAM_ALBUM));
-                //this.setPictureList(this.getSelectedAlbum().getPictureList().getList());
             }
 
             //this.setIsFacebookLogin(getBundleExtra.getBoolean(Constant.BUNDLE_PARAM_IS_FACEBOOK_LOGIN));
@@ -92,12 +96,12 @@ public class PictureActivity extends BaseActivity implements
             }
             */
 
-            //this.getCustomLogging().debug(TAG, "this.getIsFacebookLogin() => " + this.getIsFacebookLogin());
-            //this.getCustomLogging().debug(TAG, "this.getCurrentFacebookAccessTokenString() => " + this.getCurrentFacebookAccessTokenString());
+            //this.getLogging().debug(TAG, "this.getIsFacebookLogin() => " + this.getIsFacebookLogin());
+            //this.getLogging().debug(TAG, "this.getCurrentFacebookAccessTokenString() => " + this.getCurrentFacebookAccessTokenString());
 
             switch(this.getOpenFragmentType()){
                 case PictureActivity.OPEN_FRAGMENT_ALBUM:
-                    this.getCustomLogging().debug(TAG, "PictureActivity.OPEN_FRAGMENT_ALBUM");
+                    this.getLogging().debug(TAG, "PictureActivity.OPEN_FRAGMENT_ALBUM");
 
                     if(this.getFacebookLogic().getIsFacebookLogin()){
                         this.getFacebookLogic().sendGraphRequest(this, EnumFacebookQueryType.GET_ALL_ALBUM, "");
@@ -110,7 +114,7 @@ public class PictureActivity extends BaseActivity implements
                     break;
 
                 case PictureActivity.OPEN_FRAGMENT_LIST_PICTURES:
-                    this.getCustomLogging().debug(TAG, "PictureActivity.OPEN_FRAGMENT_LIST_PICTURES");
+                    this.getLogging().debug(TAG, "PictureActivity.OPEN_FRAGMENT_LIST_PICTURES");
 
                     if(this.getFacebookLogic().getIsFacebookLogin() && this.getSelectedAlbum() != null){
                         this.getFacebookLogic().sendGraphRequest(this,
@@ -144,7 +148,7 @@ public class PictureActivity extends BaseActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if(id == android.R.id.home) {
-            getCustomLogging().debug(TAG, "onOptionsItemSelected");
+            getLogging().debug(TAG, "onOptionsItemSelected");
             onBackPressed();
             return true;
 
@@ -216,20 +220,20 @@ public class PictureActivity extends BaseActivity implements
     }
 
     private void displayFragmentPictures(){
-        this.getCustomLogging().debug(TAG, "displayFragmentPictures");
+        this.getLogging().debug(TAG, "displayFragmentPictures");
         this.mFragmentPictures = FragmentPictures.newInstance(this.getSelectedAlbum());
         if(!isAnyFragmentExist()){ // no fragment exist
-            this.getCustomLogging().debug(TAG, "Replace Fragment");
+            this.getLogging().debug(TAG, "Replace Fragment");
             this.replaceFragment(this.mFragmentPictures, Constant.FRAGMENT_PICTURES);
         }else{
-            this.getCustomLogging().debug(TAG, "Add Fragment");
+            this.getLogging().debug(TAG, "Add Fragment");
             this.addFragment(this.mFragmentPictures, Constant.FRAGMENT_PICTURES);
         }
 
     }
 
     private void displayFragmentAlbum(){
-        this.getCustomLogging().debug(TAG, "displayFragmentAlbum");
+        this.getLogging().debug(TAG, "displayFragmentAlbum");
         this.mFragmentAlbum = FragmentAlbum.newInstance(this.getFacebookLogic().getIsFacebookLogin(),
                                                         this.getFacebookLogic().getCurrentFacebookAccessTokenString());
         this.replaceFragment(this.mFragmentAlbum, Constant.FRAGMENT_ALBUM);
@@ -281,38 +285,51 @@ public class PictureActivity extends BaseActivity implements
     /*
     private void updateFragmentAlbum(AlbumList list) {
         if(this.mFragmentAlbum != null) {
-            this.getCustomLogging().debug(TAG, "updateFragmentAlbum -> mFragmentAlbum.updateGridAlbum");
+            this.getLogging().debug(TAG, "updateFragmentAlbum -> mFragmentAlbum.updateGridAlbum");
             this.mFragmentAlbum.updateGridAlbum(list);
         }else{
-            this.getCustomLogging().debug(TAG, "updateFragmentAlbum -> mFragmentAlbumis null");
+            this.getLogging().debug(TAG, "updateFragmentAlbum -> mFragmentAlbumis null");
         }
     }
     */
 
     public void updateFragmentAlbumGridAdapter(AlbumList list) {
         if(this.mFragmentAlbum != null) {
-            this.getCustomLogging().debug(TAG, "updateFragmentAlbumGridAdapter -> mFragmentAlbum.updateGridAlbumAdapter");
+            this.getLogging().debug(TAG, "updateFragmentAlbumGridAdapter -> mFragmentAlbum.updateGridAlbumAdapter");
             this.mFragmentAlbum.updateGridAlbumAdapter(list);
         }else{
-            this.getCustomLogging().debug(TAG, "updateFragmentAlbumGridAdapter -> mFragmentAlbum is null");
+            this.getLogging().debug(TAG, "updateFragmentAlbumGridAdapter -> mFragmentAlbum is null");
         }
     }
 
     public void updateFragmentPicturesGridAdapter(PictureList list) {
         if(this.mFragmentPictures != null) {
-            this.getCustomLogging().debug(TAG, "updateFragmentPicturesGridAdapter -> mFragmentPictures.updateGridPicturesAdapter");
+            this.getLogging().debug(TAG, "updateFragmentPicturesGridAdapter -> mFragmentPictures.updateGridPicturesAdapter");
             this.mFragmentPictures.updateGridPicturesAdapter(list);
         }else{
-            this.getCustomLogging().debug(TAG, "updateFragmentPicturesGridAdapter -> mFragmentPictures is null");
+            this.getLogging().debug(TAG, "updateFragmentPicturesGridAdapter -> mFragmentPictures is null");
         }
     }
+
+    private void updateCurrentUserAlbum(Album newAlbum) {
+        CurrentLoginUser.getUser().getJournalList().get(this.getJournalID()).setAlbum(newAlbum);
+    }
+
 
     private String getOpenFragmentType() {
         return this.openType;
     }
 
+    private String getJournalID() {
+        return this.journalID;
+    }
+
     private FragmentAlbum getFragmentAlbum() {
         return this.mFragmentAlbum;
+    }
+
+    private FragmentPictures getFragmentPictures() {
+        return this.mFragmentPictures;
     }
 
     private AlbumList getAlbumList() {
@@ -334,6 +351,10 @@ public class PictureActivity extends BaseActivity implements
 
     private void setOpenFragmentType(String type) {
         this.openType = type;
+    }
+
+    private void setJournalID(String id) {
+        this.journalID = id;
     }
 
     private void setAlbumList(AlbumList list) {
@@ -359,7 +380,7 @@ public class PictureActivity extends BaseActivity implements
                 break;
 
             case Constant.DIALOG_REQUEST_OPEN_INTENT_CAMERA:
-
+                this.openCameraIntent();
                 break;
 
             case Constant.DIALOG_REQUEST_OPEN_FACEBOOK_ALBUM:
@@ -374,7 +395,7 @@ public class PictureActivity extends BaseActivity implements
         this.setSelectedAlbum(selectedAlbum);
         switch(request){
             case FragmentAlbum.REQUEST_OPEN_FRAGMENT_PICTURES:
-                this.getCustomLogging().debug(TAG, "onFragmentAlbumInteraction REQUEST_OPEN_FRAGMENT_PICTURES");
+                this.getLogging().debug(TAG, "onFragmentAlbumInteraction REQUEST_OPEN_FRAGMENT_PICTURES");
                 if(this.getFacebookLogic().getIsFacebookLogin()){
                     this.getFacebookLogic().sendGraphRequest(this,
                             EnumFacebookQueryType.GET_ALL_ALBUM_PICTURES,
@@ -397,7 +418,41 @@ public class PictureActivity extends BaseActivity implements
                 && data != null && data.getData() != null) {
 
             Uri uri = data.getData();
-            this.getCustomLogging().debug(TAG, "onActivityResult uri string => " + uri.toString());
+            this.getLogging().debug(TAG, "onActivityResult uri string => " + getPath(uri));
+
+            this.getLogic().uploadNewPicture(this, getPath(uri),
+                                            CurrentLoginUser.getUser().getUserID(),
+                                            this.getSelectedAlbum().getAlbumID());
+
+  /*
+            try {
+
+                if (this.resultBitmap != null) {
+                    this.resultBitmap.recycle();
+                }
+                InputStream stream = getContentResolver().openInputStream(
+                        data.getData());
+                this.resultBitmap = BitmapFactory.decodeStream(stream);
+                stream.close();
+
+                this.getLogic().uploadNewPicture(this, this.resultBitmap,
+                                                CurrentLoginUser.getUser().getUserID(),
+                                                 this.getSelectedAlbum().getAlbumID());
+
+
+            } catch (FileNotFoundException e) {
+                this.getLogging().debug(TAG, "onActivityResult error => " + e.getMessage());
+                e.printStackTrace();
+
+            } catch (IOException e) {
+                this.getLogging().debug(TAG, "onActivityResult error => " + e.getMessage());
+                e.printStackTrace();
+
+            }
+  */
+
+
+
             /*
             try {
 
@@ -408,6 +463,20 @@ public class PictureActivity extends BaseActivity implements
         }
     }
 
+    private String getPath(Uri uri) {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        if(cursor!=null)
+        {
+            //HERE YOU WILL GET A NULLPOINTER IF CURSOR IS NULL
+            //THIS CAN BE, IF YOU USED OI FILE MANAGER FOR PICKING THE MEDIA
+            int column_index = cursor
+                    .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        }
+        else return null;
+    }
 
     /**
      * onReceiveResult is used to receive the picture service result
@@ -416,39 +485,78 @@ public class PictureActivity extends BaseActivity implements
     public void onReceiveResult(int resultCode, Bundle resultData) {
         EnumPictureServiceType type = null;
         String jsonResult = "";
+        int progressValue = -1;
+
+        if(resultData == null) {
+            this.getLogging().debug(TAG, "onReceiveResult resultData is null...");
+            return;
+        }
 
         switch (resultCode) {
             case PictureService.STATUS_RUNNING:
-                this.getCustomLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_RUNNING");
+                this.getLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_RUNNING");
+
+                type = (EnumPictureServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
+                switch(type){
+                    case UPLOAD_IMAGE_FILE:
+                        try{
+                            progressValue = resultData.getInt(Constant.INTENT_SERVICE_RESULT_UPLOAD_FILE_PROGRESS_VALUE_TAG);
+                            this.getLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_RUNNING UPLOAD_IMAGE_FILE progress value => " + progressValue);
+                        }catch (Exception e) {
+                            e.printStackTrace();
+                            progressValue = -1;
+                        }
+
+                        if(progressValue != -1) {
+                            if(this.getFragmentPictures() != null) {
+                                this.getFragmentPictures().updateUploadImageProgressValue(progressValue);
+                            }
+                        }
+
+                }
+
+
                 break;
 
             case PictureService.STATUS_FINISHED:
-                this.getCustomLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_FINISHED");
+                this.getLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_FINISHED");
                 type = (EnumPictureServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
 
                 switch(type){
                     case GET_ALL_ALBUM:
                         jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
-                        this.getCustomLogging().debug(TAG, "onReceiveResult GET_ALL_ALBUM -> jsonResult => " + jsonResult);
+                        //this.getLogging().debug(TAG, "onReceiveResult GET_ALL_ALBUM -> jsonResult => " + jsonResult);
 
                         AlbumList list = getParser().parseJsonToAlbumList(jsonResult);
                         this.setAlbumList(list);
 
                         if(this.getAlbumList() !=  null){
-                            this.getCustomLogging().debug(TAG, "onReceiveResult this.getAlbumList().size() => " + this.getAlbumList().size());
-                            //this.updateFragmentAlbum(this.getAlbumList());
                             this.updateFragmentAlbumGridAdapter(this.getAlbumList());
                         }else{
-                            this.getCustomLogging().debug(TAG, "onReceiveResult this.getAlbumList() is null!");
+                            this.getLogging().debug(TAG, "onReceiveResult this.getAlbumList() is null!");
                         }
 
                         break;
-                }
+
+                    case UPLOAD_IMAGE_FILE:
+                        jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
+                        //this.getLogging().debug(TAG, "onReceiveResult UPLOAD_IMAGE_FILE -> jsonResult => " + jsonResult);
+
+                        Album updatedAlbum = getParser().parseJsonToSpecificAlbum(jsonResult);
+
+                        this.updateCurrentUserAlbum(updatedAlbum);
+                        this.updateFragmentPicturesGridAdapter(updatedAlbum.getPictureList());
+                        if(this.getFragmentPictures() != null) {
+                            this.getFragmentPictures().closeUploadImageProgressDialog();
+                        }
+
+                        break;
+                } //end switch
 
                 break;
 
             case PictureService.STATUS_ERROR:
-                this.getCustomLogging().debug(TAG, "PictureService.STATUS_ERROR");
+                this.getLogging().debug(TAG, "PictureService.STATUS_ERROR");
                 break;
         }
 
