@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Created by joseph on 20/6/2015.
@@ -59,29 +58,12 @@ public class AlbumList implements Parcelable {
         return this._arrayAlbum;
     }
 
-    public Album get(int position) {
+    public Album getAlbum(int position) {
         if(this.getList() == null){
             return null;
         }
 
         return this.getList().get(position);
-    }
-
-    public Album get(String albumID) {
-        if(this.getList() == null){
-            return null;
-        }
-
-        Iterator<Album> iter = this.getList().iterator();
-        while (iter.hasNext()) {
-            Album a = iter.next();
-            if(a.getAlbumID().equals(albumID)){
-                return a;
-            }
-        }
-
-        return null;
-
     }
 
     public int size() {

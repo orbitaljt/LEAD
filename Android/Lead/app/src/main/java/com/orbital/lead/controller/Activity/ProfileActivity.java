@@ -132,7 +132,7 @@ public class ProfileActivity extends BaseActivity
     }
 
     private void displayFragmentProfile(){
-        this.getLogging().debug(TAG, "displayFragmentProfile");
+        this.getCustomLogging().debug(TAG, "displayFragmentProfile");
         this.mFragmentProfile = FragmentProfile.newInstance("","");
         this.replaceFragment(this.mFragmentProfile, Constant.FRAGMENT_PROFILE);
     }
@@ -148,10 +148,10 @@ public class ProfileActivity extends BaseActivity
 
     private void saveUserProfile() {
         if(mFragmentProfile.hasChanges()){
-            getLogging().debug(TAG, "updateUserProfile there's changes made in fragment profile");
+            getCustomLogging().debug(TAG, "updateUserProfile there's changes made in fragment profile");
             this.updateUserProfile();
         }else {
-            getLogging().debug(TAG, "updateUserProfile no changes made in fragment profile");
+            getCustomLogging().debug(TAG, "updateUserProfile no changes made in fragment profile");
         }
     }
 
@@ -176,7 +176,7 @@ public class ProfileActivity extends BaseActivity
             CurrentLoginUser.getUser().setCountry(newCountry);
 
             String detail = getParser().userObjectToJson(CurrentLoginUser.getUser());
-            getLogging().debug(TAG, "updateUserProfile detail => " + detail);
+            getCustomLogging().debug(TAG, "updateUserProfile detail => " + detail);
             getLogic().updateUserProfileDatabase(this, CurrentLoginUser.getUser().getUserID(), detail);
 
     }
@@ -192,7 +192,7 @@ public class ProfileActivity extends BaseActivity
                         && data != null && data.getData() != null) {
 
                     Uri uri = data.getData();
-                    this.getLogging().debug(TAG, "onActivityResult REQUEST_PICK_IMAGE_INTENT uri string => " + uri.toString());
+                    this.getCustomLogging().debug(TAG, "onActivityResult REQUEST_PICK_IMAGE_INTENT uri string => " + uri.toString());
                     /*
                     try {
 
@@ -207,7 +207,7 @@ public class ProfileActivity extends BaseActivity
                 if (resultCode == RESULT_OK
                         && data != null && data.getData() != null) {
                     Uri uri = data.getData();
-                    this.getLogging().debug(TAG, "onActivityResult REQUEST_IMAGE_CAPTURE uri string => " + uri.toString());
+                    this.getCustomLogging().debug(TAG, "onActivityResult REQUEST_IMAGE_CAPTURE uri string => " + uri.toString());
 
 
                 }

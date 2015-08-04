@@ -75,7 +75,7 @@ public class Album implements Parcelable {
         this.pictureCoverType = getParser().getPictureType(picCoverType);
         if(isFromFacebook){
             this._thumbnailUrl = ParserFacebook.createFacebookPictureThumbnailUrl(mFacebookLogic.getCurrentFacebookAccessTokenString(), albumID);
-            this._actualUrl = ParserFacebook.createFacebookPictureNormalUrl(mFacebookLogic.getCurrentFacebookAccessTokenString(), albumID);
+            this._thumbnailUrl = ParserFacebook.createFacebookPictureNormalUrl(mFacebookLogic.getCurrentFacebookAccessTokenString(), albumID);
 
         }else{
             this._thumbnailUrl = this.getParser().createPictureThumbnailUrl(this.pictureCoverID, picCoverType, userID);
@@ -96,25 +96,6 @@ public class Album implements Parcelable {
         this._list = list;
         this.tagList = taglist;
         this.isFromFacebook = isFromFacebook;
-    }
-
-    public Album(Album album) {
-        this._userID = album.getUserID();
-        this._albumID = album.getAlbumID();
-        this.pictureCoverID = album.getPictureCoverID();
-        this.pictureCoverType = album.getPictureCoverType();
-        this._thumbnailUrl = album.getThumbnailUrl();
-        this._actualUrl = album.getAcutalUrl();
-        this._title =album.getTitle();
-        this._description = album.getDescription();
-        this._createdDate = album.getCreatedDate();
-        this._createdTime = album.getCreatedTime();
-        this.lastModifiedDate = album.getLastModifiedDate();
-        this.lastModifiedTime = album.getLastModifiedTime();
-        this.numofPicture = album.getNumberOfPicture();
-        this._list = album.getPictureList();
-        this.tagList = album.getTagList();
-        this.isFromFacebook = album.getIsFromFacebook();
     }
 
 
@@ -156,14 +137,6 @@ public class Album implements Parcelable {
 
     public String getLastModifiedTime(){
         return this.lastModifiedTime;
-    }
-
-    public String getPictureCoverID() {
-        return this.pictureCoverID;
-    }
-
-    public EnumPictureType getPictureCoverType() {
-        return this.pictureCoverType;
     }
 
     public int getNumberOfPicture() {

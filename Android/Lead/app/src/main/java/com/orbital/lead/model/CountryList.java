@@ -1,28 +1,30 @@
 package com.orbital.lead.model;
 
+/**
+ * Created by Terence on 7/19/2015.
+ */
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
 
-/**
- * Created by joseph on 30/6/2015.
- */
-public class ProjectList {
-    private ArrayList<Project> list;
 
-    public ProjectList(){
+public class CountryList {
+    private ArrayList<Country> list;
+
+    public CountryList(){
         this.initArrayList();
     }
 
-    public void addProject(Project project) {
+    public void addCountry(Country country) {
         if(this.list == null){
             this.initArrayList();
         }
-        this.list.add(project);
+        this.list.add(country);
     }
 
-    public void setList(ProjectList list){
-        this.list = new ArrayList<Project>(list.getList());
+    public void setList(CountryList list){
+        this.list = new ArrayList<Country>(list.getList());
         /*
         if(this.list == null){
             this.initArrayList();
@@ -32,6 +34,7 @@ public class ProjectList {
         */
     }
 
+    /*
     public void removeProject(String name){
         Iterator<Project> iter = this.list.iterator();
         while (iter.hasNext()) {
@@ -52,20 +55,21 @@ public class ProjectList {
         }
         return null;
     }
+    \
 
     public void resetList() {
-        Iterator<Project> iter = this.list.iterator();
+        Iterator<Country> iter = this.list.iterator();
         while (iter.hasNext()) {
-            Project p = iter.next();
-            p.setIsSelected(false);
+            Country p = iter.next();
+            //p.setIsSelected(false);
         }
     }
 
-    public void updateProject(Project updatedProject) {
+    public void updateCountry(Country updatedCountry) {
 
-        ListIterator<Project> iter = this.list.listIterator();
+        ListIterator<Country> iter = this.list.listIterator();
         while (iter.hasNext()) {
-            Project p = iter.next();
+            Country p = iter.next();
             if(p.getProjectID().equals(updatedProject.getProjectID())){
                 p.setIsSelected(updatedProject.getIsSelected());
             }
@@ -81,8 +85,9 @@ public class ProjectList {
         System.out.println("index => " + index);
         System.out.println(" updatedProject.getName() => " + updatedProject.getName());
         System.out.println(" updatedProject.getIsSelected() => " + updatedProject.getIsSelected());
-        */
+
     }
+    */
 
 
     public int size(){
@@ -90,16 +95,16 @@ public class ProjectList {
     }
 
 
-    public ArrayList<Project> getList(){
+    public ArrayList<Country> getList(){
         return this.list;
     }
 
-    public void setList(ArrayList<Project> newList){
-        this.list = new ArrayList<Project>(newList);
+    public void setList(ArrayList<Country> newList){
+        this.list = new ArrayList<Country>(newList);
     }
 
     private void initArrayList() {
-        this.list = new ArrayList<Project>();
+        this.list = new ArrayList<Country>();
     }
 
 

@@ -6,9 +6,11 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.LocalStorage.LocalStorage;
+import com.orbital.lead.logic.s3.S3Logic;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.EnumS3ServiceType;
 
@@ -24,6 +26,7 @@ public class S3Service extends IntentService{
     private final String TAG = this.getClass().getSimpleName();
     private CustomLogging mLogging;
 
+    private S3Logic mS3Logic;
     private Parser mParser;
     private LocalStorage mLocalStorage;
     private String userID;
@@ -34,16 +37,10 @@ public class S3Service extends IntentService{
 
     public S3Service() {
         super(S3Service.class.getName());
-       // this.initLogging();
+        this.initLogging();
 
     }
 
-    @Override
-    protected void onHandleIntent(Intent intent) {
-
-    }
-
-    /*
     @Override
     protected void onHandleIntent(Intent intent) {
         this.mLogging.debug(TAG, "onHandleIntent -> Service Started!");
@@ -65,7 +62,7 @@ public class S3Service extends IntentService{
 
         returnBundle.putSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG, this.serviceType); // return the type of service
 
-        // Update UI: Download Service is Running
+        /* Update UI: Download Service is Running */
         receiver.send(STATUS_RUNNING, Bundle.EMPTY);
 
         switch (this.serviceType){
@@ -165,5 +162,5 @@ public class S3Service extends IntentService{
         return this.serviceType;
     }
 
-*/
+
 }

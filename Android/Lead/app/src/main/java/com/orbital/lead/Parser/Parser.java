@@ -1,8 +1,6 @@
 package com.orbital.lead.Parser;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.util.Base64;
 
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.model.Album;
@@ -12,6 +10,7 @@ import com.orbital.lead.model.EnumMessageType;
 import com.orbital.lead.model.EnumPictureType;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.JournalList;
+import com.orbital.lead.model.CountryList;
 import com.orbital.lead.model.Message;
 import com.orbital.lead.model.Picture;
 import com.orbital.lead.model.PictureList;
@@ -19,15 +18,13 @@ import com.orbital.lead.model.Project;
 import com.orbital.lead.model.ProjectList;
 import com.orbital.lead.model.Tag;
 import com.orbital.lead.model.TagList;
-import com.orbital.lead.model.TagSet;
 import com.orbital.lead.model.User;
+import com.orbital.lead.model.Country;
+import com.orbital.lead.model.CountryList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  * Created by joseph on 14/6/2015.
@@ -205,72 +202,6 @@ public class Parser {
         }
     }
 
-    public Journal parseJsonToSpecificJournal(String json) {
-        Journal journal = null;
-        Album album = null;
-        TagList albumTagList = null;
-        Project project = null;
-
-        try {
-            mLogging.debug(TAG, "parseJsonToSpecificJournal");
-            JSONObject topObj = new JSONObject(json);
-
-            String code = topObj.getString(Constant.MESSAGE_JSON_CODE_TAG);
-            String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
-
-            Message mMessage = new Message(code, msg);
-            if(this.getMessageType(mMessage) == EnumMessageType.SUCCESS || this.getMessageType(mMessage) == EnumMessageType.HAS_RECORD) {
-
-                JSONObject detailObj = topObj.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
-
-                journal = new Journal(detailObj.getString(Constant.MESSAGE_JSON_JOURNAL_ID_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_PICTURE_COVER_ID_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_PICTURE_COVER_TYPE_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_ALBUM_ID_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_TITLE_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_CONTENT_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_JOURNAL_DATE_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_JOURNAL_TIME_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_DATE_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_TIME_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_CREATED_DATE_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG),
-                        detailObj.getString(Constant.MESSAGE_JSON_IS_PUBLISHED_TAG));
-
-                // Album Tags
-                JSONArray tagArray = detailObj.getJSONArray(Constant.MESSAGE_JSON_TAGS_TAG);
-                albumTagList = parseJsonToTagList(tagArray);
-
-                // Project
-                JSONObject projectObj = detailObj.getJSONObject(Constant.MESSAGE_JSON_PROJECT_TAG);
-                String projectJournalRelationID = projectObj.getString(Constant.MESSAGE_JSON_PROJECT_JOURNAL_RELATION_ID_TAG);
-                String projectID = projectObj.getString(Constant.MESSAGE_JSON_PROJECT_ID_TAG);
-                project = new Project();
-                project.setProjectJournalRelationID(projectJournalRelationID);
-                project.setProjectID(projectID);
-
-                // Album and its objects (include list of pictures and album tags)
-                JSONObject albumObj = detailObj.getJSONObject(Constant.MESSAGE_JSON_ALBUM_TAG);
-                album = this.parseJsonAlbumObject(albumObj);
-
-
-                journal.setTagList(albumTagList);
-                journal.setAlbum(album);
-                journal.setProject(project);
-
-            }
-
-            return journal;
-
-        } catch (JSONException e){
-            mLogging.debug(TAG, "error => " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
     public ProjectList parseJsonToProjectList(String json){
         ProjectList list = null;
         try {
@@ -319,6 +250,42 @@ public class Parser {
         }
     }
 
+    public CountryList parseJsonToCountryList(String json){
+        CountryList list = null;
+        try {
+            mLogging.debug(TAG, "parseJsonToCountryList");
+            JSONObject topObj = new JSONObject(json);
+            String code = topObj.getString(Constant.MESSAGE_JSON_CODE_TAG);
+            String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
+
+            Message mMessage = new Message(code, msg);
+            if(this.getMessageType(mMessage) == EnumMessageType.SUCCESS){
+                list = new CountryList();
+
+                JSONArray detailArray = topObj.getJSONArray(Constant.MESSAGE_JSON_DETAIL_TAG);
+
+                for(int i=0; i < detailArray.length(); i++) {
+                    JSONObject countryObj = detailArray.getJSONObject(i);
+
+                    Country mCountry = new Country(countryObj.getString(Constant.MESSAGE_JSON_COUNTRY_TAG),
+                            countryObj.getString(Constant.MESSAGE_JSON_REGION_TAG),
+                            countryObj.getString(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG));
+
+
+                    list.addCountry(mCountry);
+
+                }
+            }
+
+            return list;
+
+        } catch (JSONException e){
+            mLogging.debug(TAG, "error => " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public Album parseJsonToSpecificAlbum(String json){
         Album mAlbum = null;
         PictureList pList = null;
@@ -334,14 +301,34 @@ public class Parser {
             if(this.getMessageType(mMessage) == EnumMessageType.SUCCESS){
 
                 JSONObject detailObj = topObj.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
-
-                mAlbum = this.parseJsonAlbumObject(detailObj);
-                /*
                 JSONArray listOfPictureArray = detailObj.getJSONArray(Constant.MESSAGE_JSON_LIST_OF_PICTURES_TAG);
                 JSONArray listOfTagArray = detailObj.getJSONArray(Constant.MESSAGE_JSON_TAGS_TAG);
 
                 tagList = parseJsonToTagList(listOfTagArray);
-                pList = this.parseJsonToPictureList(listOfPictureArray);
+
+                pList = new PictureList();
+                for(int i=0; i < listOfPictureArray.length(); i++) {
+
+                    pList = this.parseJsonToPictureList(listOfPictureArray);
+
+                    /*
+                    JSONObject picObj = listOfPictureArray.getJSONObject(i);
+                    JSONArray picTagArray = picObj.getJSONArray(Constant.MESSAGE_JSON_TAGS_TAG);
+
+                    TagList pictureTagList = parseJsonToTagList(picTagArray);
+
+                    Picture picElement = new Picture(picObj.getString(Constant.MESSAGE_JSON_USER_ID_TAG),
+                                        picObj.getString(Constant.MESSAGE_JSON_PICTURE_ID_TAG),
+                                        picObj.getString(Constant.MESSAGE_JSON_PICTURE_TYPE_TAG));
+                    picElement.setName(picObj.getString(Constant.MESSAGE_JSON_TITLE_TAG));
+                    picElement.setDescription(picObj.getString(Constant.MESSAGE_JSON_DESCRIPTION_TAG));
+                    picElement.setCreatedDate(picObj.getString(Constant.MESSAGE_JSON_CREATED_DATE_TAG));
+                    picElement.setCreatedTime(picObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG));
+                    picElement.setTagMap(pictureTagList);
+
+                    pList.addPicture(picElement);
+                    */
+                }
 
                 mAlbum = new Album(detailObj.getString(Constant.MESSAGE_JSON_USER_ID_TAG),
                         detailObj.getString(Constant.MESSAGE_JSON_ALBUM_ID_TAG),
@@ -356,7 +343,6 @@ public class Parser {
                         pList,
                         tagList,
                         false);
-                */
 
             }//end if
 
@@ -369,41 +355,11 @@ public class Parser {
         }
     }
 
-    private Album parseJsonAlbumObject(JSONObject albumObj) throws JSONException {
-        Album album = null;
-        PictureList pList = null;
-        TagList tagList = null;
-
-        JSONArray listOfPictureArray = albumObj.getJSONArray(Constant.MESSAGE_JSON_LIST_OF_PICTURES_TAG);
-        JSONArray listOfTagArray = albumObj.getJSONArray(Constant.MESSAGE_JSON_TAGS_TAG);
-
-        tagList = parseJsonToTagList(listOfTagArray);
-        pList = this.parseJsonToPictureList(listOfPictureArray);
-
-        album = new Album(albumObj.getString(Constant.MESSAGE_JSON_USER_ID_TAG),
-                albumObj.getString(Constant.MESSAGE_JSON_ALBUM_ID_TAG),
-                albumObj.getString(Constant.MESSAGE_JSON_PICTURE_COVER_ID_TAG),
-                albumObj.getString(Constant.MESSAGE_JSON_PICTURE_COVER_TYPE_TAG),
-                albumObj.getString(Constant.MESSAGE_JSON_TITLE_TAG),
-                albumObj.getString(Constant.MESSAGE_JSON_DESCRIPTION_TAG),
-                albumObj.getString(Constant.MESSAGE_JSON_CREATED_DATE_TAG),
-                albumObj.getString(Constant.MESSAGE_JSON_CREATED_TIME_TAG),
-                albumObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_DATE_TAG),
-                albumObj.getString(Constant.MESSAGE_JSON_LAST_MODIFIED_TIME_TAG),
-                pList,
-                tagList,
-                false);
-
-        return album;
-    }
-
-
     public AlbumList parseJsonToAlbumList(String json){
         AlbumList mAlbumList = new AlbumList();
         Album mAlbum = null;
         PictureList pList = null;
         TagList albumTagList = null;
-
         try {
             mLogging.debug(TAG, "parseJsonToAlbumList");
             JSONObject topObj = new JSONObject(json);
@@ -419,13 +375,15 @@ public class Parser {
                     // array of pictures
                     // array of tags
                     JSONObject albumObj = detailArray.getJSONObject(i);
-
-
                     JSONArray listOfPictureArray = albumObj.getJSONArray(Constant.MESSAGE_JSON_LIST_OF_PICTURES_TAG);
                     JSONArray listOfTagArray = albumObj.getJSONArray(Constant.MESSAGE_JSON_TAGS_TAG);
 
                     albumTagList = parseJsonToTagList(listOfTagArray);
-                    pList = this.parseJsonToPictureList(listOfPictureArray);
+
+                    pList = new PictureList();
+                    for(int k=0; k < listOfPictureArray.length(); k++) { // each picture array is 1 picture object
+                        pList = this.parseJsonToPictureList(listOfPictureArray);
+                    }
 
                     mAlbum = new Album(albumObj.getString(Constant.MESSAGE_JSON_USER_ID_TAG),
                             albumObj.getString(Constant.MESSAGE_JSON_ALBUM_ID_TAG),
@@ -488,12 +446,6 @@ public class Parser {
     }
 
     public TagList parseJsonToTagList(JSONArray tagArray){
-
-        if(tagArray == null) {
-            mLogging.debug(TAG, "parseJsonToTagList tagArray is null");
-            return null;
-        }
-
         TagList tagList = new TagList();
         try {
             for(int i=0; i < tagArray.length(); i++) {
@@ -515,36 +467,36 @@ public class Parser {
         }
     }
 
-    public TagSet parseJsonToTagSet(String json){
+    public TagList parseJsonToUnusedTagList(String json){
         // format -> [{“tagName”:”xxxx”}, {“tagName”:yyyy},….]
-        TagSet set = new TagSet();
+        TagList tagList = new TagList();
         try {
             JSONArray tagArray = new JSONArray(json);
             for(int i=0; i < tagArray.length(); i++) {
                 JSONObject tagObj = tagArray.getJSONObject(i);
                 String tagName = tagObj.getString(Constant.MESSAGE_JSON_TAG_NAME_TAG);
 
-                set.add(tagName);
+                Tag tag = new Tag(tagName); // all these tags are unused, means not checked, no IDs
+                tagList.addTag(tag);
             }
 
-            return set;
+            return tagList;
 
         } catch (JSONException e){
-            mLogging.debug(TAG, "parseJsonToTagSet error => " + e.getMessage());
+            mLogging.debug(TAG, "parseJsonToUnsedTagList error => " + e.getMessage());
             e.printStackTrace();
             return null;
         }
 
     }
 
-    public String parseTagSetToJson(TagSet set) {
-        // format -> [{“tagName”:”xxxx”}, {“tagName”:yyyy},….]
+    public String parseUnusedTagListToJson(TagList list) {
         try {
             JSONArray tagArray = new JSONArray();
-            if(set != null) {
-                for(String tagName : set.getList()) {
+            if(list != null) {
+                for(Tag tag : list.getList()) {
                     JSONObject tagObj = new JSONObject();
-                    tagObj.put(Constant.MESSAGE_JSON_TAG_NAME_TAG, tagName);
+                    tagObj.put(Constant.MESSAGE_JSON_TAG_NAME_TAG, tag.getName());
 
                     tagArray.put(tagObj);
                 }
@@ -557,7 +509,7 @@ public class Parser {
 
 
         } catch (JSONException e){
-            mLogging.debug(TAG, "parseTagSetToJson error => " + e.getMessage());
+            mLogging.debug(TAG, "parseJsonToUnsedTagList error => " + e.getMessage());
             e.printStackTrace();
             return "";
         }
@@ -565,7 +517,7 @@ public class Parser {
 
     }
 
-    public String updateJournalDetailToJson(Journal journal, TagList deleteTagList) {
+    public String updateJournalDetailToJson(Journal journal) {
         JSONObject root = new JSONObject();
 
         try{
@@ -590,25 +542,11 @@ public class Parser {
                 if(tag.getIsChecked()){
                     // true, means still under the journal
                     tagArray.put(tagObj);
-                }else if(!tag.getIsChecked() && !isStringEmpty(tag.getID())){
-                    // not checked and has tag ID
+                }else{
                     removeTagArray.put(tagObj);
                 }
 
             }
-
-            if(deleteTagList != null) {
-                for(Tag tag : deleteTagList.getList()) {
-                    JSONObject tagObj = new JSONObject();
-                    tagObj.put(Constant.MESSAGE_JSON_ID_TAG, tag.getTempID());
-                    tagObj.put(Constant.MESSAGE_JSON_TAG_ID_TAG, tag.getID());
-                    tagObj.put(Constant.MESSAGE_JSON_TAG_NAME_TAG, tag.getName());
-
-                    removeTagArray.put(tagObj);
-                }
-            }
-
-
 
             root.put(Constant.MESSAGE_JSON_TAGS_TAG, tagArray); // tags to be added
             root.put(Constant.MESSAGE_JSON_REMOVE_TAGS_TAG, removeTagArray); // tags to be removed
@@ -623,105 +561,13 @@ public class Parser {
             return root.toString();
 
         } catch (JSONException e){
-            mLogging.debug(TAG, "updateJournalDetailToJson error => " + e.getMessage());
+            mLogging.debug(TAG, "userObjectToJson error => " + e.getMessage());
             e.printStackTrace();
             return "";
         }
 
     }
 
-    public String uploadNewJournalToJson(Journal journal) {
-        JSONObject root = new JSONObject();
-        try{
-            root.put(Constant.MESSAGE_JSON_TITLE_TAG, journal.getTitle());
-            root.put(Constant.MESSAGE_JSON_CONTENT_TAG, journal.getContent());
-            root.put(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG, journal.getCountryCode());
-            root.put(Constant.MESSAGE_JSON_JOURNAL_DATE_TAG, journal.getJournalDate());
-            root.put(Constant.MESSAGE_JSON_JOURNAL_TIME_TAG, journal.getJournalTime());
-            root.put(Constant.MESSAGE_JSON_CREATED_DATE_TAG, journal.getCreatedDate());
-            root.put(Constant.MESSAGE_JSON_CREATED_TIME_TAG, journal.getCreatedTime());
-            root.put(Constant.MESSAGE_JSON_IS_PUBLISHED_TAG, this.convertBooleanToString(journal.getIsPublished()));
-
-            JSONArray tagArray = new JSONArray();
-            //JSONArray removeTagArray = new JSONArray();
-            for(Tag tag : journal.getTagList().getList()){
-
-                JSONObject tagObj = new JSONObject();
-                tagObj.put(Constant.MESSAGE_JSON_ID_TAG, tag.getTempID());
-                tagObj.put(Constant.MESSAGE_JSON_TAG_ID_TAG, tag.getID());
-                tagObj.put(Constant.MESSAGE_JSON_TAG_NAME_TAG, tag.getName());
-
-                if(tag.getIsChecked()){
-                    // true, means still under the journal
-                    tagArray.put(tagObj);
-                }
-
-            }
-
-            root.put(Constant.MESSAGE_JSON_TAGS_TAG, tagArray); // tags to be added
-            //root.put(Constant.MESSAGE_JSON_REMOVE_TAGS_TAG, removeTagArray); // tags to be removed
-
-
-            JSONObject projectObj = new JSONObject();
-            projectObj.put(Constant.MESSAGE_JSON_PROJECT_JOURNAL_RELATION_ID_TAG, journal.getProject().getProjectJournalRelationID());
-            projectObj.put(Constant.MESSAGE_JSON_PROJECT_ID_TAG, journal.getProject().getProjectID());
-
-            root.put(Constant.MESSAGE_JSON_PROJECT_TAG, projectObj); // current assigned project
-
-            return root.toString();
-
-        } catch (JSONException e){
-            mLogging.debug(TAG, "uploadNewJournalToJson error => " + e.getMessage());
-            e.printStackTrace();
-            return "";
-        }
-    }
-
-
-    public String parseJsonToJournalID(String response) {
-        try{
-            JSONObject root = new JSONObject(response);
-            JSONObject detailObj = root.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
-
-            return detailObj.getString(Constant.MESSAGE_JSON_JOURNAL_ID_TAG);
-
-        } catch (JSONException e){
-            mLogging.debug(TAG, "parseJsonToJournalID error => " + e.getMessage());
-            e.printStackTrace();
-            return "";
-        }
-
-    }
-
-    public String parseJsonToAlbumID(String response) {
-        try{
-            JSONObject root = new JSONObject(response);
-            JSONObject detailObj = root.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
-
-            return detailObj.getString(Constant.MESSAGE_JSON_ALBUM_ID_TAG);
-
-        } catch (JSONException e){
-            mLogging.debug(TAG, "parseJsonToAlbumID error => " + e.getMessage());
-            e.printStackTrace();
-            return "";
-        }
-
-    }
-
-    public JSONArray parseJsonToTagArray(String response) {
-        try{
-            JSONObject root = new JSONObject(response);
-            JSONObject detailObj = root.getJSONObject(Constant.MESSAGE_JSON_DETAIL_TAG);
-
-            return detailObj.getJSONArray(Constant.MESSAGE_JSON_TAGS_TAG);
-
-        } catch (JSONException e){
-            mLogging.debug(TAG, "parseJsonToTagArray error => " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
-
-    }
 
 
     public String userObjectToJson(User user){
@@ -798,27 +644,6 @@ public class Parser {
 
     public String generateFilename(String name, String ext){
         return name + "." + ext;
-    }
-
-    public String bitmapToBase64(Bitmap bitmap) {
-        try{
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
-            byte[] byteArray = byteArrayOutputStream .toByteArray();
-            byteArrayOutputStream.close();
-            byteArrayOutputStream = null;
-            return Base64.encodeToString(byteArray, Base64.DEFAULT);
-        }catch (IOException e) {
-            mLogging.debug(TAG, "bitmapToBase64 error => " + e.getMessage());
-            e.printStackTrace();
-            return "";
-        }
-
-    }
-
-    public Bitmap base64ToBitmap(String b64) {
-        byte[] imageAsBytes = Base64.decode(b64.getBytes(), Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
     }
 
 

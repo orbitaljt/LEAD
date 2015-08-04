@@ -1,10 +1,8 @@
 package com.orbital.lead.controller.Activity;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,8 +20,8 @@ import com.orbital.lead.R;
 import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerDividerItemDecoration;
 import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerProjectListAdapter;
 import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerTagListAdapter;
-import com.orbital.lead.controller.Service.JournalReceiver;
 import com.orbital.lead.model.Constant;
+import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumDialogEditJournalType;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.Project;
@@ -31,9 +29,14 @@ import com.orbital.lead.model.ProjectList;
 import com.orbital.lead.model.Tag;
 import com.orbital.lead.model.TagList;
 
+import java.util.ArrayList;
+
 public class AddNewSpecificJournalActivity extends BaseActivity {
 
     private final String TAG = this.getClass().getSimpleName();
+
+    private final int EDIT_TAG = 0;
+    private final int EDIT_PROJECT = 1;
 
     private View mToolbarView;
     private TextView mToolbarTitle;
@@ -45,11 +48,7 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
     private AlertDialog mDialogOption;
 
     private Journal mJournal;
-    private TagList newTagList;
-    private ProjectList newProjectList;
-    private Project newProject;
-
-
+    private TagList mHistoryTagList;
     private DatePickerDialog datePickerDialog;
     private DatePickerDialog.OnDateSetListener datePickerListener;
     private RecyclerView mRecyclerViewTagList;
@@ -57,14 +56,10 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
     private RecyclerView.Adapter mRecyclerDialogTagAdapter;
     private RecyclerView.Adapter mRecyclerDialogProjectAdapter;
 
-    private String newJournalID;
-    private String newAlbumID;
-
     private int mYear;
     private int mMonth;
     private int mDay;
 
-    private boolean toggleRefresh = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,24 +73,14 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
         this.restoreCustomActionbar();
         this.restoreDrawerHeaderValues();
 
-        this.initJournalReceiver();
-        this.retrieveNewJournalAlbumID();
-
-        this.initNewJournal();
         this.initTextTitle();
         this.initTextContent();
         this.initTextJournalDate();
         this.initTextTag();
         this.initTextProject();
-        this.initNewTagList();
-        this.initNewProject();
         this.initOnDateSetListener();
 
-        this.initTagSet();
-        this.retrievePreferenceTagSet();
-
-        this.newProjectList = new ProjectList();
-        this.newProjectList.setList(this.getCurrentUser().getProjectList());
+        getLogic().retrieveUnusedTagList(this);
 
         Bundle getBundleExtra = getIntent().getExtras();
         if (getBundleExtra != null) {
@@ -108,28 +93,38 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!getNavigationDrawerFragment().isDrawerOpen()) {
+            // Only show items in the action bar relevant to this screen
+            // if the drawer is not showing. Otherwise, let the drawer
+            // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.menu_add_new_specific_journal, menu);
             this.restoreCustomActionbar();
         }
         return true;
+        //return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        switch(id) {
-            case android.R.id.home: // save the current new journal
-                //onBackPressed();
-                this.uploadNewJournal();
-                return true;
 
-            case R.id.action_image:
-                getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, this.getJournal().getAlbum(), this.getJournal().getJournalID());
-                return true;
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
 
+        }else if(id == android.R.id.home){
+            // save the current new journal
+            onBackPressed();
+            return true;
+
+        }else if(id == R.id.action_image) {
+            getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, null);
+            return true;
         }
 
         return false;
+        //return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -137,14 +132,6 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
         this.mToolbarTitle.setText(title);
     }
 
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent();
-        intent.putExtra(Constant.BUNDLE_PARAM_JOURNAL_LIST_TOGGLE_REFRESH, toggleRefresh);
-        setResult(Activity.RESULT_OK, intent);
-        finish();
-        super.onBackPressed();
-    }
 
     private void restoreCustomActionbar(){
         // disable the home button and onClick to open navigation drawer
@@ -162,19 +149,9 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 //onBackPressed();
-                getLogging().debug(TAG, "mToolbarView setNavigationOnClickListener onClick");
+                getCustomLogging().debug(TAG, "mToolbarView setNavigationOnClickListener onClick");
             }
         });
-    }
-
-    public void refreshRecyclerDialogTagAdapter(){
-        if(this.mRecyclerDialogTagAdapter != null) {
-            this.mRecyclerDialogTagAdapter.notifyDataSetChanged();
-        }
-    }
-
-    public void setToggleRefresh(boolean val) {
-        this.toggleRefresh = val;
     }
 
     private void initToolbarTitle() {
@@ -187,14 +164,6 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
 
     private void pushToolbarToActionbar() {
         setSupportActionBar((Toolbar) this.getToolbar());
-    }
-
-    private void retrieveNewJournalAlbumID() {
-        this.getLogic().getNewJournaAlbumlID(this);
-    }
-
-    private void initNewJournal() {
-        this.mJournal = new Journal();
     }
 
     private void initTextTitle() {
@@ -224,9 +193,11 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
                 mYear = year;
                 mMonth = monthOfYear;
                 mDay = dayOfMonth;
-
-                String databaseFormatDate = year + "-" + (monthOfYear + 1) + "-" + dayOfMonth;
-                setTextJournalDate(convertToDisplayDate(databaseFormatDate));
+                // Display Selected date in textbox
+                /*
+                txtDate.setText(dayOfMonth + "-"
+                        + (monthOfYear + 1) + "-" + year);
+                */
             }
         };
     }
@@ -236,7 +207,7 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
         this.mTextTag.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showTagDialog(getTagSet().getTagList());
+                showTagDialog(getJournal().getTagList());
             }
         });
     }
@@ -246,17 +217,9 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
         this.mTextProject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showProjectDialog(getCurrentUser().getProjectList());
+                showProjectDialog(CurrentLoginUser.getUser().getProjectList());
             }
         });
-    }
-
-    private void initNewTagList() {
-        this.newTagList = new TagList();
-    }
-
-    private void initNewProject() {
-        this.newProject = new Project();
     }
 
     private void initDialogTagRecyclerView(View v){
@@ -278,27 +241,33 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
     }
 
     private void initRecyclerDialogTagAdapter(TagList currentUsedTagList){
-        getLogging().debug(TAG, "initRecyclerDialogTagAdapter");
-        this.mRecyclerDialogTagAdapter = new RecyclerTagListAdapter(currentUsedTagList);
+        getCustomLogging().debug(TAG, "initRecyclerDialogTagAdapter");
+        //this.mRecyclerDialogTagAdapter = new RecyclerJournalListAdapter(headerView, list, CurrentLoginUser.getUser());
+        this.mRecyclerDialogTagAdapter = new RecyclerTagListAdapter(currentUsedTagList, null);
         /*
         ((RecyclerTagListAdapter) mRecyclerDialogTagAdapter).setOnItemClickListener(new RecyclerTagListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                getLogging().debug(TAG, "initRecyclerDialogTagAdapter onItemClick position -> " + position);
+                getCustomLogging().debug(TAG, "initRecyclerDialogTagAdapter onItemClick position -> " + position);
             }
         });
         */
     }
 
     private void initRecyclerProjectAdapter(ProjectList list){
-        getLogging().debug(TAG, "initRecyclerProjectAdapter");
+        getCustomLogging().debug(TAG, "initRecyclerProjectAdapter");
         //this.mRecyclerDialogTagAdapter = new RecyclerJournalListAdapter(headerView, list, CurrentLoginUser.getUser());
-        if(this.newProject != null) {
-            this.mRecyclerDialogProjectAdapter = new RecyclerProjectListAdapter(list, this.newProject.getProjectID());
-        }else{
-            this.mRecyclerDialogProjectAdapter = new RecyclerProjectListAdapter(list, "");
-        }
+        this.mRecyclerDialogProjectAdapter = new RecyclerProjectListAdapter(list, "");
+        /*
+        ((RecyclerTagListAdapter) mRecyclerDialogTagAdapter).setOnItemClickListener(new RecyclerTagListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                getCustomLogging().debug(TAG, "initRecyclerDialogTagAdapter onItemClick position -> " + position);
+            }
+        });
+        */
     }
+
 
     private RecyclerView.Adapter getRecyclerDialogTagAdapter(){
         return this.mRecyclerDialogTagAdapter;
@@ -308,17 +277,11 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
         return this.mRecyclerDialogProjectAdapter;
     }
 
-    public void setNewJournalID(String id) {
-        this.getLogging().debug(TAG, "setNewJournalID id => " + id);
-        this.newJournalID = id;
+    private Journal getJournal() {
+        return this.mJournal;
     }
 
-    public void setNewAlbumID(String id) {
-        this.getLogging().debug(TAG, "setNewAlbumID id => " + id);
-        this.newAlbumID = id;
-    }
-
-    public void setJournal(Journal j){
+    private void setJournal(Journal j){
         this.mJournal = j;
     }
 
@@ -342,49 +305,6 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
         this.mTextProject.setText(value);
     }
 
-    private void setNewProject(Project project) {
-        this.newProject = project;
-    }
-
-    private String getEditTextTitle() {
-        return this.mEditTextTitle.getText().toString();
-    }
-
-    private String getTextJournalDate() {
-        return this.mTextJournalDate.getText().toString();
-    }
-
-    private String getTextTags() {
-        return this.mTextTag.getText().toString();
-    }
-
-    private String getTextProject() {
-        return this.mTextProject.getText().toString();
-    }
-
-    private String getEditTextContent() {
-        return this.mEditTextContent.getText().toString();
-    }
-
-    private TagList getTagList() {
-        return this.newTagList;
-    }
-
-    private Journal getJournal() {
-        return this.mJournal;
-    }
-
-    private void updateNewTagList(TagList list) {
-        this.newTagList.replaceWithTagList(list);
-    }
-
-    private String getNewJournalID() {
-        return this.newJournalID;
-    }
-
-    private String getNewAlbumID() {
-        return this.newAlbumID;
-    }
 
     /*=============== DIALOGS ==========*/
     private void showDatePickerDialog(){
@@ -400,19 +320,20 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
         return this.datePickerListener;
     }
 
-   private void showTagDialog(TagList list){
+   private void showTagDialog(TagList currentUsedTagList){
        AlertDialog.Builder builder = new AlertDialog.Builder(this);
        LayoutInflater inflater = this.getLayoutInflater();
 
        final View dialogView = inflater.inflate(R.layout.dialog_tag, null);
 
-       this.initRecyclerDialogTagAdapter(list);
+       this.initRecyclerDialogTagAdapter(currentUsedTagList);
        this.initDialogTagRecyclerView(dialogView);
 
        ImageView addNewTag = (ImageView) dialogView.findViewById(R.id.image_toolbar_add_new_tag);
        addNewTag.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View v) {
+               //showAddTagProjectDialog(EnumDialogEditJournalType.ADD_TAG, "");
                getLogic().showAddTagProjectDialog(AddNewSpecificJournalActivity.this, EnumDialogEditJournalType.ADD_TAG, "");
            }
        });
@@ -421,14 +342,7 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
                .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                    @Override
                    public void onClick(DialogInterface dialog, int id) {
-                       TagList list = ((RecyclerTagListAdapter) getRecyclerDialogTagAdapter()).getTagList();
-                       updateNewTagList(list); // update new tag list
-
-                       for (Tag t : newTagList.getList()) {
-                           getLogging().debug(TAG, "after update newTagList t.getName() => " + t.getName() + " checked => " + t.getIsChecked());
-                       }
-
-                       setTextTag(newTagList.getCheckedToString()); // update the tag text, show only all checked tags
+                       dialog.dismiss();
                    }
                });
 
@@ -456,16 +370,7 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
                 .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        Project selectedProject = ((RecyclerProjectListAdapter) getRecyclerDialogProjectAdapter()).getSelectedProject();
-
-                        newProject = selectedProject;
-                        newProjectList.resetList();
-                        if (selectedProject != null) { // sometimes user will not choose a project
-                            newProjectList.updateProject(selectedProject);
-                        }
-
-                        setTextProject(selectedProject != null ? selectedProject.getName() : "");
-                        setNewProject(selectedProject); // update the new project
+                        dialog.dismiss();
                     }
                 });
 
@@ -473,35 +378,35 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
     }
 
 
-    private void uploadNewJournal() {
-        if(!this.isValidJournal()) {
-            this.getLogging().debug(TAG, "uploadNewJournal it is not a valid new journal");
-            return;
-        }
 
-        this.getJournal().setJournalID(this.getNewJournalID());
-        this.getJournal().setTitle(this.getEditTextTitle());
-        this.getJournal().setContent(this.getEditTextContent());
-        this.getJournal().setJournalDate(this.convertToDatabaseDate(this.getTextJournalDate()));
-        this.getJournal().setTagList(this.newTagList);
-        this.getJournal().setProject(this.newProject);
 
-        String detail = this.getParser().uploadNewJournalToJson(this.getJournal());
-        this.getLogging().debug(TAG, "uploadNewJournal detail => " + detail);
 
-        this.getLogic().insertNewJournal(this, this.getCurrentUser().getUserID(), this.getNewJournalID(), this.getNewAlbumID(), detail);
-    }
 
-    private boolean isValidJournal() {
-        // Check title and content
-        if(getParser().isStringEmpty(this.getEditTextTitle()) &&
-                getParser().isStringEmpty(this.getEditTextContent())) {
-            return false; // if both empty, means it is not suitable to be uploaded as a new journal
-        }
-        return true;
+
+    private TagList initRecentHistoryTagList(){
+        //String tags = getLogic().retrieveUnusedTagList(this);
+        return null;
     }
 
 
 
+
+
+    private TagList createDummyTagList(){
+        TagList mTagList = new TagList();
+        ArrayList<Tag> list = new ArrayList<Tag>();
+        Tag mTag = new Tag("1", "1", "Demo", true);
+        list.add(mTag);
+        mTag = new Tag("2", "2", "MiddleEast", false);
+        list.add(mTag);
+        mTag = new Tag("3", "3", "Richest", false);
+        list.add(mTag);
+        mTag = new Tag("4", "4", "AbuDhabi", true);
+        list.add(mTag);
+
+        mTagList.setList(list);
+
+        return mTagList;
+    }
 
 }

@@ -1,7 +1,5 @@
 package com.orbital.lead.controller.Activity;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -17,14 +15,22 @@ import com.orbital.lead.R;
 import com.orbital.lead.controller.Fragment.FragmentDetail;
 import com.orbital.lead.controller.Fragment.FragmentMainUserJournalList;
 import com.orbital.lead.controller.Service.JournalReceiver;
+import com.orbital.lead.controller.Service.JournalService;
 import com.orbital.lead.controller.Service.ProjectReceiver;
+import com.orbital.lead.controller.Service.ProjectService;
 import com.orbital.lead.model.Constant;
 
 
 import com.orbital.lead.model.CurrentLoginUser;
+import com.orbital.lead.model.EnumJournalServiceType;
+import com.orbital.lead.model.EnumProjectServiceType;
 import com.orbital.lead.model.FacebookUserObject;
+import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.JournalList;
+import com.orbital.lead.model.ProjectList;
+import com.orbital.lead.model.TagList;
 import com.orbital.lead.model.User;
+import com.orbital.lead.model.CountryList;
 
 
 public class MainActivity extends BaseActivity
@@ -44,7 +50,7 @@ public class MainActivity extends BaseActivity
     //private FragmentMainUserJournalList mFragmentMainUserJournalList;
 
     private JournalReceiver mJournalReceiver;
-    //private ProjectReceiver mProjectReceiver;
+    private ProjectReceiver mProjectReceiver;
 
     private String currentFacebookUserID;
     private String currentLeadUserID;
@@ -93,22 +99,22 @@ public class MainActivity extends BaseActivity
 
 
             if(this.getFacebookLogic().getIsFacebookLogin()) { // login using facebook
-                //getLogging().debug(TAG, "AccessToken.getCurrentAccessToken().getToken() => " + AccessToken.getCurrentAccessToken().getToken());
+                //getCustomLogging().debug(TAG, "AccessToken.getCurrentAccessToken().getToken() => " + AccessToken.getCurrentAccessToken().getToken());
                 //this.currentFacebookAccessToken = AccessToken.getCurrentAccessToken().getToken(); //get current access token string
 
                 this.currentFacebookUserID = getBundleExtra.getString(Constant.BUNDLE_PARAM_FACEBOOK_USER_ID, "");
                 this.currentFacebookResponse = getBundleExtra.getString(Constant.BUNDLE_PARAM_FACEBOOK_RESPONSE, "");
 
-                getLogging().debug(TAG, "currentFacebookResponse => " + currentFacebookResponse);
+                getCustomLogging().debug(TAG, "currentFacebookResponse => " + currentFacebookResponse);
             }
 
 
             if(this.isRegistered){ // is registered with lead
-                getLogging().debug(TAG, "OnCreate Current user is registered");
-                //getLogging().debug(TAG, "getProfile from this.currentLeadUserID => " + currentLeadUserID);
-                this.getProfile(this.currentLeadUserID);
-                // update user profile from facebook will be done after getProfile onPostExecute
-                // update user profile picture from facebook will be done after getProfile onPostExecute
+                getCustomLogging().debug(TAG, "OnCreate Current user is registered");
+                //getCustomLogging().debug(TAG, "getUserProfile from this.currentLeadUserID => " + currentLeadUserID);
+                this.getUserProfile(this.currentLeadUserID);
+                // update user profile from facebook will be done after getUserProfile onPostExecute
+                // update user profile picture from facebook will be done after getUserProfile onPostExecute
 
                 if(!this.getFacebookLogic().getIsFacebookLogin()){ // login with lead account
                     this.currentLoginUsername = getBundleExtra.getString(Constant.BUNDLE_PARAM_USERNAME, "");
@@ -116,7 +122,7 @@ public class MainActivity extends BaseActivity
                 }
 
             }else { // not registered with lead
-                getLogging().debug(TAG, "OnCreate Current user is not registered!");
+                getCustomLogging().debug(TAG, "OnCreate Current user is not registered!");
                 this.setNewCurrentUser();
                 this.updateCurrentUserProfileFromFacebook();
                 this.createNewUserProfileToDatabase();
@@ -125,7 +131,7 @@ public class MainActivity extends BaseActivity
 
 
         }else{
-            getLogging().debug(TAG, "No bundle extra from getIntent()");
+            getCustomLogging().debug(TAG, "No bundle extra from getIntent()");
         }
 
     }
@@ -156,16 +162,8 @@ public class MainActivity extends BaseActivity
         this.mFragmentManager = getSupportFragmentManager();
     }
 
-    public void updateFragmentMainUserJournalList(JournalList list){
-        this.getFragmentJournalList().updateJournalList(list);
-    }
-
-    public void showFragmentEmptyJournalLayout() {
-        this.getFragmentJournalList().showEmptyJournalListLayout();
-    }
-
     private void displayFragmentJournalList(){
-        this.getLogging().debug(TAG, "displayFragmentAlbum");
+        this.getCustomLogging().debug(TAG, "displayFragmentAlbum");
         //this,
         this.mFragmentJournalList = FragmentMainUserJournalList.newInstance("", "");
         this.replaceFragment(this.mFragmentJournalList, Constant.FRAGMENT_JOURNAL_LIST);
@@ -184,16 +182,24 @@ public class MainActivity extends BaseActivity
         return this.mFragmentJournalList;
     }
 
-
-
-
-
-    /*
-    private TagSet getAllJournalTags(JournalList list) {
-        TagSet set = list.getAllTags();
-        return set;
+    private void updateFragmentMainUserJournalList(JournalList list){
+        this.getFragmentJournalList().updateJournalList(list);
     }
-    */
+
+    private void showFragmentEmptyJournalLayout() {
+        this.getFragmentJournalList().showEmptyJournalListLayout();
+    }
+
+    private void updateCurrentUserUsingTagList(JournalList list){
+        TagList tagList = new TagList();
+        for(Journal j : list.getList()){
+            tagList.getList().addAll(j.getTagList().getList()); //copy all tags into new taglist
+            this.getCustomLogging().debug(TAG, "updateCurrentUserUsingTagList copying tag");
+        }
+
+        this.getCurrentUser().getTagMap().addTagList(tagList);
+    }
+
 
     /*
     private String getCurrentFacebookAccessTokenString() {
@@ -404,7 +410,7 @@ public class MainActivity extends BaseActivity
     }
 
     public void setCurrentUser(User user){
-        getLogging().debug(TAG, "setCurrentUser");
+        getCustomLogging().debug(TAG, "setCurrentUser");
         CurrentLoginUser.setUser(user);
 
         if(!this.currentIsFacebookLogin){ //not login using facebook
@@ -414,7 +420,7 @@ public class MainActivity extends BaseActivity
     }
 
     public void setNewCurrentUser(){
-        getLogging().debug(TAG, "setNewCurrentUser");
+        getCustomLogging().debug(TAG, "setNewCurrentUser");
         User user = new User();
         CurrentLoginUser.setUser(user);
     }
@@ -424,7 +430,7 @@ public class MainActivity extends BaseActivity
     }
 
     public void updateCurrentUserProfileFromFacebook(){
-        getLogging().debug(TAG, "updateCurrentUserProfileFromFacebook");
+        getCustomLogging().debug(TAG, "updateCurrentUserProfileFromFacebook");
         if(this.currentIsFacebookLogin){ // is login from facebook
             // update all info that can be found from facebook
             // plus profile picture
@@ -435,7 +441,7 @@ public class MainActivity extends BaseActivity
                 CurrentLoginUser.getUser().setProfilePicUrl(fbObj.getModifiedProfilePictureUrl()); // profile picture will be facebook url
                 CurrentLoginUser.getUser().setProfilePictureID(fbObj.getProfilePictureID()); // update profile picture ID
                 CurrentLoginUser.getUser().setProfilePictureType(fbObj.getProfilePictureType()); //update profile picture type
-                getLogging().debug(TAG, "updateCurrentUserProfileFromFacebook fbObj.getProfilePictureType() => " + fbObj.getProfilePictureType());
+                getCustomLogging().debug(TAG, "updateCurrentUserProfileFromFacebook fbObj.getProfilePictureType() => " + fbObj.getProfilePictureType());
 
 
                 CurrentLoginUser.getUser().setBirthday(FormatDate.parseDate(fbObj.getBirthday(), FormatDate.FACEBOOK_DATE_TO_DATABASE_DATE, null));
@@ -445,73 +451,78 @@ public class MainActivity extends BaseActivity
                 CurrentLoginUser.getUser().setEmail(fbObj.getEmail()); // update email
 
             }else{
-                getLogging().debug(TAG, "updateCurrentUserProfileFromFacebook FacebookUserObject is null!");
+                getCustomLogging().debug(TAG, "updateCurrentUserProfileFromFacebook FacebookUserObject is null!");
             }
         }
     }
 
     public void updateCurrentUserProfileToDatabase(){
         String detail = getParser().userObjectToJson(getCurrentUser());
-        getLogging().debug(TAG, "updateCurrentUserProfileToDatabase detail => " + detail);
+        getCustomLogging().debug(TAG, "updateCurrentUserProfileToDatabase detail => " + detail);
         getLogic().updateUserProfileDatabase(this, this.getCurrentUser().getUserID(), detail);
+    }
+
+    public void updateCurrentUserCountryList(CountryList list) {
+        getCustomLogging().debug(TAG, "updateCurrentUserCountryList listSize =>" + list.size());
+        CurrentLoginUser.getUser().setCountryList(list);
     }
 
 
     public void createNewUserProfileToDatabase(){
         String detail = getParser().userObjectToJson(getCurrentUser());
-        getLogging().debug(TAG, "createNewUserProfileToDatabase detail => " + detail);
+        getCustomLogging().debug(TAG, "createNewUserProfileToDatabase detail => " + detail);
         // new user does not have lead user ID
         getLogic().insertUserProfileDatabase(this, detail);
     }
 
 
-    public void getProfile(String userID){
+    public void getUserProfile(String userID){
         this.getLogic().getUserProfile(this, userID);
     }
 
-    public void setProfilePicture(){
+    public void setUserProfilePicture(){
         this.setNavigationDrawerUserProfilePicture(this.getCurrentUser().getProfilePicUrl());
     }
 
 
-    public void uploadProfilePictureFromFacebook(){
-        getLogging().debug(TAG, "uploadProfilePictureFromFacebook");
+    public void uploadUserProfilePictureUrl(){
+        getCustomLogging().debug(TAG, "uploadUserProfilePictureUrl");
 
         String userID = this.getCurrentUser().getUserID();
         String imageUrl = this.getCurrentUser().getProfilePicUrl();
         String fileType = this.getCurrentUser().getProfilePictureType().toString();
         String fileName = getParser().generateFilename(this.getCurrentUser().getProfilePictureID(), fileType);
 
-        this.getLogic().uploadProfilePictureFromFacebook(this, userID, "", imageUrl, fileName, fileType, true, false);
+        this.getLogic().uploadProfilePictureFromFacebook(this, userID, imageUrl, fileName, fileType, true, false);
     }
 
 
 
-    public void setCurrentUserJournalList(JournalList list){
+
+    public void setUserJournalList(JournalList list){
         this.getCurrentUser().setJournalList(list);
     }
 
-    /*
     public void setProjectList(ProjectList list) {
         this.getCurrentUser().setProjectList(list);
     }
-    */
+
 
     public void setNavigationDrawerUserProfilePicture(String url){
-        getLogging().debug(TAG, "setNavigationDrawerUserProfilePicture using url => " + url);
+        getCustomLogging().debug(TAG, "setNavigationDrawerUserProfilePicture using url => " + url);
         this.getNavigationDrawerFragment().setImageUserProfile(url);
     }
 
     /*
     public void setNavigationDrawerUserProfilePicture(Drawable drawable, String fileName){
-        getLogging().debug(TAG, "setNavigationDrawerUserProfilePicture using drawable");
+        getCustomLogging().debug(TAG, "setNavigationDrawerUserProfilePicture using drawable");
 
         this.getNavigationDrawerFragment().setImageUserProfile(drawable);
         //this.getNavigationDrawerFragment().setCurrentUserProfilePictureFilePath(fileName);
     }
 
     public void setNavigationDrawerUserProfilePicture(Bitmap bmp, String fileName){
-        getLogging().debug(TAG, "setNavigationDrawerUserProfilePicture using Bitmap");
+        getCustomLogging().debug(TAG, "setNavigationDrawerUserProfilePicture using Bitmap");
         this.getNavigationDrawerFragment().setImageUserProfile(bmp);
         //this.getNavigationDrawerFragment().setCurrentUserProfilePictureFilePath(fileName);
     }
@@ -543,12 +554,10 @@ public class MainActivity extends BaseActivity
         this.mJournalReceiver.setReceiver(this);
     }
 
-    /*
     public void initProjectReceiver() {
         this.mProjectReceiver = new ProjectReceiver(new Handler());
         this.mProjectReceiver.setReceiver(this);
     }
-    */
 
     public JournalReceiver getJournalReceiver(){
         if(this.mJournalReceiver == null){
@@ -557,102 +566,80 @@ public class MainActivity extends BaseActivity
         return this.mJournalReceiver;
     }
 
-    /*
     public ProjectReceiver getProjectReceiver() {
         if(this.mProjectReceiver == null){
             this.initProjectReceiver();
         }
         return this.mProjectReceiver;
     }
-    */
 
     public void getUserJournalList(){
-        this.getLogic().getUserJournalList(this, this.getCurrentUser().getUserID());
+        this.getLogic().getUserJournalList(this, this.getCurrentUser());
     }
 
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch(requestCode) {
-            case START_ADD_NEW_SPECIFIC_JOURNAL_ACTIVITY:
-                if(resultCode == Activity.RESULT_OK) {
-                    Bundle b = data.getExtras();
-                    if (b != null) {
-                        boolean refresh = b.getBoolean(Constant.BUNDLE_PARAM_JOURNAL_LIST_TOGGLE_REFRESH);
-
-                        if(refresh) {
-                            // refresh the entire list again
-                            this.updateFragmentMainUserJournalList(this.getCurrentUser().getJournalList());
-                        }
-                    }
-                }
-
-
-        }
+    public void getAllCountries() {
+        this.getLogic().getAllCountries(this);
     }
 
-    /*
-    public void retrieveAllProject() {
-        this.getLogic().getAllProject(this);
+    public void getAllProject() {
+        this.getLogic().getAllProject(this, "", "", "");
     }
-    */
 
     /**
-     * Get result from services
+     * Get result from S3Receiver
      * **/
-    /*
     @Override
     public void onReceiveResult(int resultCode, Bundle resultData) {
-
         EnumJournalServiceType journalServiceType = null;
         EnumProjectServiceType projectServiceType = null;
         String jsonResult = "";
 
         switch (resultCode) {
             case JournalService.STATUS_RUNNING:
-                this.getLogging().debug(TAG, "onReceiveResult -> JournalService.STATUS_RUNNING");
+                this.getCustomLogging().debug(TAG, "onReceiveResult -> JournalService.STATUS_RUNNING");
                 break;
 
-
             case ProjectService.STATUS_RUNNING:
-                this.getLogging().debug(TAG, "onReceiveResult -> ProjectService.STATUS_RUNNING");
+                this.getCustomLogging().debug(TAG, "onReceiveResult -> ProjectService.STATUS_RUNNING");
                 break;
 
             case JournalService.STATUS_FINISHED:
-                this.getLogging().debug(TAG, "onReceiveResult -> JournalService.STATUS_FINISHED");
+                this.getCustomLogging().debug(TAG, "onReceiveResult -> JournalService.STATUS_FINISHED");
                 journalServiceType = (EnumJournalServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
 
                 switch(journalServiceType){
                     case GET_ALL_JOURNAL:
                         jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
-                        this.getLogging().debug(TAG, "onReceiveResult GET_ALL_JOURNAL -> jsonResult => " + jsonResult);
+                        this.getCustomLogging().debug(TAG, "onReceiveResult GET_ALL_JOURNAL -> jsonResult => " + jsonResult);
                         JournalList list = this.getJournalListFromJson(jsonResult);
 
                         if(list != null){
-                            this.setCurrentUserJournalList(list);
+                            this.setUserJournalList(list);
                             this.updateFragmentMainUserJournalList(list);
-                            this.getLogic().addPreferenceTagSet(this, this.getAllJournalTags(list)); // get all journals tags and save to tag file
+                            this.updateCurrentUserUsingTagList(list);
                         }else{
-                            this.getLogging().debug(TAG, "onReceiveResult list is null");
+                            this.getCustomLogging().debug(TAG, "onReceiveResult list is null");
                             this.showFragmentEmptyJournalLayout();
                         }
 
                         break;
 
+                    /*
+                    case GET_SPECIFIC_JOURNAL:
+                        break;
+                   */
                 }
 
                 break;
 
 
             case ProjectService.STATUS_FINISHED:
-                this.getLogging().debug(TAG, "onReceiveResult -> ProjectService.STATUS_FINISHED");
+                this.getCustomLogging().debug(TAG, "onReceiveResult -> ProjectService.STATUS_FINISHED");
                 projectServiceType = (EnumProjectServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
                 switch (projectServiceType) {
                     case GET_ALL_PROJECT:
                         jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
-                        this.getLogging().debug(TAG, "onReceiveResult GET_ALL_PROJECT -> jsonResult => " + jsonResult);
+                        this.getCustomLogging().debug(TAG, "onReceiveResult GET_ALL_PROJECT -> jsonResult => " + jsonResult);
                         ProjectList list = this.getProjectListFromJson(jsonResult);
 
                         if(list != null) {
@@ -664,19 +651,18 @@ public class MainActivity extends BaseActivity
 
 
             case JournalService.STATUS_ERROR:
-                this.getLogging().debug(TAG, "JournalService.STATUS_ERROR");
+                this.getCustomLogging().debug(TAG, "JournalService.STATUS_ERROR");
                 break;
 
             case ProjectService.STATUS_ERROR:
-                this.getLogging().debug(TAG, "ProjectService.STATUS_ERROR");
+                this.getCustomLogging().debug(TAG, "ProjectService.STATUS_ERROR");
                 break;
 
         }
 
     }
-*/
 
-/*
+
     public JournalList getJournalListFromJson(String json){
         return getParser().parseJsonToJournalList(json);
     }
@@ -684,11 +670,14 @@ public class MainActivity extends BaseActivity
     public ProjectList getProjectListFromJson(String json) {
         return getParser().parseJsonToProjectList(json);
     }
-*/
 
     private FacebookUserObject getFacebookUserObject(String json) {
         return ParserFacebook.getFacebookUserObject(json);
     }
+
+
+
+
 
 
 

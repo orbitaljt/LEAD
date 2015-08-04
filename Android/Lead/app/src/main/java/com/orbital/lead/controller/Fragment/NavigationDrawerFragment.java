@@ -345,21 +345,21 @@ public class NavigationDrawerFragment extends Fragment {
                                 @Override
                                 public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
                                     //holder.progressBar.setVisibility(View.GONE);
-                                    //getLogging().debug(TAG, "onLoadingFailed");
+                                    //getCustomLogging().debug(TAG, "onLoadingFailed");
                                     //mAnimator.setDisplayedChild(2);
                                 }
 
                                 @Override
                                 public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
                                     //holder.progressBar.setVisibility(View.GONE);
-                                    //getLogging().debug(TAG, "onLoadingComplete");
+                                    //getCustomLogging().debug(TAG, "onLoadingComplete");
                                    // mAnimator.setDisplayedChild(0);
                                 }
                             },
                             new ImageLoadingProgressListener() {
                                 @Override
                                 public void onProgressUpdate(String imageUri, View view, int current, int total) {
-                                    //getLogging().debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
+                                    //getCustomLogging().debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
                                     //holder.progressBar.setProgress(Math.round(100.0f * current / total));
                                 }
                             });

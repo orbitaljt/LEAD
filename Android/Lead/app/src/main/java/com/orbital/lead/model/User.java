@@ -37,6 +37,8 @@ public class User {
 
     private ProjectList mProjectList;
     private JournalList mJournalList;
+    private CountryList mCountryList;
+    private TagMap mTagMap; //list of tags that are currently using across all journals
 
     public User(){
         this.initParser();
@@ -71,6 +73,7 @@ public class User {
         this._profilePicUrl = getParser().createPictureNormalUrl(this._profilePicID,
                 this._profilePicType.toString(), this._userID);
 
+        this.mTagMap = new TagMap();
     }
 
     // Get
@@ -194,6 +197,15 @@ public class User {
         return this.mJournalList;
     }
 
+    public TagMap getTagMap() {
+        if(this.mTagMap == null){
+            this.mTagMap = new TagMap();
+        }
+        return this.mTagMap;
+    }
+
+    public CountryList getCountryList() { return this.mCountryList; }
+
     // Set
     public void setFacebookAccessToken(AccessToken at) {
         this._facebookAccessToken = at;
@@ -304,6 +316,10 @@ public class User {
     public void setJournalList(JournalList list){
         this.mJournalList = list;
     }
+
+    public void setCountryList(CountryList list) { this.mCountryList = list; }
+
+    public void setTagMap(TagMap map) { this.mTagMap = map; }
 
     private void initParser(){
         this.mParser = Parser.getInstance();

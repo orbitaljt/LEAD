@@ -264,11 +264,6 @@
         <item name="android:textColor">@color/primary_text</item>
     </style>
 
-    <style name="textDialogStyle">
-        <item name="android:layout_marginTop">@dimen/edit_text_margin_top</item>
-        <item name="android:textSize">@dimen/text_primary</item>
-        <item name="android:textColor">@color/primary_text</item>
-    </style>
 
     <style name="gridAlbumContentAreaStyle">
         <item name="android:padding">@dimen/grid_text_content_area_padding</item>
