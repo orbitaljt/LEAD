@@ -19,20 +19,27 @@ public class AsyncJournal extends AsyncTask<String, Void, String> {
     Parser mParser;
     InputStream urlStream = null;
 
+    final int INDEX_SERVICE_TYPE = 0;
+    final int INDEX_USER_ID = 1;
+
     @Override
     final protected String doInBackground(String... params) {
-        // params[0] - serviec type
-
+        // params[0] - service type
+        String userID = "";
         String response = "";
         this.initParser();
 
         try{
-            EnumJournalServiceType serviceType = EnumJournalServiceType.fromString(params[0]);
+            if(params.length <= 0) {
+                throw new Exception("user ID is required");
+            }
+
+            EnumJournalServiceType serviceType = EnumJournalServiceType.fromString(params[INDEX_SERVICE_TYPE]);
 
             switch(serviceType){
                 case GET_NEW_JOURNAL_ALBUM_ID:
-
-                    response = this.getNewJournalAlbumID();
+                    userID = params[INDEX_USER_ID];
+                    response = this.getNewJournalAlbumID(userID);
                     System.out.println("AsyncJournal TYPE_GET_NEW_JOURNAL_ALBUM_ID response => " + response);
                     return response;
 
@@ -58,9 +65,10 @@ public class AsyncJournal extends AsyncTask<String, Void, String> {
     /**
      * Gets new generated journal and album IDs from server
      * **/
-    private String getNewJournalAlbumID() throws IOException {
+    private String getNewJournalAlbumID(String userID) throws IOException {
         String url = Constant.URL_CLIENT_SERVER;
         HashMap<String, String> params = new HashMap<String, String>();
+        params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, userID);
 
         this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_GET_NEW_JOURNAL_ALBUM_ID, params);
         return WebConnector.convertStreamToString(this.urlStream);

@@ -87,7 +87,6 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
             this.mTextTitle = (TextView) v.findViewById(R.id.text_view_title);
             this.mTextSubTitle = (TextView) v.findViewById(R.id.text_view_subtitle);
             this.initThumbnailImageView(v);
-            //this.mLoadingSpinner = (ProgressBar) v.findViewById(R.id.loading_spinner);
             this.initViewAnimator(v);
         }
 
@@ -107,6 +106,13 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
             mLogging.debug(TAG, "setThumbnailImage");
             this.mAnimator.setDisplayedChild(1);
 
+            if(!getParser().isStringEmpty(url)) {
+                mLogic.showPicture(mContext, mAnimator, mImagePicture, url);
+            }else{
+                this.mAnimator.setDisplayedChild(2);
+            }
+
+            /*
             ImageLoader.getInstance()
                     .displayImage(url, this.mImagePicture, mOptions,
                             new SimpleImageLoadingListener(){
@@ -138,29 +144,8 @@ public class RecyclerJournalListAdapter extends RecyclerView.Adapter<RecyclerVie
                                     //holder.progressBar.setProgress(Math.round(100.0f * current / total));
                                 }
                     });
+            */
 
-
-
-            /*
-            Picasso.with(context)
-                    .load(url)
-                    .error(R.drawable.image_blank_picture_16_to_9)
-                    .noFade()
-                    .into(this.mImagePicture, new Callback() {
-                        @Override
-                        public void onSuccess() {
-                            mLogging.debug(TAG, "Picasso onSuccess");
-                            mAnimator.setDisplayedChild(0); // show actual image
-                        }
-
-                        @Override
-                        public void onError() {
-                            mLogging.debug(TAG, "Picasso onError");
-                            mAnimator.setDisplayedChild(2);
-                        }
-                    });
-
-                    */
 
         }
 

@@ -40,22 +40,23 @@ import com.orbital.lead.controller.Activity.MainActivity;
 import com.orbital.lead.controller.Service.JournalService;
 import com.orbital.lead.controller.Service.PictureService;
 import com.orbital.lead.controller.Service.ProjectService;
-import com.orbital.lead.logic.Asynchronous.AsyncCountry;
+import com.orbital.lead.logic.Asynchronous.AsyncJournal;
 import com.orbital.lead.logic.Asynchronous.AsyncUploadImage;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfilePicture;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfile;
 import com.orbital.lead.logic.LocalStorage.LocalStorage;
-import com.orbital.lead.logic.Preference.History;
+import com.orbital.lead.logic.Preference.Preference;
 import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Constant;
-import com.orbital.lead.model.CountryList;
 import com.orbital.lead.model.EnumDialogEditJournalType;
 import com.orbital.lead.model.EnumJournalServiceType;
 import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.EnumProjectServiceType;
 import com.orbital.lead.model.Journal;
+import com.orbital.lead.model.ProjectList;
 import com.orbital.lead.model.Tag;
 import com.orbital.lead.model.TagList;
+import com.orbital.lead.model.TagSet;
 import com.orbital.lead.model.User;
 
 import java.io.FileNotFoundException;
@@ -75,14 +76,14 @@ public class Logic {
     private Parser mParser;
     private LocalStorage mStorageLogic;
     private CustomLogging mLogging;
-    private History mHistoryPref;
+    private Preference mPref;
 
     private Logic(){} // private constructor to prevent creating new instance
 
     public static Logic getInstance(){
         mLogic.initLogging();
         mLogic.initParser();
-        mLogic.initHistoryPreference();
+        mLogic.initPreference();
         mLogic.initLocalStorageLogic();
         return mLogic;
     }
@@ -149,21 +150,21 @@ public class Logic {
     }
 
 
-    public void getUserJournalList(Context context, User currentUser){
-        if(currentUser == null){
-            this.getLogging().debug(TAG, "getUserJournalList => No journal list ID available.");
+    public void getUserJournalList(Context context, String userID){
+        if(getParser().isStringEmpty(userID)){
+            this.getLogging().debug(TAG, "retrieveUserJournalList => No journal list ID available.");
         }else{
-            mLogging.debug(TAG, "getUserJournalList => Get journal list from web service");
-            this.executeJournalService(context, EnumJournalServiceType.GET_ALL_JOURNAL, currentUser, null, "");
+            mLogging.debug(TAG, "retrieveUserJournalList => Get journal list from web service");
+            this.executeJournalService(context, EnumJournalServiceType.GET_ALL_JOURNAL, userID, "", "", "");
         }
     }
 
-    public void updateUserJournal(Context context, User currentUser, Journal journal, String detail) {
-        if(currentUser == null){
+    public void updateUserJournal(Context context, String userID, String journalID, String detail) {
+        if(getParser().isStringEmpty(userID) || getParser().isStringEmpty(journalID) || getParser().isStringEmpty(detail)){
             this.getLogging().debug(TAG, "updateUserJournal => No journal list ID available.");
         }else{
             mLogging.debug(TAG, "updateUserJournal => update journal from web service");
-            this.executeJournalService(context, EnumJournalServiceType.UPDATE_SPECIFIC_JOURNAL, currentUser, journal, detail);
+            this.executeJournalService(context, EnumJournalServiceType.UPDATE_SPECIFIC_JOURNAL, userID, journalID, "", detail);
         }
     }
 
@@ -172,7 +173,7 @@ public class Logic {
             this.getLogging().debug(TAG, "getUserSpecificAlbum => Album ID is empty.");
         }else{
             mLogging.debug(TAG, "getUserSpecificAlbum => Get specific album from web service with album ID => " + albumID);
-            this.executePictureService(context, EnumPictureServiceType.GET_SPECIFIC_ALBUM, albumID, "");
+            this.executePictureService(context, EnumPictureServiceType.GET_SPECIFIC_ALBUM, albumID, "", "");
         }
     }
 
@@ -181,18 +182,14 @@ public class Logic {
             this.getLogging().debug(TAG, "getUserAllAlbum => User ID is empty.");
         }else{
             mLogging.debug(TAG, "getUserAllAlbum => Get all album from web service with user ID => " + userID);
-            this.executePictureService(context, EnumPictureServiceType.GET_ALL_ALBUM, "", userID);
+            this.executePictureService(context, EnumPictureServiceType.GET_ALL_ALBUM, "", userID, "");
         }
     }
 
-    public void getAllProject(Context context, String projectID, String userID, String detail) {
-        mLogging.debug(TAG, "getAllProject");
-        executeProjectService(context, EnumProjectServiceType.GET_ALL_PROJECT, projectID, userID, detail);
-    }
 
-    public void getAllCountries(Context context){
-        HttpAsyncCountry mAsync = new HttpAsyncCountry(context);
-        mAsync.execute(Constant.TYPE_GET_ALL_COUNTRIES);
+    public void getAllProject(Context context) {
+        mLogging.debug(TAG, "retrieveAllProject");
+        executeProjectService(context, EnumProjectServiceType.GET_ALL_PROJECT, "", "", "");
     }
 
 
@@ -202,10 +199,11 @@ public class Logic {
         mAsync.execute(Constant.TYPE_UPDATE_USER_PROFILE, userID, detail);
     }
 
-    public void uploadProfilePictureFromFacebook(Context context, String userID, String imageUrl, String fileName, String fileType,
+    public void uploadProfilePictureFromFacebook(Context context, String userID, String albumID, String imageUrl, String fileName, String fileType,
                                                  boolean fromFacebook, boolean fromLead){
-        HttpAsyncUploadImageUrl mAsync = new HttpAsyncUploadImageUrl(context);
-        mAsync.execute(Constant.TYPE_UPLOAD_IMAGE_URL, userID, imageUrl, fileName, fileType,
+
+        HttpAsyncUploadImage mAsync = new HttpAsyncUploadImage(context, EnumPictureServiceType.UPLOAD_PROFILE_IMAGE_URL);
+        mAsync.execute(EnumPictureServiceType.UPLOAD_PROFILE_IMAGE_URL.toString(), userID, imageUrl, fileName, fileType,
                         mParser.convertBooleanToString(fromFacebook),
                         mParser.convertBooleanToString(fromLead));
     }
@@ -214,6 +212,34 @@ public class Logic {
         // detail in json string
         HttpAsyncUserProfile mAsync = new HttpAsyncUserProfile(context, Constant.TYPE_CREATE_USER_PROFILE);
         mAsync.execute(Constant.TYPE_CREATE_USER_PROFILE, "", detail);
+    }
+
+    public void insertNewJournal(Context context, String userID, String journalID, String albumID, String detail){
+        if(this.getParser().isStringEmpty(userID) || this.getParser().isStringEmpty(journalID) ||
+                this.getParser().isStringEmpty(albumID) || this.getParser().isStringEmpty(detail)){
+            this.getLogging().debug(TAG, "insertNewJournal => some parameter(s) is/are empty.");
+        }else{
+            mLogging.debug(TAG, "insertNewJournal");
+            this.executeJournalService(context, EnumJournalServiceType.INSERT_NEW_JOURNAL, userID, journalID, albumID, detail);
+        }
+    }
+
+
+    public void uploadNewPicture(Context context, String filePath, String userID, String albumID) {
+        mLogging.debug(TAG, "uploadNewPicture");
+
+        if(this.getParser().isStringEmpty(userID) || this.getParser().isStringEmpty(albumID) ||
+                this.getParser().isStringEmpty(filePath)){
+            this.getLogging().debug(TAG, "uploadNewPicture => User ID or album ID or file path is empty.");
+        }else{
+            this.executePictureService(context, EnumPictureServiceType.UPLOAD_IMAGE_FILE, albumID, userID, filePath);
+        }
+
+    }
+
+    public void getNewJournaAlbumlID(Context context, String userID) {
+        HttpAsyncJournal mAsync = new HttpAsyncJournal(context, EnumJournalServiceType.GET_NEW_JOURNAL_ALBUM_ID);
+        mAsync.execute(EnumJournalServiceType.GET_NEW_JOURNAL_ALBUM_ID.toString(), userID);
     }
 
 
@@ -232,16 +258,16 @@ public class Logic {
         context.startActivity(newIntent);
     }
 
-    public void displayPictureActivity(Context context, String type, Album album){
+    public void displayPictureActivity(Context context, String type, Album album, String journalID){
         //, ArrayList<Picture> picList
         mLogging.debug(TAG, "displayPictureActivity");
         Intent newIntent = new Intent(context, PictureActivity.class);
 
         Bundle mBundle = new Bundle();
         mBundle.putString(Constant.BUNDLE_PARAM_OPEN_FRAGMENT_TYPE, type);
+        mBundle.putString(Constant.BUNDLE_PARAM_JOURNAL_ID, journalID);
         mBundle.putParcelable(Constant.BUNDLE_PARAM_ALBUM, album);
-        //mBundle.putBoolean(Constant.BUNDLE_PARAM_IS_FACEBOOK_LOGIN, isFacebookLogin);
-        //mBundle.putParcelableArrayList(Constant.BUNDLE_PARAM_PICTURE_LIST, picList);
+
 
         newIntent.putExtras(mBundle);
         context.startActivity(newIntent);
@@ -258,12 +284,14 @@ public class Logic {
         if(context instanceof SpecificJournalActivity){
             ((SpecificJournalActivity) context).startActivityForResult(newIntent, SpecificJournalActivity.START_EDIT_SPECIFIC_JOURNAL_ACTIVITY);
         }
-        //context.startActivity(newIntent);
     }
 
     public void displayAddNewJournalActivity(Context context) {
         Intent newIntent = new Intent(context, AddNewSpecificJournalActivity.class);
-        context.startActivity(newIntent);
+        if(context instanceof MainActivity){
+            ((MainActivity) context).startActivityForResult(newIntent, MainActivity.START_ADD_NEW_SPECIFIC_JOURNAL_ACTIVITY);
+        }
+        //context.startActivity(newIntent);
     }
 
     public void displayProfileActivity(Context context){
@@ -328,9 +356,9 @@ public class Logic {
         }
     }
 
-    private void initHistoryPreference() {
-        if(this.mHistoryPref == null) {
-            this.mHistoryPref = History.getInstance();
+    private void initPreference() {
+        if(this.mPref == null) {
+            this.mPref = Preference.getInstance();
         }
     }
 
@@ -346,27 +374,9 @@ public class Logic {
         this.mStorageLogic = LocalStorage.getInstance();
     }
 
-    private void showPicture(Context context, final ViewAnimator animator, ImageView targetView, String url){
+    public void showPicture(Context context, final ViewAnimator animator, ImageView targetView, String url){
         animator.setDisplayedChild(1);
 
-        /*
-        Picasso.with(context)
-                .load(url)
-                .noFade()
-                .into(targetView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        //mLogging.debug(TAG, "Picasso onSuccess with URL => " + url);
-                        animator.setDisplayedChild(0); // show actual image
-                    }
-
-                    @Override
-                    public void onError() {
-                        //mLogging.debug(TAG, "Picasso onError with URL => " + url);
-                        animator.setDisplayedChild(2); // failed to load
-                    }
-                });
-        */
         ImageLoader.getInstance()
                 .displayImage(url, targetView, CustomApplication.getDisplayImageOptions(),
                         new SimpleImageLoadingListener(){
@@ -432,14 +442,13 @@ public class Logic {
                         ((MainActivity) mContext).setCurrentUser(user);
                         ((MainActivity) mContext).updateCurrentUserProfileFromFacebook();
                         ((MainActivity) mContext).updateCurrentUserProfileToDatabase();
-                        ((MainActivity) mContext).uploadUserProfilePictureUrl();
+                        ((MainActivity) mContext).uploadProfilePictureFromFacebook();
                         //((MainActivity) mContext).getUserProfilePicture(user.getUserID());
-                        ((MainActivity) mContext).setUserProfilePicture();
+                        ((MainActivity) mContext).setProfilePicture();
                         ((MainActivity) mContext).setNavigationDrawerUserName();
                         ((MainActivity) mContext).setNavigationDrawerUserEmail();
-                        ((MainActivity) mContext).getUserJournalList();
-                        ((MainActivity) mContext).getAllCountries();
-                        ((MainActivity) mContext).getAllProject();
+                        ((MainActivity) mContext).retrieveUserJournalList();
+                        ((MainActivity) mContext).retrieveAllProject();
 
                     }
                     break;
@@ -459,8 +468,8 @@ public class Logic {
                             mLogging.debug(TAG, "HttpAsyncUserProfile TYPE_CREATE_USER_PROFILE onPostExecute newUserID => " + newUserID);
 
                             ((MainActivity) mContext).setNewCurrentUserID(newUserID);
-                            ((MainActivity) mContext).uploadUserProfilePictureUrl();
-                            ((MainActivity) mContext).setUserProfilePicture();
+                            ((MainActivity) mContext).uploadProfilePictureFromFacebook();
+                            ((MainActivity) mContext).setProfilePicture();
                             ((MainActivity) mContext).setNavigationDrawerUserName();
                             ((MainActivity) mContext).setNavigationDrawerUserEmail();
                         }else{
@@ -500,7 +509,7 @@ public class Logic {
                         String getImageLink = mParser.parseJsonToProfilePictureLink(result);
 
                         user.setProfilePicUrl(getImageLink);
-                        //((MainActivity) mContext).setUserProfilePicture(getImageLink);
+                        //((MainActivity) mContext).setProfilePicture(getImageLink);
 
                         break;
                     case Constant.PICTURE_QUERY_QUANTITY_ALBUM:
@@ -516,12 +525,14 @@ public class Logic {
 
     }//end HttpAsyncUserProfilePicture
 
-    private class HttpAsyncCountry extends AsyncCountry {
 
+    private class HttpAsyncUploadImage extends AsyncUploadImage {
         private Context mContext;
+        private EnumPictureServiceType type;
 
-        public HttpAsyncCountry(Context c){
+        public HttpAsyncUploadImage(Context c, EnumPictureServiceType serviceType){
             this.mContext = c;
+            this.type = serviceType;
         }
 
         @Override
@@ -530,31 +541,17 @@ public class Logic {
 
         @Override
         protected void onPostExecute(final String result) {
-            CountryList list = getParser().parseJsonToCountryList(result);
-            mLogging.debug(TAG, "httpAsyncCountryOnPostExecute result => " + result);
-            if(mContext instanceof MainActivity) {
-                ((MainActivity) mContext).updateCurrentUserCountryList(list);
+            mLogging.debug(TAG, "HttpAsyncUploadImage onPostExecute result => " + result);
+
+            switch (this.type) {
+                case UPLOAD_PROFILE_IMAGE_URL:
+                    break;
+                /*
+                case UPLOAD_IMAGE_FILE:
+                    break;
+                */
             }
 
-        }//end onPostExecute
-
-    }//end HttpAsyncCountry
-
-
-    private class HttpAsyncUploadImageUrl extends AsyncUploadImage {
-        private Context mContext;
-
-        public HttpAsyncUploadImageUrl(Context c){
-            this.mContext = c;
-        }
-
-        @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected void onPostExecute(final String result) {
-            mLogging.debug(TAG, "HttpAsyncUploadImageUrl onPostExecute result => " + result);
 
             //if(mContext instanceof MainActivity){ // calling from mainactivity
 
@@ -563,16 +560,67 @@ public class Logic {
                 //String getImageLink = mParser.parseJsonToProfilePictureLink(result);
 
                 //user.setProfilePicUrl(getImageLink);
-                //((MainActivity) mContext).setUserProfilePicture(getImageLink);
-
+                //((MainActivity) mContext).setProfilePicture(getImageLink);
 
             //}//end if
 
         }//end onPostExecute
 
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
 
+            switch (this.type) {
+                case UPLOAD_PROFILE_IMAGE_URL:
+                    break;
+                /*
+                case UPLOAD_IMAGE_FILE:
+                    if(mContext instanceof PictureActivity) {
 
+                    }
+                    break;
+                */
+            }
 
+        }
+
+    }
+
+    private class HttpAsyncJournal extends AsyncJournal {
+
+        private Context context;
+        private EnumJournalServiceType serviceType;
+
+        public HttpAsyncJournal(Context context, EnumJournalServiceType type){
+            this.serviceType = type;
+            this.context = context;
+        }
+
+        protected void onPreExecute() {
+        }
+
+        @Override
+        protected void onPostExecute(final String result) {
+            mLogging.debug(TAG, "HttpAsyncJournal onPostExecute result => " + result);
+
+            switch (this.serviceType) {
+                case GET_NEW_JOURNAL_ALBUM_ID:
+
+                    String newJournalID = getParser().parseJsonToJournalID(result);
+                    String newAlbumID = getParser().parseJsonToAlbumID(result);
+
+                    if(context instanceof AddNewSpecificJournalActivity) {
+                        ((AddNewSpecificJournalActivity) context).setNewJournalID(newJournalID);
+                        ((AddNewSpecificJournalActivity) context).setNewAlbumID(newAlbumID);
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+
+        }//end onPostExecute
     }
 
 
@@ -599,17 +647,24 @@ public class Logic {
     }
 */
 
-    private void executeJournalService(Context mContext, EnumJournalServiceType serviceType, User currentUser, Journal journal, String detail){
+    private void executeJournalService(Context mContext, EnumJournalServiceType serviceType, String userID, String journalID, String albumID, String detail){
         Intent intent = new Intent(Intent.ACTION_SYNC, null, mContext, JournalService.class);
 
         switch(serviceType){
             case GET_ALL_JOURNAL:
-                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, currentUser.getUserID()); // user ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, userID); // user ID
                 break;
 
             case UPDATE_SPECIFIC_JOURNAL:
-                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, currentUser.getUserID()); // user ID
-                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG, journal.getJournalID()); // journal ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, userID); // user ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG, journalID); // journal ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_DETAIL_TAG, detail); // detail
+                break;
+
+            case INSERT_NEW_JOURNAL:
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, userID); // user ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG, journalID); // journal ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG, albumID); // journal ID
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_DETAIL_TAG, detail); // detail
                 break;
         }
@@ -621,19 +676,27 @@ public class Logic {
 
         }else if (mContext instanceof EditSpecificJournalActivity) {
             intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((EditSpecificJournalActivity) mContext).getJournalReceiver());
+
+        }else if (mContext instanceof AddNewSpecificJournalActivity) {
+            intent.putExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG, ((AddNewSpecificJournalActivity) mContext).getJournalReceiver());
         }
 
         mContext.startService(intent);
     }
 
-    private void executePictureService(Context mContext, EnumPictureServiceType serviceType, String albumID, String userID) {
+    private void executePictureService(Context mContext, EnumPictureServiceType serviceType, String albumID, String userID, String uploadFilePath) {
         Intent intent = new Intent(Intent.ACTION_SYNC, null, mContext, PictureService.class);
         switch(serviceType){
             case GET_SPECIFIC_ALBUM:
-                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG, albumID); // user ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG, albumID); // album ID
                 break;
             case GET_ALL_ALBUM:
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, userID); // user ID
+                break;
+            case UPLOAD_IMAGE_FILE:
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, userID); // user ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG, albumID); // album ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_PATH_TAG, uploadFilePath); // Upload File Path
                 break;
         }
 
@@ -716,7 +779,7 @@ public class Logic {
                                     break;
 
                                 case ADD_PROJECT:
-
+                                    break;
                             }
                             dialog.dismiss();
                         }
@@ -735,7 +798,7 @@ public class Logic {
         builder.create().show();
     }
 
-    public void showDeleteTagProjectDialog(final Context context, final EnumDialogEditJournalType type, final String currentSelectedName){
+    public void showDeleteTagProjectDialog(final Context context, final EnumDialogEditJournalType type, final TagList tagList, final int position){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -763,10 +826,16 @@ public class Logic {
 
                         if (context instanceof EditSpecificJournalActivity) {
 
-                            mLogging.debug(TAG, "currentSelectedName => " + currentSelectedName);
+                            mLogging.debug(TAG, "showDeleteTagProjectDialog tagList.getList().get(position).getName() => " + tagList.getList().get(position).getName());
 
-                            ((EditSpecificJournalActivity) context).removeTag(currentSelectedName);
-                            ((EditSpecificJournalActivity) context).refreshRecyclerDialogTagAdapter();
+                            switch (type) {
+                                case DELETE_TAG:
+                                    ((EditSpecificJournalActivity) context).removeTag(tagList.getList().get(position));
+                                    ((EditSpecificJournalActivity) context).refreshRecyclerDialogTagAdapter();
+                                case DELETE_PROJECT:
+                                    break;
+                            }
+
                         }
 
                     }
@@ -785,7 +854,7 @@ public class Logic {
 
 
     /*=========== POPUP MENU ===========*/
-    public void showJournalPopUpMenu(final Context context, View v, final EnumDialogEditJournalType type, final String currentValue){
+    public void showJournalPopUpMenu(final Context context, View v, final EnumDialogEditJournalType type, final TagList tagList, final ProjectList projectList, final int position){
         PopupMenu menu = new PopupMenu(context, v){
 
             @Override
@@ -807,10 +876,10 @@ public class Logic {
                     case R.id.dialog_overflow_edit_journal_delete: // Delete the current row
                         switch(type){
                             case EDIT_TAG:
-                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_TAG, currentValue);
+                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_TAG, tagList, position);
                                 break;
                             case EDIT_PROJECT:
-                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_PROJECT, currentValue);
+                                showDeleteTagProjectDialog(context, EnumDialogEditJournalType.DELETE_PROJECT, tagList, position);
                                 break;
                         }
                         return true;
@@ -868,13 +937,26 @@ public class Logic {
     }
 
     /*=========== ACCESS TO PREFERENCE ===========*/
+    public void addPreferenceTagSet(Context context, TagSet addSet) {
+        mLogging.debug(TAG, "addPreferenceTagSet start");
+        TagSet currentSet = this.retrievePreferenceTagSet(context);
+        if(currentSet != null) {
+            currentSet.add(addSet);
+            this.savePreferenceTagSet(context, currentSet);
+        }else{
+            this.savePreferenceTagSet(context, addSet);
+        }
 
-    public TagList retrieveUnusedTagList(Context context){
-        mLogging.debug(TAG, "retrieveUnusedTagList");
+        mLogging.debug(TAG, "addPreferenceTagSet done");
+    }
+
+    public TagSet retrievePreferenceTagSet(Context context){
+        mLogging.debug(TAG, "retrievePreferenceTagSet");
         try{
-            String value = this.mHistoryPref.getUnusedTags(context);
+            String value = this.mPref.getTags(context);
+            mLogging.debug(TAG, "retrievePreferenceTagSet value => " + value);
             if(!mParser.isStringEmpty(value)){
-                return mParser.parseJsonToUnusedTagList(value);
+                return mParser.parseJsonToTagSet(value);
             }
 
             return null;
@@ -890,11 +972,12 @@ public class Logic {
         return null;
     }
 
-    public void saveUnusedTagList(Context context, TagList list){
-        mLogging.debug(TAG, "saveUnusedTagList");
+    public void savePreferenceTagSet(Context context, TagSet set){
+        mLogging.debug(TAG, "savePreferenceTagSet");
         try{
-            String value = mParser.parseUnusedTagListToJson(list);
-            this.mHistoryPref.setUnusedTags(context, value);
+            String value = mParser.parseTagSetToJson(set);
+            mLogging.debug(TAG, "savePreferenceTagSet value => " + value);
+            this.mPref.setTags(context, value);
 
         }catch (FileNotFoundException e){
             mLogging.debug(TAG, "error -> " + e.getMessage());
@@ -905,6 +988,8 @@ public class Logic {
         }
 
     }
+
+
 
 
 

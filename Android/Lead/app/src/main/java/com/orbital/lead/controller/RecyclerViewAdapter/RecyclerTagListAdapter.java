@@ -20,7 +20,6 @@ import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.EnumDialogEditJournalType;
 import com.orbital.lead.model.Tag;
 import com.orbital.lead.model.TagList;
-import com.orbital.lead.model.TagMap;
 
 
 /**
@@ -38,8 +37,6 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private Logic mLogic;
     private Context mContext;
 
-    private TagMap recentTagMap;
-    private TagList mUsedTagList;
     private TagList mTagList;
 
     private Animation inAnim;
@@ -136,7 +133,7 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             this.mImageOptions.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                   mLogic.showJournalPopUpMenu(mContext, v, EnumDialogEditJournalType.EDIT_TAG, getTextTag());
+                   mLogic.showJournalPopUpMenu(mContext, v, EnumDialogEditJournalType.EDIT_TAG, getTagList(), null, pos);
                 }
             });
         }
@@ -153,14 +150,13 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     //MainActivity activity, View headerView,
-    public RecyclerTagListAdapter(TagList currentUsedTagList, TagMap recentTagMap){
+    public RecyclerTagListAdapter(TagList tagList){
         this.initLogging();
         this.initLogic();
         this.initParser();
         //this.setHeaderView(headerView);
-        this.setUsedTagList(currentUsedTagList);
-        this.setRecentTagMap(recentTagMap);
-        this.initCompliedTagList();
+        this.setTagList(tagList);
+        //.initCompliedTagList();
     }
 
     @Override
@@ -184,9 +180,9 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(holder instanceof ListContentHolder){
             //position = position - 1;
-            if(this.getCompliedTagList() != null){
+            if(this.getTagList() != null){
 
-                Tag mTag = this.getCompliedTagList().getList().get(position);
+                Tag mTag = this.getTagList().getList().get(position);
 
                 ((ListContentHolder) holder).setTextTag(mTag.getName());
                 ((ListContentHolder) holder).setTagChecked(mTag.getIsChecked());
@@ -208,8 +204,8 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
         return count;
         */
-        if(this.getCompliedTagList() != null){
-            return this.getCompliedTagList().size();
+        if(this.mTagList != null){
+            return this.mTagList.size();
         }
         return 0;
     }
@@ -257,6 +253,7 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
     */
 
+    /*
     private void initCompliedTagList() {
         this.mTagList = new TagList();
 
@@ -268,28 +265,20 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             //mLogging.debug(TAG, tag.getName() + " => " + tag.getIsChecked());
         }
 
-        /*
-        mLogging.debug(TAG, "================== getRecentTagMap Tag List ==================");
-        for (Tag tag : getRecentTagMap().getTagList().getList()) {
-            mLogging.debug(TAG, tag.getName() + " => " + tag.getIsChecked());
-        }
-        */
 
         // display all tags based on the compiled tag map
         this.mTagList.setList(this.getRecentTagMap().getTagList().getList());
     }
+    */
 
-    private void setUsedTagList(TagList list){
-        this.mUsedTagList = list;
+    private void setTagList(TagList list){
+        this.mTagList = list;
     }
 
 
-    private void setRecentTagMap(TagMap map) {
-        this.recentTagMap = new TagMap(map.getMap());
-    }
 
     private void setCurrentTagCheckedStatus(int position, boolean val) {
-        this.getCompliedTagList().getList().get(position).setIsChecked(val);
+        this.getTagList().getList().get(position).setIsChecked(val);
     }
 
     private Parser getParser(){
@@ -300,17 +289,10 @@ public class RecyclerTagListAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         return this.mContext;
     }
 
-    private TagList getUsedTagList(){
-        return this.mUsedTagList;
-    }
-
-    public TagList getCompliedTagList() {
+    public TagList getTagList() {
         return this.mTagList;
     }
 
-    public TagMap getRecentTagMap(){
-        return this.recentTagMap;
-    }
 
     private void initAnimation(){
         this.inAnim = AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in);

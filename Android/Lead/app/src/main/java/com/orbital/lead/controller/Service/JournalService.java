@@ -9,7 +9,6 @@ import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.LocalStorage.LocalStorage;
 import com.orbital.lead.logic.WebConnector;
-import com.orbital.lead.logic.s3.S3Logic;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.EnumJournalServiceType;
 
@@ -29,11 +28,11 @@ public class JournalService extends IntentService{
     private final String TAG = this.getClass().getSimpleName();
     private CustomLogging mLogging;
 
-    private S3Logic mS3Logic;
     private Parser mParser;
     private LocalStorage mLocalStorage;
     private String userID;
     private String journalID;
+    private String albumID;
     private String detail;
     private String userProfilePicID;
     private String urlStreamStr;
@@ -54,7 +53,6 @@ public class JournalService extends IntentService{
         HashMap<String, String> params;
         Bundle returnBundle = new Bundle();
 
-        this.initS3Logic();
         this.initParser();
         this.initLocalStorage();
 
@@ -70,10 +68,13 @@ public class JournalService extends IntentService{
             this.journalID = intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG);
         }
 
+        if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG) != null){
+            this.albumID = intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG);
+        }
+
         if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_DETAIL_TAG) != null){
             this.detail = intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_DETAIL_TAG);
         }
-
 
         if(intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG) != null){
             this.serviceType = (EnumJournalServiceType) intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
@@ -100,7 +101,7 @@ public class JournalService extends IntentService{
 
                     mLogging.debug(TAG, "getUserID ->" + getUserID());
 
-                    this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_GET_USER_ALL_JOURNAL, params);
+                    this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_GET_ALL_JOURNAL, params);
                     this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
 
                     returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
@@ -115,7 +116,22 @@ public class JournalService extends IntentService{
                     params.put(Constant.URL_POST_PARAMETER_TAG_USER_JOURNAL_ID, this.getJournalID());
                     params.put(Constant.URL_POST_PARAMETER_TAG_DETAIL, this.getDetail());
 
-                    this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_UPDATE_USER_JOURNAL, params);
+                    this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_UPDATE_JOURNAL, params);
+                    this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
+
+                    returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
+                    receiver.send(STATUS_FINISHED, returnBundle);
+
+                    break;
+
+                case INSERT_NEW_JOURNAL:
+                    params = new HashMap<String, String>();
+                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, this.getUserID());
+                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_JOURNAL_ID, this.getJournalID());
+                    params.put(Constant.URL_POST_PARAMETER_TAG_ALBUM_ID, this.getAlbumID());
+                    params.put(Constant.URL_POST_PARAMETER_TAG_DETAIL, this.getDetail());
+
+                    this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_INSERT_NEW_JOURNAL, params);
                     this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
 
                     returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
@@ -149,10 +165,6 @@ public class JournalService extends IntentService{
         this.mLogging = CustomLogging.getInstance();
     }
 
-    private void initS3Logic(){
-        this.mS3Logic = S3Logic.getInstance(this);
-    }
-
     private void initParser() { this.mParser = Parser.getInstance(); }
 
     private void initLocalStorage() { this.mLocalStorage = LocalStorage.getInstance(); }
@@ -164,6 +176,10 @@ public class JournalService extends IntentService{
 
     private String getJournalID() {
         return this.journalID;
+    }
+
+    private String getAlbumID() {
+        return this.albumID;
     }
 
     private String getDetail() {

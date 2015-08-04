@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/orbital/lead/logic/CustomLogging.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/orbital/lead/logic/WebConnector.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/orbital/lead/model/InternetVariableClass.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/layout/toolbar_layout.xml" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/layout/toolbar_specific_journal_layout.xml" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/layout/toolbar_specific_journal_pictures_layout.xml" charset="windows-1252" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>

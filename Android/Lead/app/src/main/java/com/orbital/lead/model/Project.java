@@ -88,22 +88,27 @@ public class Project implements Parcelable {
     }
 
     public Project(Project project){
-        this.projectID = project.getProjectID();
-        this.createdByUserID = project.getCreatedByUserID();
-        this.name = project.getName();
-        this.content = project.getContent();
-        this.country = project.getCountry();
-        this.countryCode = project.getCountryCode();
-        this.lastModifiedDate = project.getLastModifiedDate();
-        this.lastModifiedTime = project.getLastModifiedTime();
-        this.createdDate = project.getCreatedDate();
-        this.createdTime = project.getCreatedTime();
-        this.projectStartDate = project.getProjectStartDate();
-        this.projectStartTime = project.getProjectStartTime();
-        this.projectEndDate = project.getProjectEndDate();
-        this.projectEndTime = project.getProjectEndTime();
-        this.projectYear = project.getProjectYear();
-        this.isSelected = project.getIsSelected();
+        if(project != null) {
+            this.projectID = project.getProjectID();
+            this.createdByUserID = project.getCreatedByUserID();
+            this.name = project.getName();
+            this.content = project.getContent();
+            this.country = project.getCountry();
+            this.countryCode = project.getCountryCode();
+            this.lastModifiedDate = project.getLastModifiedDate();
+            this.lastModifiedTime = project.getLastModifiedTime();
+            this.createdDate = project.getCreatedDate();
+            this.createdTime = project.getCreatedTime();
+            this.projectStartDate = project.getProjectStartDate();
+            this.projectStartTime = project.getProjectStartTime();
+            this.projectEndDate = project.getProjectEndDate();
+            this.projectEndTime = project.getProjectEndTime();
+            this.projectYear = project.getProjectYear();
+            this.isSelected = project.getIsSelected();
+        }else{
+            new Project();
+        }
+
     }
 
     public String getProjectJournalRelationID() {

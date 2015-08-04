@@ -148,7 +148,7 @@ public class FragmentAlbum extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mLogging.debug(TAG, "onItemClick -> " + position);
 
-                Album selectedAlbum = getAlbumList().getAlbum(position);
+                Album selectedAlbum = getAlbumList().get(position);
                 if(selectedAlbum != null) {
                     mListener.onFragmentAlbumInteraction(FragmentAlbum.REQUEST_OPEN_FRAGMENT_PICTURES, selectedAlbum);
                 }else{

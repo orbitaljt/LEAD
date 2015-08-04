@@ -22,6 +22,10 @@ public class ProjectList {
     }
 
     public void setList(ProjectList list){
+        if(list == null){
+            this.initArrayList();
+            return;
+        }
         this.list = new ArrayList<Project>(list.getList());
         /*
         if(this.list == null){
@@ -50,7 +54,7 @@ public class ProjectList {
                 return p;
             }
         }
-        return null;
+        return new Project();
     }
 
     public void resetList() {
@@ -62,7 +66,6 @@ public class ProjectList {
     }
 
     public void updateProject(Project updatedProject) {
-
         ListIterator<Project> iter = this.list.listIterator();
         while (iter.hasNext()) {
             Project p = iter.next();

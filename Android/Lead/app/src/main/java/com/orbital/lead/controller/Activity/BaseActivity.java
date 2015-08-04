@@ -2,6 +2,7 @@ package com.orbital.lead.controller.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -9,25 +10,38 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 
-import com.facebook.AccessToken;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
+import com.orbital.lead.Parser.FormatDate;
 import com.orbital.lead.Parser.Parser;
-import com.orbital.lead.Parser.ParserFacebook;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.controller.Fragment.NavigationDrawerFragment;
+import com.orbital.lead.controller.Service.JournalReceiver;
+import com.orbital.lead.controller.Service.JournalService;
+import com.orbital.lead.controller.Service.ProjectReceiver;
+import com.orbital.lead.controller.Service.ProjectService;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.FacebookLogic;
 import com.orbital.lead.logic.Logic;
-import com.orbital.lead.model.AlbumList;
+import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
-
-import org.json.JSONObject;
+import com.orbital.lead.model.EnumJournalServiceType;
+import com.orbital.lead.model.EnumProjectServiceType;
+import com.orbital.lead.model.Journal;
+import com.orbital.lead.model.JournalList;
+import com.orbital.lead.model.ProjectList;
+import com.orbital.lead.model.TagSet;
+import com.orbital.lead.model.User;
 
 
 public class BaseActivity extends AppCompatActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+        JournalReceiver.Receiver,
+        ProjectReceiver.Receiver{
+
+    public static final int START_ADD_NEW_SPECIFIC_JOURNAL_ACTIVITY = 1;
+    public static final int START_EDIT_SPECIFIC_JOURNAL_ACTIVITY = 2;
+
+
 
     protected final int REQUEST_PICK_IMAGE_INTENT = 1;
     protected final int REQUEST_IMAGE_CAPTURE = 1337;
@@ -50,8 +64,14 @@ public class BaseActivity extends AppCompatActivity
     private Logic mLogic;
     private FacebookLogic mFacebookLogic;
 
-    private boolean isFacebookLogin;
-    private String currentFacebookAccessToken;
+    private ProjectList projectList;
+    private TagSet tagSet;
+
+    private ProjectReceiver mProjectReceiver;
+    private JournalReceiver mJournalReceiver;
+
+    //private boolean isFacebookLogin;
+   // private String currentFacebookAccessToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +84,7 @@ public class BaseActivity extends AppCompatActivity
         this.initLogic();
         this.initFacebookLogic();
         this.initBaseFrameLayout();
+        this.initTagSet();
 
         mTitle = getTitle();
         if(this.mNavigationDrawerFragment == null){
@@ -102,7 +123,7 @@ public class BaseActivity extends AppCompatActivity
                 getLogic().displayProfileActivity(this);
                 break;
             case 1: // Albums
-                getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_ALBUM, null);
+                getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_ALBUM, null, "");
                 break;
             case 2: // Badge
                 break;
@@ -161,6 +182,10 @@ public class BaseActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    public CustomApplication getCustomApplication(){
+        return this.mApp;
+    }
+
     protected void initLogging(){
         this.mLogging = CustomLogging.getInstance();
     }
@@ -172,6 +197,21 @@ public class BaseActivity extends AppCompatActivity
     protected void initLogic(){
         this.mLogic = Logic.getInstance();
     }
+
+    protected void initTagSet() {
+        this.tagSet = new TagSet();
+    }
+
+    protected void initProjectReceiver() {
+        this.mProjectReceiver = new ProjectReceiver(new Handler());
+        this.mProjectReceiver.setReceiver(this);
+    }
+
+    protected void initJournalReceiver(){
+        mJournalReceiver = new JournalReceiver(new Handler());
+        mJournalReceiver.setReceiver(this);
+    }
+
 
     protected void initBaseFrameLayout(){
         this.mBaseFrameLayout = (FrameLayout) findViewById(R.id.base_content_frame);
@@ -208,7 +248,7 @@ public class BaseActivity extends AppCompatActivity
         return this.mBaseFrameLayout;
     }
 
-    protected CustomLogging getCustomLogging(){
+    protected CustomLogging getLogging(){
         return this.mLogging;
     }
 
@@ -219,6 +259,8 @@ public class BaseActivity extends AppCompatActivity
     protected Parser getParser(){
         return this.mParser;
     }
+
+
 
     protected NavigationDrawerFragment getNavigationDrawerFragment(){
         return this.mNavigationDrawerFragment;
@@ -246,7 +288,7 @@ public class BaseActivity extends AppCompatActivity
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setAction(Intent.ACTION_GET_CONTENT);
 
-        this.getCustomLogging().debug(TAG, "openImagesIntent startActivityForResult");
+        this.getLogging().debug(TAG, "openImagesIntent startActivityForResult");
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), this.REQUEST_PICK_IMAGE_INTENT);
     }
 
@@ -254,10 +296,190 @@ public class BaseActivity extends AppCompatActivity
         Intent intent = new Intent(
                 android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         if (intent.resolveActivity(getPackageManager()) != null) {
-            this.getCustomLogging().debug(TAG, "openCameraIntent startActivityForResult");
+            this.getLogging().debug(TAG, "openCameraIntent startActivityForResult");
             startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
         }
     }
+
+    protected void retrievePreferenceTagSet() {
+        this.setTagSet(getLogic().retrievePreferenceTagSet(this));
+    }
+
+    public void retrieveAllProject() {
+        this.getLogic().getAllProject(this);
+    }
+
+    protected String convertToDisplayDate(String oldDate) {
+        if(getParser().isStringEmpty(oldDate)) {
+            return "";
+        }
+        return FormatDate.parseDate(oldDate, FormatDate.DATABASE_DATE_TO_DISPLAY_DATE, FormatDate.DISPLAY_FORMAT);
+    }
+
+    protected String convertToDatabaseDate(String displayDate) {
+        if(getParser().isStringEmpty(displayDate)) {
+            return "";
+        }
+        return FormatDate.parseDate(displayDate, FormatDate.DISPLAY_DATE_TO_DATABASE_DATE, FormatDate.DATABASE_FORMAT);
+    }
+
+
+
+
+    @Override
+    public void onReceiveResult(int resultCode, Bundle resultData) {
+        EnumJournalServiceType journalServiceType = null;
+        EnumProjectServiceType projectServiceType = null;
+        String jsonResult = "";
+
+        switch (resultCode) {
+
+            case JournalService.STATUS_RUNNING:
+                this.getLogging().debug(TAG, "onReceiveResult -> JournalService.STATUS_RUNNING");
+                break;
+
+            case ProjectService.STATUS_RUNNING:
+                this.getLogging().debug(TAG, "onReceiveResult -> ProjectService.STATUS_RUNNING");
+                break;
+
+            case JournalService.STATUS_FINISHED:
+                this.getLogging().debug(TAG, "onReceiveResult -> JournalService.STATUS_FINISHED");
+                journalServiceType = (EnumJournalServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
+
+                switch(journalServiceType){
+                    case GET_ALL_JOURNAL:
+                        jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
+                        this.getLogging().debug(TAG, "onReceiveResult GET_ALL_JOURNAL -> jsonResult => " + jsonResult);
+                        JournalList list = this.getJournalListFromJson(jsonResult);
+
+                        if(list != null){
+                            if(this instanceof MainActivity) {
+                                ((MainActivity)this).updateFragmentMainUserJournalList(list);
+                            }
+
+                            this.setCurrentUserJournalList(list);
+                            this.getLogic().addPreferenceTagSet(this, this.getAllJournalTags(list)); // get all journals tags and save to tag file
+                        }else{
+                            this.getLogging().debug(TAG, "onReceiveResult list is null");
+                            if(this instanceof MainActivity) {
+                                ((MainActivity)this).showFragmentEmptyJournalLayout();
+                            }
+                        }
+
+                        break;
+
+                    case INSERT_NEW_JOURNAL:
+                        jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
+                        this.getLogging().debug(TAG, "onReceiveResult INSERT_NEW_JOURNAL -> jsonResult => " + jsonResult);
+                        Journal journal = this.getSpecificJournalFromJson(jsonResult);
+
+                        if(journal != null) {
+                            this.getLogging().debug(TAG, "onReceiveResult INSERT_NEW_JOURNAL journal is not null");
+                            this.getCurrentUser().getJournalList().addJournal(journal);
+
+                            if(this instanceof AddNewSpecificJournalActivity) {
+                                // close this add activity
+                                // refresh the journal list
+                                ((AddNewSpecificJournalActivity) this).setToggleRefresh(true);
+                            }
+                        }else{
+                            if(this instanceof AddNewSpecificJournalActivity) {
+                                this.getLogging().debug(TAG, "onReceiveResult INSERT_NEW_JOURNAL journal is null");
+                            }
+                        }
+
+
+                }
+
+                break;
+
+            case ProjectService.STATUS_FINISHED:
+                this.getLogging().debug(TAG, "onReceiveResult -> ProjectService.STATUS_FINISHED");
+                projectServiceType = (EnumProjectServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
+                switch (projectServiceType) {
+                    case GET_ALL_PROJECT:
+                        jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
+                        this.getLogging().debug(TAG, "onReceiveResult GET_ALL_PROJECT -> jsonResult => " + jsonResult);
+                        ProjectList list = this.getProjectListFromJson(jsonResult);
+
+                        this.setProjectList(list);
+                        this.setCurrentUserProjectList(list);
+
+                        break;
+                }
+                break;
+
+            case JournalService.STATUS_ERROR:
+                this.getLogging().debug(TAG, "JournalService.STATUS_ERROR");
+                break;
+
+            case ProjectService.STATUS_ERROR:
+                this.getLogging().debug(TAG, "ProjectService.STATUS_ERROR");
+                break;
+
+        }
+
+    }
+
+
+    protected void setCurrentUserJournalList(JournalList list){
+        this.getCurrentUser().setJournalList(list);
+    }
+
+    protected void setCurrentUserProjectList(ProjectList list) {
+        this.getCurrentUser().setProjectList(list);
+    }
+
+    protected void setProjectList(ProjectList list) {
+        this.projectList = new ProjectList();
+        this.projectList.setList(list);
+    }
+
+    public ProjectReceiver getProjectReceiver() {
+        if(this.mProjectReceiver == null){
+            this.initProjectReceiver();
+        }
+        return this.mProjectReceiver;
+    }
+
+    public JournalReceiver getJournalReceiver() {
+        if(this.mJournalReceiver == null){
+            this.initJournalReceiver();
+        }
+        return this.mJournalReceiver;
+    }
+
+
+    protected JournalList getJournalListFromJson(String json){
+        return this.getParser().parseJsonToJournalList(json);
+    }
+
+    protected ProjectList getProjectListFromJson(String json) {
+        return this.getParser().parseJsonToProjectList(json);
+    }
+
+    protected Journal getSpecificJournalFromJson(String json) {
+        return this.getParser().parseJsonToSpecificJournal(json);
+    }
+
+    protected User getCurrentUser(){
+        return CurrentLoginUser.getUser();
+    }
+
+    protected ProjectList getProjectList() {
+        return this.projectList;
+    }
+
+    protected TagSet getTagSet() {
+        return this.tagSet;
+    }
+
+    protected TagSet getAllJournalTags(JournalList list) {
+        TagSet set = list.getAllTags();
+        return set;
+    }
+
+
     /*
     protected void setIsFacebookLogin(boolean val) {
         mLogging.debug(TAG, "setIsFacebookLogin to => " + val);
@@ -335,9 +557,6 @@ public class BaseActivity extends AppCompatActivity
     }
     */
 
-    public CustomApplication getCustomApplication(){
-        return this.mApp;
-    }
 
     private void initApplication(){
         this.mApp = (CustomApplication) getApplicationContext();
@@ -347,5 +566,10 @@ public class BaseActivity extends AppCompatActivity
         this.mFacebookLogic = FacebookLogic.getInstance();
     }
 
+    private void setTagSet(TagSet set) {
+        if(set != null) {
+            this.tagSet = new TagSet(set.getSet());
+        }
+    }
 
 }

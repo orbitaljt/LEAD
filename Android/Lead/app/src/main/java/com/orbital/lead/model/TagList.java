@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
 /**
@@ -42,8 +44,6 @@ public class TagList implements Parcelable{
         return filteredList;
     }
 
-
-
     public TagList(){
         this.list = new ArrayList<Tag>();
     }
@@ -56,10 +56,16 @@ public class TagList implements Parcelable{
     }
 
     public void addList(TagList list) {
-        if(this.list != null){
-            this.list.addAll(list.getList());
-            this.sort();
+        if(this.list == null) {
+            this.list = new ArrayList<Tag>();
         }
+
+        this.list.addAll(list.getList());
+        this.sort();
+    }
+
+    public void replaceWithTagList(TagList list) {
+        this.replaceOrInsertTag(list);
     }
 
     public void removeTag(String name){
@@ -86,7 +92,23 @@ public class TagList implements Parcelable{
     public void setList(ArrayList<Tag> newList){
         this.list = new ArrayList<Tag>(newList);
         this.sort();
-        newList = null;
+    }
+
+    public boolean isTagExist(Tag tag){
+        Iterator<Tag> iter = this.list.iterator();
+        while (iter.hasNext()) {
+            Tag t = iter.next();
+            if(t.getName().equals(tag.getName())){
+                return  true;
+            }
+        }
+
+        return false;
+    }
+
+
+    public void clearAll() {
+        this.list.clear();
     }
 
     public String toString() {
@@ -134,6 +156,29 @@ public class TagList implements Parcelable{
 
     private boolean isEmpty() {
         return this.size() == 0;
+    }
+
+    private void replaceOrInsertTag(TagList anotherList) {
+        HashMap<String, Tag> map = this.listToMap();
+        for(Tag tag : anotherList.getList()) {
+            map.put(tag.getName(), tag);
+        }
+
+        this.setList(this.mapToList(map));
+    }
+
+    private HashMap<String, Tag> listToMap() {
+        HashMap<String, Tag> map = new HashMap<String, Tag>();
+        for(Tag tag : this.list) {
+            map.put(tag.getName(), tag);
+        }
+        return map;
+    }
+
+    private ArrayList<Tag> mapToList(HashMap<String, Tag> map) {
+        ArrayList<Tag> list = new ArrayList<Tag>();
+        list.addAll(map.values());
+        return list;
     }
 
     private TagList(Parcel pc){

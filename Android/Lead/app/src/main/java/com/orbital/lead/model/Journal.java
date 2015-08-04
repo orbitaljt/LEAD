@@ -11,24 +11,24 @@ import com.orbital.lead.Parser.Parser;
 public class Journal implements Parcelable {
     // each journal has an album
     private Parser mParser;
-    private Album album;
-    private Project project;
-    private TagList tagList;
-    private String journalID;
-    private String pictureCoverID;
-    private EnumPictureType pictureCoverType;
-    private String albumID;
-    private String title;
-    private String content;
-    private String countryCode;
-    private String journalDate;
-    private String journalTime;
-    private String lastModifiedDate;
-    private String lastModifiedTime;
-    private String createdDate;
-    private String createdTime;
-    private boolean isPublished;
-    private boolean hasDetail;
+    private Album album = null;
+    private Project project = null;
+    private TagList tagList = null;
+    private String journalID = "";
+    private String pictureCoverID = "";
+    private EnumPictureType pictureCoverType = null;
+    //private String albumID = "";
+    private String title = "";
+    private String content = "";
+    private String countryCode = "";
+    private String journalDate = "";
+    private String journalTime = "";
+    private String lastModifiedDate = "";
+    private String lastModifiedTime = "";
+    private String createdDate = "";
+    private String createdTime = "";
+    private boolean isPublished = false;
+    private boolean hasDetail = false;
 
     @Override
     public int describeContents() {
@@ -40,7 +40,7 @@ public class Journal implements Parcelable {
         dest.writeString(this.journalID);
         dest.writeString(this.pictureCoverID);
         dest.writeString((this.pictureCoverType == null) ? "" : this.pictureCoverType.name());
-        dest.writeString(this.albumID);
+        //dest.writeString(this.albumID);
         dest.writeString(this.title);
         dest.writeString(this.content);
         dest.writeString(this.countryCode);
@@ -65,7 +65,11 @@ public class Journal implements Parcelable {
         }
     };
 
-    public Journal() {}
+    public Journal() {
+        this.album = new Album();
+        this.tagList = new TagList();
+        this.project = new Project();
+    }
 
     public Journal(String jID, String picCoverID, String picCoverType, String albumID,
                    String title, String content, String cc, String jDate, String jTime, String lastModDate, String lastModTime,
@@ -75,7 +79,7 @@ public class Journal implements Parcelable {
         this.journalID = jID;
         this.pictureCoverID = picCoverID;
         this.pictureCoverType = this.getParser().getPictureType(picCoverType);
-        this.albumID = albumID;
+        //this.albumID = albumID;
         this.title = title;
         this.content = content;
         this.countryCode = cc;
@@ -86,13 +90,15 @@ public class Journal implements Parcelable {
         this.createdDate = createdDate;
         this.createdTime = createdTime;
         this.isPublished = this.getParser().convertStringToBoolean(isPub);
+
+        this.album = new Album();
+        this.album.setAlbumID(albumID);
     }
 
     public Journal(Journal j) {
         this.journalID = j.getJournalID();
         this.pictureCoverID = j.getPictureCoverID();
         this.pictureCoverType = j.getPictureCoverType();
-        this.albumID = j.getAlbumID();
         this.title = j.getTitle();
         this.content = j.getContent();
         this.countryCode = j.getCountryCode();
@@ -139,10 +145,6 @@ public class Journal implements Parcelable {
         return this.pictureCoverType;
     }
 
-    public String getAlbumID(){
-        return this.albumID;
-    }
-
     public String getTitle(){
         return this.title;
     }
@@ -184,7 +186,8 @@ public class Journal implements Parcelable {
     }
 
     public void setAlbum(Album album) {
-        this.album = album;
+        this.album = null;
+        this.album = new Album(album);
     }
 
     public void setProject(Project project) {
@@ -204,10 +207,6 @@ public class Journal implements Parcelable {
 
     public void setPictureCoverID(String val){
         this.pictureCoverID = val;
-    }
-
-    public void setAlbumID(String val){
-        this.albumID = val;
     }
 
     public void setTitle(String val){
@@ -266,7 +265,7 @@ public class Journal implements Parcelable {
         } catch (IllegalArgumentException x) {
             pictureCoverType = null;
         }
-        this.albumID = pc.readString();
+        //this.albumID = pc.readString();
         this.title = pc.readString();
         this.content = pc.readString();
         this.countryCode = pc.readString();

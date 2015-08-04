@@ -43,6 +43,13 @@ public class Tag implements Comparable<Tag>, Parcelable {
         this.isChecked = false;
     }
 
+    public Tag(Tag tag) {
+        this.tempID = tag.getTempID();
+        this.id = tag.getID();
+        this.name = tag.getName();
+        this.isChecked = tag.getIsChecked();
+    }
+
     public Tag(String tempID, String id, String name, boolean checked){
         this.tempID = tempID;
         this.id = id;
