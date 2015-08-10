@@ -40,7 +40,6 @@ import com.orbital.lead.controller.Activity.MainActivity;
 import com.orbital.lead.controller.Service.JournalService;
 import com.orbital.lead.controller.Service.PictureService;
 import com.orbital.lead.controller.Service.ProjectService;
-import com.orbital.lead.logic.Asynchronous.AsyncCountry;
 import com.orbital.lead.logic.Asynchronous.AsyncJournal;
 import com.orbital.lead.logic.Asynchronous.AsyncUploadImage;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfilePicture;
@@ -59,7 +58,6 @@ import com.orbital.lead.model.Tag;
 import com.orbital.lead.model.TagList;
 import com.orbital.lead.model.TagSet;
 import com.orbital.lead.model.User;
-import com.orbital.lead.model.CountryList;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -194,10 +192,6 @@ public class Logic {
         executeProjectService(context, EnumProjectServiceType.GET_ALL_PROJECT, "", "", "");
     }
 
-    public void getAllCountries(Context context){
-        HttpAsyncCountry mAsync = new HttpAsyncCountry(context);
-        mAsync.execute(Constant.TYPE_GET_ALL_COUNTRIES);
-    }
 
     public void updateUserProfileDatabase(Context context, String userID, String detail){
         // detail in json string
@@ -530,30 +524,6 @@ public class Logic {
         }//end onPostExecute
 
     }//end HttpAsyncUserProfilePicture
-
-    private class HttpAsyncCountry extends AsyncCountry {
-
-        private Context mContext;
-
-        public HttpAsyncCountry(Context c){
-            this.mContext = c;
-        }
-
-        @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected void onPostExecute(final String result) {
-            CountryList list = getParser().parseJsonToCountryList(result);
-            mLogging.debug(TAG, "httpAsyncCountryOnPostExecute result => " + result);
-            if(mContext instanceof MainActivity) {
-                ((MainActivity) mContext).updateCurrentUserCountryList(list);
-            }
-
-        }//end onPostExecute
-
-    }//end HttpAsyncCountry
 
 
     private class HttpAsyncUploadImage extends AsyncUploadImage {

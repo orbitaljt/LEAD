@@ -494,8 +494,6 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
                                         this.getNewJournal().getJournalID(),
                                         this.getNewJournal().getAlbum().getAlbumID(),
                                         detail);
-
-        this.onBackPressed();
     }
 
     private boolean isValidJournal() {

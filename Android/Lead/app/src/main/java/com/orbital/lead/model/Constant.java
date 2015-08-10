@@ -86,12 +86,10 @@ public class Constant {
     public static final String TYPE_UPDATE_JOURNAL = "401";
     public static final String TYPE_INSERT_NEW_JOURNAL = "402";
     public static final String TYPE_GET_NEW_JOURNAL_ALBUM_ID = "403";
-    public static final String TYPE_DELETE_JOURNAL = "404";
     public static final String TYPE_GET_USER_PICTURE = "900";
     public static final String TYPE_GET_USER_SPECIFIC_ALBUM = "901";
     public static final String TYPE_GET_USER_ALL_ALBUM = "902";
     public static final String TYPE_GET_ALL_PROJECT = "1000";
-    public static final String TYPE_GET_ALL_COUNTRIES = "1999";
     public static final String TYPE_UPLOAD_PROFILE_IMAGE_URL = "2000";
     public static final String TYPE_UPLOAD_IMAGE = "2001";
     public static final String TYPE_FACEBOOK = "1";
@@ -121,7 +119,6 @@ public class Constant {
     public static final String MESSAGE_JSON_STATE_TAG = "state";
     public static final String MESSAGE_JSON_COUNTRY_TAG = "country";
     public static final String MESSAGE_JSON_COUNTRY_CODE_TAG = "countryCode";
-    public static final String MESSAGE_JSON_REGION_TAG = "region";
     public static final String MESSAGE_JSON_EMAIL_TAG = "email";
     public static final String MESSAGE_JSON_CONTACT_TAG = "contact";
     public static final String MESSAGE_JSON_CREATED_DATE_TAG = "createdDate";
