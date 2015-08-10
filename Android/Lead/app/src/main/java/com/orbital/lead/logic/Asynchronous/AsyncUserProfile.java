@@ -109,4 +109,5 @@ public class AsyncUserProfile extends AsyncTask<String, Void, String> {
         this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_CREATE_USER_PROFILE, params);
         return WebConnector.convertStreamToString(this.urlStream);
     }
+
 }

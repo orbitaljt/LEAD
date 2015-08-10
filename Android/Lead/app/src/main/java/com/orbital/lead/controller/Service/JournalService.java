@@ -140,6 +140,16 @@ public class JournalService extends IntentService{
                     break;
 
                 case DELETE_SPECIFC_JOURNAL:
+                    params = new HashMap<String, String>();
+                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, this.getUserID());
+                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_JOURNAL_ID, this.getJournalID());
+
+                    this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_DELETE_JOURNAL, params);
+                    this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
+
+                    returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
+                    receiver.send(STATUS_FINISHED, returnBundle);
+
                     break;
 
                 default:
