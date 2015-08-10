@@ -1,6 +1,5 @@
 package com.orbital.lead.controller.Activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,10 +22,8 @@ import com.orbital.lead.controller.Service.ProjectService;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.FacebookLogic;
 import com.orbital.lead.logic.Logic;
-import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
-import com.orbital.lead.model.EnumAndroidVersion;
 import com.orbital.lead.model.EnumJournalServiceType;
 import com.orbital.lead.model.EnumProjectServiceType;
 import com.orbital.lead.model.Journal;
@@ -43,7 +40,7 @@ public class BaseActivity extends AppCompatActivity
 
     public static final int START_ADD_NEW_SPECIFIC_JOURNAL_ACTIVITY = 1;
     public static final int START_EDIT_SPECIFIC_JOURNAL_ACTIVITY = 2;
-    public static final int START_PICTURE_ACTIVITY = 3;
+
 
 
     protected final int REQUEST_PICK_IMAGE_INTENT = 1;
@@ -126,7 +123,7 @@ public class BaseActivity extends AppCompatActivity
                 getLogic().displayProfileActivity(this);
                 break;
             case 1: // Albums
-                getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_ALBUM, null, Constant.STRING_EMPTY);
+                getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_ALBUM, null, "");
                 break;
             case 2: // Badge
                 break;
@@ -231,49 +228,51 @@ public class BaseActivity extends AppCompatActivity
 
     protected void restoreDrawerHeaderValues() {
         if(CurrentLoginUser.getUser() != null){
-            this.getNavigationDrawerFragment().setImageUserProfile(this.getCurrentUser().getProfilePicUrl());
-            this.getNavigationDrawerFragment().setTextUserName(this.getCurrentUser().getFirstName(),
-                                                                this.getCurrentUser().getMiddleName(),
-                                                                this.getCurrentUser().getLastName());
-            this.getNavigationDrawerFragment().setTextUserEmail(this.getCurrentUser().getEmail());
+            this.getNavigationDrawerFragment().setImageUserProfile(CurrentLoginUser.getUser().getProfilePicUrl());
+            this.getNavigationDrawerFragment().setTextUserName(CurrentLoginUser.getUser().getFirstName(),
+                                                                CurrentLoginUser.getUser().getMiddleName(),
+                                                                CurrentLoginUser.getUser().getLastName());
+            this.getNavigationDrawerFragment().setTextUserEmail(CurrentLoginUser.getUser().getEmail());
         }else{
-            this.getNavigationDrawerFragment().setImageUserProfile(Constant.STRING_EMPTY);
+            this.getNavigationDrawerFragment().setImageUserProfile("");
         }
 
     }
 
 
-    protected void setToolbarTitle(String title) {
+    protected void setToolbarTitle(String title){
         getSupportActionBar().setTitle(title);
     }
 
-    protected FrameLayout getBaseFrameLayout() {
+    protected FrameLayout getBaseFrameLayout(){
         return this.mBaseFrameLayout;
     }
 
-    protected CustomLogging getLogging() {
+    protected CustomLogging getLogging(){
         return this.mLogging;
     }
 
-    protected Logic getLogic() {
+    protected Logic getLogic(){
         return this.mLogic;
     }
 
-    protected Parser getParser() {
+    protected Parser getParser(){
         return this.mParser;
     }
 
-    protected NavigationDrawerFragment getNavigationDrawerFragment() {
+
+
+    protected NavigationDrawerFragment getNavigationDrawerFragment(){
         return this.mNavigationDrawerFragment;
     }
 
-    protected void initNavigationDrawerToggle() {
+    protected void initNavigationDrawerToggle(){
         if(mNavigationDrawerFragment != null){
             this.mNavigationDrawerToggle = this.mNavigationDrawerFragment.getDrawerToggle();
         }
     }
 
-    protected ActionBarDrawerToggle getNavigationDrawerToggle() {
+    protected ActionBarDrawerToggle getNavigationDrawerToggle(){
         return this.mNavigationDrawerToggle;
     }
 
@@ -286,9 +285,8 @@ public class BaseActivity extends AppCompatActivity
         Intent intent = new Intent();
         // Show only images, no videos or anything else
         intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
-        intent.setAction(Intent.ACTION_PICK);
-        //intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
 
         this.getLogging().debug(TAG, "openImagesIntent startActivityForResult");
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), this.REQUEST_PICK_IMAGE_INTENT);
@@ -299,7 +297,7 @@ public class BaseActivity extends AppCompatActivity
                 android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         if (intent.resolveActivity(getPackageManager()) != null) {
             this.getLogging().debug(TAG, "openCameraIntent startActivityForResult");
-            startActivityForResult(intent, this.REQUEST_IMAGE_CAPTURE);
+            startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
         }
     }
 
@@ -313,24 +311,26 @@ public class BaseActivity extends AppCompatActivity
 
     protected String convertToDisplayDate(String oldDate) {
         if(getParser().isStringEmpty(oldDate)) {
-            return Constant.STRING_EMPTY;
+            return "";
         }
         return FormatDate.parseDate(oldDate, FormatDate.DATABASE_DATE_TO_DISPLAY_DATE, FormatDate.DISPLAY_FORMAT);
     }
 
     protected String convertToDatabaseDate(String displayDate) {
         if(getParser().isStringEmpty(displayDate)) {
-            return Constant.STRING_EMPTY;
+            return "";
         }
         return FormatDate.parseDate(displayDate, FormatDate.DISPLAY_DATE_TO_DATABASE_DATE, FormatDate.DATABASE_FORMAT);
     }
+
+
 
 
     @Override
     public void onReceiveResult(int resultCode, Bundle resultData) {
         EnumJournalServiceType journalServiceType = null;
         EnumProjectServiceType projectServiceType = null;
-        String jsonResult = Constant.STRING_EMPTY;
+        String jsonResult = "";
 
         switch (resultCode) {
 
@@ -381,7 +381,6 @@ public class BaseActivity extends AppCompatActivity
                                 // close this add activity
                                 // refresh the journal list
                                 ((AddNewSpecificJournalActivity) this).setToggleRefresh(true);
-                                ((AddNewSpecificJournalActivity) this).setIsSaved(true);
                             }
                         }else{
                             if(this instanceof AddNewSpecificJournalActivity) {
@@ -423,40 +422,7 @@ public class BaseActivity extends AppCompatActivity
     }
 
 
-    /**
-     *  Get results from activity that has backed pressed
-     * **/
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch(requestCode){
-            case START_PICTURE_ACTIVITY:
-                if(resultCode == Activity.RESULT_OK){
-                    Bundle b = data.getExtras();
-                    if (b != null) {
-                        Album updatedAlbum = (Album) b.getParcelable(Constant.BUNDLE_PARAM_ALBUM);
-                        String journalID = b.getString(Constant.BUNDLE_PARAM_JOURNAL_ID);
-
-                        updateCurrentUserAlbum(journalID, updatedAlbum);
-
-                        if(this instanceof SpecificJournalActivity) {
-                            ((SpecificJournalActivity) this).refreshJournal(journalID);
-                        }
-
-                    }
-                }
-                break;
-
-
-
-
-        }
-    }
-
-
-
-    protected void setCurrentUserJournalList(JournalList list) {
+    protected void setCurrentUserJournalList(JournalList list){
         this.getCurrentUser().setJournalList(list);
     }
 
@@ -467,10 +433,6 @@ public class BaseActivity extends AppCompatActivity
     protected void setProjectList(ProjectList list) {
         this.projectList = new ProjectList();
         this.projectList.setList(list);
-    }
-
-    protected EnumAndroidVersion getAndroidVersion() {
-        return getCustomApplication().getAndroidVersion();
     }
 
     public ProjectReceiver getProjectReceiver() {
@@ -487,7 +449,8 @@ public class BaseActivity extends AppCompatActivity
         return this.mJournalReceiver;
     }
 
-    protected JournalList getJournalListFromJson(String json) {
+
+    protected JournalList getJournalListFromJson(String json){
         return this.getParser().parseJsonToJournalList(json);
     }
 
@@ -499,7 +462,7 @@ public class BaseActivity extends AppCompatActivity
         return this.getParser().parseJsonToSpecificJournal(json);
     }
 
-    protected User getCurrentUser() {
+    protected User getCurrentUser(){
         return CurrentLoginUser.getUser();
     }
 
@@ -516,20 +479,6 @@ public class BaseActivity extends AppCompatActivity
         return set;
     }
 
-    protected void updateCurrentUserAlbum(String journalID, Album album) {
-        if(getParser().isStringEmpty(journalID)) {
-            getLogging().debug(TAG, "updateCurrentUserAlbum journalID is empty!");
-            return;
-        }
-
-        try{
-            getLogging().debug(TAG, "updateCurrentUserAlbum trying...");
-            this.getCurrentUser().getJournalList().get(journalID).setAlbum(album);
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 
     /*
     protected void setIsFacebookLogin(boolean val) {

@@ -40,7 +40,6 @@ import com.orbital.lead.controller.Activity.MainActivity;
 import com.orbital.lead.controller.Service.JournalService;
 import com.orbital.lead.controller.Service.PictureService;
 import com.orbital.lead.controller.Service.ProjectService;
-import com.orbital.lead.logic.Asynchronous.AsyncDeleteAlbum;
 import com.orbital.lead.logic.Asynchronous.AsyncJournal;
 import com.orbital.lead.logic.Asynchronous.AsyncUploadImage;
 import com.orbital.lead.logic.Asynchronous.AsyncUserProfilePicture;
@@ -227,6 +226,8 @@ public class Logic {
 
 
     public void uploadNewPicture(Context context, String filePath, String userID, String albumID) {
+        mLogging.debug(TAG, "uploadNewPicture");
+
         if(this.getParser().isStringEmpty(userID) || this.getParser().isStringEmpty(albumID) ||
                 this.getParser().isStringEmpty(filePath)){
             this.getLogging().debug(TAG, "uploadNewPicture => User ID or album ID or file path is empty.");
@@ -241,10 +242,6 @@ public class Logic {
         mAsync.execute(EnumJournalServiceType.GET_NEW_JOURNAL_ALBUM_ID.toString(), userID);
     }
 
-    public void deleteAlbum(Context context, String albumID) {
-        HttpAsyncDeleteAlbum mAsync = new HttpAsyncDeleteAlbum(context);
-        mAsync.execute(EnumPictureServiceType.DELETE_ALBUM.toString(), albumID);
-    }
 
 
 
@@ -271,19 +268,9 @@ public class Logic {
         mBundle.putString(Constant.BUNDLE_PARAM_JOURNAL_ID, journalID);
         mBundle.putParcelable(Constant.BUNDLE_PARAM_ALBUM, album);
 
+
         newIntent.putExtras(mBundle);
-
-        if(context instanceof SpecificJournalActivity){
-            ((SpecificJournalActivity) context).startActivityForResult(newIntent, SpecificJournalActivity.START_PICTURE_ACTIVITY);
-
-        }else if (context instanceof EditSpecificJournalActivity) {
-            ((EditSpecificJournalActivity) context).startActivityForResult(newIntent, EditSpecificJournalActivity.START_PICTURE_ACTIVITY);
-
-        }else if(context instanceof AddNewSpecificJournalActivity) {
-            ((AddNewSpecificJournalActivity) context).startActivityForResult(newIntent, AddNewSpecificJournalActivity.START_PICTURE_ACTIVITY);
-
-        }
-        //context.startActivity(newIntent);
+        context.startActivity(newIntent);
     }
 
     public void displayEditSpecificJournalActivity(Context context, Journal journal){
@@ -388,9 +375,7 @@ public class Logic {
     }
 
     public void showPicture(Context context, final ViewAnimator animator, ImageView targetView, String url){
-        if(animator != null) {
-            animator.setDisplayedChild(1);
-        }
+        animator.setDisplayedChild(1);
 
         ImageLoader.getInstance()
                 .displayImage(url, targetView, CustomApplication.getDisplayImageOptions(),
@@ -399,32 +384,27 @@ public class Logic {
                             public void onLoadingStarted(String imageUri, View view) {
                                 //holder.progressBar.setProgress(0);
                                 //holder.progressBar.setVisibility(View.VISIBLE);
-                                //mLogging.debug(TAG, "onLoadingStarted");
+                                mLogging.debug(TAG, "onLoadingStarted");
                             }
 
                             @Override
                             public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
                                 //holder.progressBar.setVisibility(View.GONE);
-                                //mLogging.debug(TAG, "onLoadingFailed");
-                                if(animator != null) {
-                                    animator.setDisplayedChild(2);
-                                }
-
+                                mLogging.debug(TAG, "onLoadingFailed");
+                                animator.setDisplayedChild(2);
                             }
 
                             @Override
                             public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
                                 //holder.progressBar.setVisibility(View.GONE);
-                                //mLogging.debug(TAG, "onLoadingComplete");
-                                if(animator != null) {
-                                    animator.setDisplayedChild(0);
-                                }
+                                mLogging.debug(TAG, "onLoadingComplete");
+                                animator.setDisplayedChild(0);
                             }
                         },
                         new ImageLoadingProgressListener() {
                             @Override
                             public void onProgressUpdate(String imageUri, View view, int current, int total) {
-                                //mLogging.debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
+                                mLogging.debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
                                 //holder.progressBar.setProgress(Math.round(100.0f * current / total));
                             }
                         });
@@ -644,24 +624,6 @@ public class Logic {
     }
 
 
-    private class HttpAsyncDeleteAlbum extends AsyncDeleteAlbum {
-
-        private Context context;
-
-        public HttpAsyncDeleteAlbum(Context context){
-            this.context = context;
-        }
-
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected void onPostExecute(final String result) {
-            mLogging.debug(TAG, "HttpAsyncDeleteAlbum onPostExecute result => " + result);
-        }//end onPostExecute
-    }
-
-
 
 
     /*=============== SERVICE ==============*/
@@ -702,7 +664,7 @@ public class Logic {
             case INSERT_NEW_JOURNAL:
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, userID); // user ID
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG, journalID); // journal ID
-                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG, albumID); // journal ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG, albumID); // journal ID
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_DETAIL_TAG, detail); // detail
                 break;
         }
@@ -726,22 +688,14 @@ public class Logic {
         Intent intent = new Intent(Intent.ACTION_SYNC, null, mContext, PictureService.class);
         switch(serviceType){
             case GET_SPECIFIC_ALBUM:
-                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG, albumID); // album ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG, albumID); // album ID
                 break;
-
             case GET_ALL_ALBUM:
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, userID); // user ID
                 break;
-
-            /*
-            case DELETE_ALBUM:
-                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG, albumID); // album ID
-                break;
-            */
-
             case UPLOAD_IMAGE_FILE:
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, userID); // user ID
-                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG, albumID); // album ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG, albumID); // album ID
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_PATH_TAG, uploadFilePath); // Upload File Path
                 break;
         }

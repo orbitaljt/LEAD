@@ -404,8 +404,13 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         this.getLogic().displayEditSpecificJournalActivity(this, this.getJournal());
     }
 
-    public void refreshJournal(String journalID){
-        getLogging().debug(TAG, "refreshJournal...");
+    private void refreshJournal(String journalID){
+
+        for(Journal journal : CurrentLoginUser.getUser().getJournalList().getList()) {
+            getLogging().debug(TAG, "refreshJournal journal => " + journal.getTitle() + " => " + journal.getProject());
+        }
+
+
         Journal updatedJournal = CurrentLoginUser.getUser().getJournalList().get(journalID);
         if(updatedJournal != null) {
             this.setJournalDetails(updatedJournal);
@@ -445,27 +450,14 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         EnumPictureServiceType type = null;
         String jsonResult = "";
 
-        try{
-            type = (EnumPictureServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
-        }catch(Exception e){
-            this.getLogging().debug(TAG, "onReceiveResult -> Invalid type. Either empty or invalid for this activity");
-            e.printStackTrace();
-            return;
-        }
-
         switch (resultCode) {
             case PictureService.STATUS_RUNNING:
                 this.getLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_RUNNING");
-                switch(type){
-                    case GET_SPECIFIC_ALBUM:
-                        this.setTextPictureCount(Constant.STRING_LOADING_PICTURE);
-                        break;
-                }
-
                 break;
 
             case PictureService.STATUS_FINISHED:
                 this.getLogging().debug(TAG, "onReceiveResult -> PictureService.STATUS_FINISHED");
+                type = (EnumPictureServiceType) resultData.getSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG);
 
                 switch(type){
                     case GET_SPECIFIC_ALBUM:

@@ -9,10 +9,6 @@ public class Constant {
 
     // Fragment names to add back stack
     public static final String FRAGMENT_LOGIN_NAME = "FragmentLogin";
-    public static final String FRAGMENT_JOURNAL_LIST_NAME = "FragmentJournalList";
-    public static final String FRAGMENT_PICTURES_NAME = "FragmentPictures";
-    public static final String FRAGMENT_ALBUM_NAME = "FragmentAlbum";
-    public static final String FRAGMENT_PROFILE_NAME = "FragmentProfile";
 
     // Title
     public static final String TITLE_LEAD = "Lead";
@@ -37,6 +33,13 @@ public class Constant {
     public static final int DRAWER_LIST_JOURNAL_ICON = R.mipmap.ic_journal;
     public static final int DRAWER_LIST_EXPERIENCE_ICON = R.mipmap.ic_experience;
     public static final int DRAWER_LIST_SETTING_ICON = R.mipmap.ic_setting;
+
+
+    // Fragment name
+    public static final String FRAGMENT_JOURNAL_LIST = "FragmentJournalList";
+    public static final String FRAGMENT_PICTURES = "FragmentPictures";
+    public static final String FRAGMENT_ALBUM = "FragmentAlbum";
+    public static final String FRAGMENT_PROFILE = "FragmentProfile";
 
 
     // URLs
@@ -86,7 +89,6 @@ public class Constant {
     public static final String TYPE_GET_USER_PICTURE = "900";
     public static final String TYPE_GET_USER_SPECIFIC_ALBUM = "901";
     public static final String TYPE_GET_USER_ALL_ALBUM = "902";
-    public static final String TYPE_DELETE_ALBUM = "903";
     public static final String TYPE_GET_ALL_PROJECT = "1000";
     public static final String TYPE_UPLOAD_PROFILE_IMAGE_URL = "2000";
     public static final String TYPE_UPLOAD_IMAGE = "2001";
@@ -226,7 +228,7 @@ public class Constant {
     public static final String INTENT_SERVICE_EXTRA_USER_PROFILE_PICTURE_ID_TAG = "u_profile_pic_id";
     public static final String INTENT_SERVICE_EXTRA_USER_PROFILE_PICTURE_FILENAME_TAG = "u_profile_pic_filename";
     public static final String INTENT_SERVICE_EXTRA_TYPE_TAG = "type";
-    public static final String INTENT_SERVICE_EXTRA_ALBUM_ID_TAG = "aid";
+    public static final String INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG = "aid";
     public static final String INTENT_SERVICE_EXTRA_UPLOAD_FILE_PATH_TAG = "file_path";
 
     // intent service return result to main UI
@@ -275,15 +277,9 @@ public class Constant {
     public static final String STRING_NUMBER_OF_PICTURES_FORMAT = "All Photos ([num])";
     public static final String STRING_UPDATE_PROGRESS_FORMAT = "[num]% Uploaded";
 
-    // Default String
-    public static final String STRING_EMPTY = "";
-    public static final String STRING_LOADING_PICTURE = "Loading...";
-
-
     // History
     public static final String PREFERENCE_HISTORY_RECENT_TAG_FILE_NAME = "recent_tag.txt";
     public static final String PREFERENCE_JSON_TAG_NAME_TAG = "name";
-
 
 
 

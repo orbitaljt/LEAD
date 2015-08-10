@@ -3,7 +3,6 @@ package com.orbital.lead.controller;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Build;
 
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -11,20 +10,16 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.orbital.lead.R;
-import com.orbital.lead.model.EnumAndroidVersion;
 
 /**
  * Created by joseph on 29/6/2015.
  */
 public class CustomApplication extends Application{
 
-    private static EnumAndroidVersion version = null;
-
     @Override
     public void onCreate() {
         super.onCreate();
         initImageLoader(getApplicationContext());
-        checkAndroidVersion();
     }
 
     @Override
@@ -63,20 +58,5 @@ public class CustomApplication extends Application{
                 .build();
 
         return mOptions;
-    }
-
-    public static void checkAndroidVersion() {
-        if (Build.VERSION.SDK_INT < 19) {
-            version = EnumAndroidVersion.LESS_THAN_19;
-        }else {
-            version = EnumAndroidVersion.MORE_THAN_EQUAL_19;
-        }
-    }
-
-    public static EnumAndroidVersion getAndroidVersion() {
-        if(version == null) {
-            checkAndroidVersion();
-        }
-        return version;
     }
 }

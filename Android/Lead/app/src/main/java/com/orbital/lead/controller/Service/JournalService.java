@@ -68,8 +68,8 @@ public class JournalService extends IntentService{
             this.journalID = intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_JOURNAL_ID_TAG);
         }
 
-        if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG) != null){
-            this.albumID = intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG);
+        if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG) != null){
+            this.albumID = intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG);
         }
 
         if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_DETAIL_TAG) != null){

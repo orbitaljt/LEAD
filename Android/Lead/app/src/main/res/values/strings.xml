@@ -50,9 +50,7 @@
     <string name="dialog_toolbar_project_title">Select A Project</string>
     <string name="dialog_description_delete_tag">Delete this tag?</string>
     <string name="dialog_description_delete_project">Delete this project?</string>
-    <string name="dialog_description_save_new_journal">You have not save this journal.\nDo you want to save?</string>
     <string name="dialog_toolbar_upload_file_progress_title">Uploading Progress</string>
-    <string name="dialog_toolbar_save">Save</string>
 
     <string name="dialog_overflow_menu_edit">Edit</string>
     <string name="dialog_overflow_menu_delete">Delete</string>
@@ -60,8 +58,6 @@
     <string name="dialog_set">Set</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_ok">Ok</string>
-    <string name="dialog_discard">Discard</string>
-    <string name="dialog_save">Save</string>
 
     <string name="dialog_editext_tag_hint">Tag name</string>
     <string name="dialog_editext_project_hint">Project name</string>
