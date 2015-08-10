@@ -88,6 +88,7 @@ public class Constant {
     public static final String TYPE_GET_USER_ALL_ALBUM = "902";
     public static final String TYPE_DELETE_ALBUM = "903";
     public static final String TYPE_GET_ALL_PROJECT = "1000";
+    public static final String TYPE_GET_ALL_COUNTRIES = "1999";
     public static final String TYPE_UPLOAD_PROFILE_IMAGE_URL = "2000";
     public static final String TYPE_UPLOAD_IMAGE = "2001";
     public static final String TYPE_FACEBOOK = "1";
