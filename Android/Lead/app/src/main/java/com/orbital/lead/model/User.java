@@ -37,6 +37,7 @@ public class User {
 
     private ProjectList mProjectList;
     private JournalList mJournalList;
+    private CountryList mCountryList;
 
     public User(){
         this.initParser();
@@ -194,6 +195,8 @@ public class User {
         return this.mJournalList;
     }
 
+    public CountryList getCountryList() { return this.mCountryList; }
+
     // Set
     public void setFacebookAccessToken(AccessToken at) {
         this._facebookAccessToken = at;
@@ -304,6 +307,8 @@ public class User {
     public void setJournalList(JournalList list){
         this.mJournalList = list;
     }
+
+    public void setCountryList(CountryList list) {this.mCountryList = list; }
 
     private void initParser(){
         this.mParser = Parser.getInstance();

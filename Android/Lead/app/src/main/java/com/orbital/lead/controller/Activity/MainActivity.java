@@ -25,6 +25,7 @@ import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.FacebookUserObject;
 import com.orbital.lead.model.JournalList;
 import com.orbital.lead.model.User;
+import com.orbital.lead.model.CountryList;
 
 
 public class MainActivity extends BaseActivity
@@ -456,6 +457,10 @@ public class MainActivity extends BaseActivity
         getLogic().updateUserProfileDatabase(this, this.getCurrentUser().getUserID(), detail);
     }
 
+    public void updateCurrentUserCountryList(CountryList list) {
+        getLogging().debug(TAG, "updateCurrentUserCountryList listSize =>" + list.size());
+        CurrentLoginUser.getUser().setCountryList(list);
+    }
 
     public void createNewUserProfileToDatabase(){
         String detail = getParser().userObjectToJson(getCurrentUser());
