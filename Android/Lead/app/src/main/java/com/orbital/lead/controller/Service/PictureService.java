@@ -55,9 +55,9 @@ public class PictureService extends IntentService  {
 
         this.receiver = intent.getParcelableExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG);
 
-        if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG) != null){
+        if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG) != null){
             this.mLogging.debug(TAG, "setAlbumID" );
-           this.setAlbumID(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ALBUM_ID_TAG));
+           this.setAlbumID(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG));
         }
 
         if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG) != null){
@@ -78,7 +78,7 @@ public class PictureService extends IntentService  {
         returnBundle.putSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG, this.getServiceType()); // return the type of service
 
         /* Update UI: Download Service is Running */
-        receiver.send(STATUS_RUNNING, null);
+        receiver.send(STATUS_RUNNING, returnBundle);
 
         this.mLogging.debug(TAG, "this.getServiceType() => " + this.getServiceType().toString());
 
@@ -105,8 +105,6 @@ public class PictureService extends IntentService  {
                     url = Constant.URL_CLIENT_SERVER;
                     params = new HashMap<String, String>();
 
-                    this.mLogging.debug(TAG, "this.getUserID() -> " + this.getUserID());
-
                     params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, this.getUserID());
                     this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_GET_USER_ALL_ALBUM, params);
                     this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
@@ -116,13 +114,27 @@ public class PictureService extends IntentService  {
 
                     break;
 
+                case DELETE_ALBUM:
+                    // delete a specific album
+                    // requires album ID
+                    /*
+                    url = Constant.URL_CLIENT_SERVER;
+                    params = new HashMap<String, String>();
+
+                    params.put(Constant.URL_POST_PARAMETER_TAG_ALBUM_ID, this.getAlbumID());
+                    this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_DELETE_ALBUM, params);
+                    this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
+
+                    returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
+                    receiver.send(STATUS_FINISHED, returnBundle);
+
+                    break;
+                    */
 
                 case UPLOAD_IMAGE_FILE:
                     // upload an image file based
                     // requires user ID, album ID, file data
                     url = Constant.URL_CLIENT_SERVER;
-                    //HashMap<String, String> params = new HashMap<String, String>();
-
                     this.urlStreamStr = WebConnector.uploadFile(this,
                                                             Constant.TYPE_UPLOAD_IMAGE,
                                                             url,

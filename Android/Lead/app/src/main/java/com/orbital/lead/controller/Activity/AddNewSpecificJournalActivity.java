@@ -41,7 +41,7 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
     private TextView mTextProject;
     private EditText mEditTextTitle;
     private EditText mEditTextContent;
-    private AlertDialog mDialogOption;
+    private AlertDialog mDialogSave;
 
     private Journal newJournal;
     private TagList newTagList;
@@ -64,6 +64,8 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
     private int mDay;
 
     private boolean toggleRefresh = false;
+    private boolean isSaved = false;
+    private boolean discard = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,7 +125,8 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
                 return true;
 
             case R.id.action_image:
-                getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, this.getNewJournal().getAlbum(), this.getNewJournal().getJournalID());
+                getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_LIST_PICTURES,
+                        this.getNewJournal().getAlbum(), this.getNewJournal().getJournalID());
                 return true;
 
         }
@@ -138,11 +141,21 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
+        if(!this.getIsSaved() && !this.getDiscard()) { // save and not discard
+            this.showSaveDialog();
+            return;
+
+        }else{ //if discard and don't save, delete album and return to previous activity
+            this.deleteAlbum();
+        }
+
         Intent intent = new Intent();
-        intent.putExtra(Constant.BUNDLE_PARAM_JOURNAL_LIST_TOGGLE_REFRESH, toggleRefresh);
+        intent.putExtra(Constant.BUNDLE_PARAM_JOURNAL_LIST_TOGGLE_REFRESH, this.getToggleRefresh());
         setResult(Activity.RESULT_OK, intent);
         finish();
         super.onBackPressed();
+
+
     }
 
     private void restoreCustomActionbar(){
@@ -174,6 +187,14 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
 
     public void setToggleRefresh(boolean val) {
         this.toggleRefresh = val;
+    }
+
+    public void setIsSaved(boolean val) {
+        this.isSaved = val;
+    }
+
+    public void setDiscard(boolean val) {
+        this.discard = val;
     }
 
     private void initToolbarTitle() {
@@ -368,6 +389,18 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
         return this.newTagList;
     }
 
+    private boolean getToggleRefresh() {
+        return this.toggleRefresh;
+    }
+
+    private boolean getIsSaved() {
+        return this.isSaved;
+    }
+
+    private boolean getDiscard() {
+        return this.discard;
+    }
+
     private Journal getNewJournal() {
         return this.newJournal;
     }
@@ -375,16 +408,6 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
     private void updateNewTagList(TagList list) {
         this.newTagList.replaceWithTagList(list);
     }
-
-    /*
-    private String getNewJournalID() {
-        return this.newJournalID;
-    }
-
-    private String getNewAlbumID() {
-        return this.newAlbumID;
-    }
-    */
 
     /*=============== DIALOGS ==========*/
     private void showDatePickerDialog(){
@@ -472,6 +495,43 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
         builder.create().show();
     }
 
+    private void showSaveDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        final View dialogView = inflater.inflate(R.layout.dialog_save_layout, null);
+        builder.setView(dialogView)
+                .setPositiveButton(R.string.dialog_save, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        getLogging().debug(TAG, "showSaveDialog Save");
+                        uploadNewJournal();
+                    }
+                })
+                .setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        getLogging().debug(TAG, "showSaveDialog Cancel");
+                        mDialogSave.dismiss();
+                    }
+                })
+                .setNeutralButton(R.string.dialog_discard, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        getLogging().debug(TAG, "showSaveDialog Discard");
+                        setDiscard(true);
+                        setToggleRefresh(false);
+                        setIsSaved(false);
+                        onBackPressed();
+                    }
+                });
+
+        this.mDialogSave = builder.create();
+        this.mDialogSave.setCanceledOnTouchOutside(false);
+        this.mDialogSave.setCancelable(true);
+        this.mDialogSave.show();
+    }
+
 
     private void uploadNewJournal() {
         if(!this.isValidJournal()) {
@@ -490,11 +550,16 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
         this.getLogging().debug(TAG, "uploadNewJournal detail => " + detail);
 
         this.getLogic().insertNewJournal(this,
-                                        this.getCurrentUser().getUserID(),
-                                        this.getNewJournal().getJournalID(),
-                                        this.getNewJournal().getAlbum().getAlbumID(),
-                                        detail);
+                this.getCurrentUser().getUserID(),
+                this.getNewJournal().getJournalID(),
+                this.getNewJournal().getAlbum().getAlbumID(),
+                detail);
     }
+
+    private void deleteAlbum() {
+        this.getLogic().deleteAlbum(this, this.getNewJournal().getAlbum().getAlbumID());
+    }
+
 
     private boolean isValidJournal() {
         // Check title and content

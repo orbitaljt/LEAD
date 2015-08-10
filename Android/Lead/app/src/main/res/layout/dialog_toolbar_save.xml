@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tb="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/custom_specific_journal_toolbar"
+    android:layout_height="56dp"
+    android:layout_width="match_parent"
+    android:minHeight="56dp"
+    android:background="?attr/colorPrimary"
+    tb:contentInsetStart="16dp"
+    tb:contentInsetRight="16dp"
+    tb:theme="@style/ToolbarTheme"
+    tb:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/toolbar_text_title_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="center_vertical"
+            android:layout_centerVertical="true"
+            android:textSize="@dimen/text_actionbar_title"
+            android:textColor="@color/white"
+            android:text="@string/dialog_toolbar_save"/>
+
+    </RelativeLayout>
+
+
+</android.support.v7.widget.Toolbar>
