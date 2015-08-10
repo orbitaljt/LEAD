@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.View;
 
 import com.orbital.lead.Parser.FormatDate;
@@ -22,7 +21,6 @@ import com.orbital.lead.controller.Service.ProjectReceiver;
 import com.orbital.lead.model.Constant;
 
 
-import com.orbital.lead.model.CountryList;
 import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.FacebookUserObject;
 import com.orbital.lead.model.JournalList;
@@ -458,10 +456,6 @@ public class MainActivity extends BaseActivity
         getLogic().updateUserProfileDatabase(this, this.getCurrentUser().getUserID(), detail);
     }
 
-    public void updateCurrentUserCountryList(CountryList list) {
-        getLogging().debug(TAG, "updateCurrentUserCountryList listSize =>" + list.size());
-        CurrentLoginUser.getUser().setCountryList(list);
-    }
 
     public void createNewUserProfileToDatabase(){
         String detail = getParser().userObjectToJson(getCurrentUser());
