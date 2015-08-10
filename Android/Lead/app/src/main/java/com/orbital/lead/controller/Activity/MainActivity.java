@@ -168,7 +168,7 @@ public class MainActivity extends BaseActivity
         this.getLogging().debug(TAG, "displayFragmentAlbum");
         //this,
         this.mFragmentJournalList = FragmentMainUserJournalList.newInstance("", "");
-        this.replaceFragment(this.mFragmentJournalList, Constant.FRAGMENT_JOURNAL_LIST);
+        this.replaceFragment(this.mFragmentJournalList, Constant.FRAGMENT_JOURNAL_LIST_NAME);
     }
 
     private void replaceFragment(Fragment newFrag, String name){
