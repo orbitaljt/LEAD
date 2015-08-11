@@ -403,6 +403,9 @@ public class FragmentLogin extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+
+                    mLogging.debug(TAG, "HttpAsyncLogin onPostExecute result => " + result);
+
                     Message msg = mParser.parseJsonToMessage(result);
 
                     mLogging.debug(TAG, "msg.getMessage() => " + msg.getMessage());

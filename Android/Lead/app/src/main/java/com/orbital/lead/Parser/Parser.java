@@ -8,6 +8,8 @@ import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.model.Album;
 import com.orbital.lead.model.AlbumList;
 import com.orbital.lead.model.Constant;
+import com.orbital.lead.model.Country;
+import com.orbital.lead.model.CountryList;
 import com.orbital.lead.model.EnumMessageType;
 import com.orbital.lead.model.EnumPictureType;
 import com.orbital.lead.model.Journal;
@@ -318,6 +320,46 @@ public class Parser {
             return null;
         }
     }
+
+
+    public CountryList parseJsonToCountryList(String json){
+        CountryList list = null;
+        try {
+            mLogging.debug(TAG, "parseJsonToCountryList");
+            JSONObject topObj = new JSONObject(json);
+            String code = topObj.getString(Constant.MESSAGE_JSON_CODE_TAG);
+            String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
+
+            Message mMessage = new Message(code, msg);
+            if(this.getMessageType(mMessage) == EnumMessageType.SUCCESS){
+                list = new CountryList();
+
+                JSONArray detailArray = topObj.getJSONArray(Constant.MESSAGE_JSON_DETAIL_TAG);
+
+                for(int i=0; i < detailArray.length(); i++) {
+                    JSONObject countryObj = detailArray.getJSONObject(i);
+
+                    Country mCountry = new Country(countryObj.getString(Constant.MESSAGE_JSON_COUNTRY_TAG),
+                            countryObj.getString(Constant.MESSAGE_JSON_REGION_TAG),
+                            countryObj.getString(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG));
+
+
+                    list.addCountry(mCountry);
+
+                }
+            }
+
+            return list;
+
+        } catch (JSONException e){
+            mLogging.debug(TAG, "error => " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+
 
     public Album parseJsonToSpecificAlbum(String json){
         Album mAlbum = null;
@@ -770,7 +812,7 @@ public class Parser {
     }
 
     public boolean isStringEmpty(String val){
-        if(val.trim().equals("") || val.trim().isEmpty()){
+        if(val == null || val.trim().equals("") || val.trim().isEmpty()){
             return true;
         }else{
             return false;

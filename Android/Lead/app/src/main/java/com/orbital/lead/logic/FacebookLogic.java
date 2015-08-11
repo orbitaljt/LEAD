@@ -76,6 +76,8 @@ public class FacebookLogic {
     }
 
     public void sendGraphRequest(Context context, EnumFacebookQueryType type, String albumID) {
+        mLogging.debug(TAG, "sendGraphRequest " + type.toString());
+
         switch(type){
             case GET_ALL_ALBUM:
                 this.initFacebookAlbumList();
@@ -142,6 +144,11 @@ public class FacebookLogic {
     }
 
     private void getFacebookAlbumPictures(final Context context, final String albumID, String param) {
+        if(mParser.isStringEmpty(albumID)) {
+            mLogging.debug(TAG, "album ID is empty or null.");
+            return;
+        }
+
         GraphRequest request = new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
                 "/" + albumID + "/photos",

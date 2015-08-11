@@ -40,6 +40,7 @@ import com.orbital.lead.controller.Activity.MainActivity;
 import com.orbital.lead.controller.Service.JournalService;
 import com.orbital.lead.controller.Service.PictureService;
 import com.orbital.lead.controller.Service.ProjectService;
+import com.orbital.lead.logic.Asynchronous.AsyncCountry;
 import com.orbital.lead.logic.Asynchronous.AsyncDeleteAlbum;
 import com.orbital.lead.logic.Asynchronous.AsyncJournal;
 import com.orbital.lead.logic.Asynchronous.AsyncUploadImage;
@@ -49,6 +50,8 @@ import com.orbital.lead.logic.LocalStorage.LocalStorage;
 import com.orbital.lead.logic.Preference.Preference;
 import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Constant;
+import com.orbital.lead.model.Country;
+import com.orbital.lead.model.CountryList;
 import com.orbital.lead.model.EnumDialogEditJournalType;
 import com.orbital.lead.model.EnumJournalServiceType;
 import com.orbital.lead.model.EnumPictureServiceType;
@@ -193,6 +196,10 @@ public class Logic {
         executeProjectService(context, EnumProjectServiceType.GET_ALL_PROJECT, "", "", "");
     }
 
+    public void getAllCountries(Context context){
+        HttpAsyncCountry mAsync = new HttpAsyncCountry(context);
+        mAsync.execute(Constant.TYPE_GET_ALL_COUNTRIES);
+    }
 
     public void updateUserProfileDatabase(Context context, String userID, String detail){
         // detail in json string
@@ -469,6 +476,7 @@ public class Logic {
                         ((MainActivity) mContext).setNavigationDrawerUserEmail();
                         ((MainActivity) mContext).retrieveUserJournalList();
                         ((MainActivity) mContext).retrieveAllProject();
+                        ((MainActivity) mContext).retrieveAllCountries();
 
                     }
                     break;
@@ -544,6 +552,30 @@ public class Logic {
         }//end onPostExecute
 
     }//end HttpAsyncUserProfilePicture
+
+    private class HttpAsyncCountry extends AsyncCountry {
+
+        private Context mContext;
+
+        public HttpAsyncCountry(Context c){
+            this.mContext = c;
+        }
+
+        @Override
+        protected void onPreExecute() {
+        }
+
+        @Override
+        protected void onPostExecute(final String result) {
+            CountryList list = getParser().parseJsonToCountryList(result);
+            mLogging.debug(TAG, "httpAsyncCountryOnPostExecute result => " + result);
+            if(mContext instanceof MainActivity) {
+                ((MainActivity) mContext).updateCurrentUserCountryList(list);
+            }
+
+        }//end onPostExecute
+
+    }//end HttpAsyncCountry
 
 
     private class HttpAsyncUploadImage extends AsyncUploadImage {
@@ -941,7 +973,7 @@ public class Logic {
     }
 
 
-    public void showCountryListPopUpMenu(final Context context, View v, ArrayList<String> countries){
+    public void showCountryListPopUpMenu(final Context context, View v, CountryList list){
         PopupMenu menu = new PopupMenu(context, v){
             @Override
             public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
@@ -954,8 +986,8 @@ public class Logic {
             }
         };
 
-        for(String country : countries){
-            menu.getMenu().add(country);
+        for(Country country : list.getList()){
+            menu.getMenu().add(country.getCountry());
         }
 
         menu.show();
