@@ -25,6 +25,7 @@ import com.orbital.lead.logic.FacebookLogic;
 import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Constant;
+import com.orbital.lead.model.CountryList;
 import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumAndroidVersion;
 import com.orbital.lead.model.EnumJournalServiceType;
@@ -311,6 +312,10 @@ public class BaseActivity extends AppCompatActivity
         this.getLogic().getAllProject(this);
     }
 
+    public void retrieveAllCountries() {
+        this.getLogic().getAllCountries(this);
+    }
+
     protected String convertToDisplayDate(String oldDate) {
         if(getParser().isStringEmpty(oldDate)) {
             return Constant.STRING_EMPTY;
@@ -382,6 +387,7 @@ public class BaseActivity extends AppCompatActivity
                                 // refresh the journal list
                                 ((AddNewSpecificJournalActivity) this).setToggleRefresh(true);
                                 ((AddNewSpecificJournalActivity) this).setIsSaved(true);
+                                ((AddNewSpecificJournalActivity) this).onBackPressed();
                             }
                         }else{
                             if(this instanceof AddNewSpecificJournalActivity) {
@@ -514,6 +520,10 @@ public class BaseActivity extends AppCompatActivity
     protected TagSet getAllJournalTags(JournalList list) {
         TagSet set = list.getAllTags();
         return set;
+    }
+
+    public CountryList getCountryList() {
+        return this.getCurrentUser().getCountryList();
     }
 
     protected void updateCurrentUserAlbum(String journalID, Album album) {

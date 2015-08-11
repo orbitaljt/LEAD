@@ -455,11 +455,11 @@ public class PictureActivity extends BaseActivity implements
                     }
                     */
 
-                        /*
+
                         this.getLogic().uploadNewPicture(this, newUri,
                                 CurrentLoginUser.getUser().getUserID(),
                                 this.getSelectedAlbum().getAlbumID());
-                        */
+
 
                         break;
 
@@ -520,6 +520,7 @@ public class PictureActivity extends BaseActivity implements
            */
 
     }
+
 
     private String getPath(Uri uri) {
         String[] projection = { MediaStore.Images.Media.DATA };

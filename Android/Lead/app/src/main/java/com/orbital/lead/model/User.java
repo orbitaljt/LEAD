@@ -37,6 +37,7 @@ public class User {
 
     private ProjectList mProjectList;
     private JournalList mJournalList;
+    private CountryList mCountryList;
 
     public User(){
         this.initParser();
@@ -191,7 +192,17 @@ public class User {
     }
 
     public JournalList getJournalList(){
+        if(this.mJournalList == null) {
+            this.mJournalList = new JournalList();
+        }
         return this.mJournalList;
+    }
+
+    public CountryList getCountryList() {
+        if(this.mCountryList == null) {
+            this.mCountryList = new CountryList();
+        }
+        return this.mCountryList;
     }
 
     // Set
@@ -304,6 +315,8 @@ public class User {
     public void setJournalList(JournalList list){
         this.mJournalList = list;
     }
+
+    public void setCountryList(CountryList list) {this.mCountryList = list; }
 
     private void initParser(){
         this.mParser = Parser.getInstance();

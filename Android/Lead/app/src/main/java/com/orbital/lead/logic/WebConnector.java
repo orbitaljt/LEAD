@@ -166,7 +166,8 @@ public class WebConnector {
             System.out.println("WebConnector uploadFile => " + sourceFile.getPath());
 
             // Adding file data to http body
-            entity.addPart(fileType.toString(), new FileBody(sourceFile));
+            //fileType.toString()
+            entity.addPart("image", new FileBody(sourceFile));
             entity.addPart(Constant.URL_POST_PARAMETER_TAG_QUERY_TYPE, new StringBody(queryType, ContentType.DEFAULT_TEXT)); // type=...
             entity.addPart(Constant.URL_POST_PARAMETER_TAG_USER_ID, new StringBody(userID, ContentType.DEFAULT_TEXT)); // uid=...
             entity.addPart(Constant.URL_POST_PARAMETER_TAG_ALBUM_ID, new StringBody(albumID, ContentType.DEFAULT_TEXT)); // aid=...

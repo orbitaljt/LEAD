@@ -28,12 +28,14 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import com.orbital.lead.Parser.FormatDate;
 import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.R;
+import com.orbital.lead.controller.Activity.ProfileActivity;
 import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.FacebookLogic;
 import com.orbital.lead.logic.Logic;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.orbital.lead.model.Constant;
+import com.orbital.lead.model.CountryList;
 import com.orbital.lead.model.CurrentLoginUser;
 
 import java.util.ArrayList;
@@ -155,8 +157,6 @@ public class FragmentProfile extends Fragment {
         this.initTextBirthday(rootView);
         this.initTextProfileNotice(rootView);
         this.initImageCamera(rootView);
-
-        this.generateCountryList();
 
         if(CurrentLoginUser.getUser() != null) {
 
@@ -334,7 +334,7 @@ public class FragmentProfile extends Fragment {
         this.textCountry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mLogic.showCountryListPopUpMenu(getActivity(), v, generateCountryList());
+                mLogic.showCountryListPopUpMenu(getActivity(), v, getCountryList());
             }
         });
 
@@ -453,6 +453,7 @@ public class FragmentProfile extends Fragment {
         return this.animatorProfileLoading;
     }
 
+    /*
     private ArrayList<String> generateCountryList(){
         ArrayList<String> countries = new ArrayList<String>();
 
@@ -469,6 +470,14 @@ public class FragmentProfile extends Fragment {
 
         return countries;
     }
+    */
+    private CountryList getCountryList() {
+        if(getActivity() instanceof ProfileActivity) {
+           return ((ProfileActivity) getActivity()).getCountryList();
+        }
+        return null;
+    }
+
 
     private void disableViews(View v){
         v.setEnabled(false);

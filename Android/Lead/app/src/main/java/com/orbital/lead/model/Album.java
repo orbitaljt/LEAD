@@ -100,6 +100,9 @@ public class Album implements Parcelable {
     }
 
     public Album(Album album) {
+        if(album == null) {
+            return;
+        }
         this._userID = album.getUserID();
         this._albumID = album.getAlbumID();
         this.pictureCoverID = album.getPictureCoverID();
