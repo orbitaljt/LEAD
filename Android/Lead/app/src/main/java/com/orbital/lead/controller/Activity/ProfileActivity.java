@@ -134,7 +134,7 @@ public class ProfileActivity extends BaseActivity
     private void displayFragmentProfile(){
         this.getLogging().debug(TAG, "displayFragmentProfile");
         this.mFragmentProfile = FragmentProfile.newInstance("","");
-        this.replaceFragment(this.mFragmentProfile, Constant.FRAGMENT_PROFILE);
+        this.replaceFragment(this.mFragmentProfile, Constant.FRAGMENT_PROFILE_NAME);
     }
 
     private void replaceFragment(Fragment newFrag, String name){

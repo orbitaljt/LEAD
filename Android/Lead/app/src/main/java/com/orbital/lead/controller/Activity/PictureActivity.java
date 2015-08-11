@@ -1,10 +1,14 @@
 package com.orbital.lead.controller.Activity;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -107,7 +111,7 @@ public class PictureActivity extends BaseActivity implements
                         this.getFacebookLogic().sendGraphRequest(this, EnumFacebookQueryType.GET_ALL_ALBUM, "");
                     }
 
-                    this.getLogic().getUserAllAlbum(this, CurrentLoginUser.getUser().getUserID());
+                    this.getLogic().getUserAllAlbum(this, this.getCurrentUser().getUserID());
                     this.setToolbarTitle(Constant.TITLE_FRAGMENT_ALBUM);
                     this.displayFragmentAlbum();
 
@@ -162,6 +166,12 @@ public class PictureActivity extends BaseActivity implements
 
     @Override
     public void onBackPressed(){
+        getLogging().debug(TAG, "onBackPressed");
+        Intent intent = new Intent();
+        intent.putExtra(Constant.BUNDLE_PARAM_JOURNAL_ID, this.getJournalID());
+        intent.putExtra(Constant.BUNDLE_PARAM_ALBUM, this.getSelectedAlbum());
+        setResult(Activity.RESULT_OK, intent);
+        finish();
         super.onBackPressed();
         this.setToolbarTitleBaseOnCurrentFragment();
     }
@@ -224,10 +234,10 @@ public class PictureActivity extends BaseActivity implements
         this.mFragmentPictures = FragmentPictures.newInstance(this.getSelectedAlbum());
         if(!isAnyFragmentExist()){ // no fragment exist
             this.getLogging().debug(TAG, "Replace Fragment");
-            this.replaceFragment(this.mFragmentPictures, Constant.FRAGMENT_PICTURES);
+            this.replaceFragment(this.mFragmentPictures, Constant.FRAGMENT_PICTURES_NAME);
         }else{
             this.getLogging().debug(TAG, "Add Fragment");
-            this.addFragment(this.mFragmentPictures, Constant.FRAGMENT_PICTURES);
+            this.addFragment(this.mFragmentPictures, Constant.FRAGMENT_PICTURES_NAME);
         }
 
     }
@@ -236,7 +246,7 @@ public class PictureActivity extends BaseActivity implements
         this.getLogging().debug(TAG, "displayFragmentAlbum");
         this.mFragmentAlbum = FragmentAlbum.newInstance(this.getFacebookLogic().getIsFacebookLogin(),
                                                         this.getFacebookLogic().getCurrentFacebookAccessTokenString());
-        this.replaceFragment(this.mFragmentAlbum, Constant.FRAGMENT_ALBUM);
+        this.replaceFragment(this.mFragmentAlbum, Constant.FRAGMENT_ALBUM_NAME);
     }
 
 
@@ -311,6 +321,7 @@ public class PictureActivity extends BaseActivity implements
         }
     }
 
+    // TODO: 4/8/2015 when user from addNewJournal comes to here to add new picture, it will become null cos journal is not created
     private void updateCurrentUserAlbum(Album newAlbum) {
         this.getCurrentUser().getJournalList().get(this.getJournalID()).setAlbum(newAlbum);
     }
@@ -362,7 +373,8 @@ public class PictureActivity extends BaseActivity implements
     }
 
     private void setSelectedAlbum(Album a) {
-        this.mAlbum = a;
+        this.mAlbum = null;
+        this.mAlbum = new Album(a);
     }
 
     /*
@@ -414,15 +426,61 @@ public class PictureActivity extends BaseActivity implements
      * **/
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == this.REQUEST_PICK_IMAGE_INTENT && resultCode == RESULT_OK
-                && data != null && data.getData() != null) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        String newUri = "";
+
+        if(resultCode == RESULT_OK && data != null && data.getData() != null) {
 
             Uri uri = data.getData();
-            this.getLogging().debug(TAG, "onActivityResult uri string => " + getPath(uri));
+            this.getLogging().debug(TAG, "onActivityResult uri string => " + uri);
 
-            this.getLogic().uploadNewPicture(this, getPath(uri),
-                                            CurrentLoginUser.getUser().getUserID(),
-                                            this.getSelectedAlbum().getAlbumID());
+            if(uri != null) {
+                switch (requestCode) {
+                    case REQUEST_PICK_IMAGE_INTENT:
+
+                        newUri = getPath(uri);
+
+                    /*
+                    switch (this.getAndroidVersion()) {
+
+                        case LESS_THAN_19:
+                            newUri = getPath(uri);
+                            this.getLogging().debug(TAG, "onActivityResult LESS_THAN_19 get path from uri string => " + newUri);
+                            break;
+                        case MORE_THAN_EQUAL_19:
+                            newUri = getPath_API19(this, uri);
+                            this.getLogging().debug(TAG, "onActivityResult MORE_THAN_EQUAL_19 get path from uri string => " + newUri);
+                            break;
+                    }
+                    */
+
+                        /*
+                        this.getLogic().uploadNewPicture(this, newUri,
+                                CurrentLoginUser.getUser().getUserID(),
+                                this.getSelectedAlbum().getAlbumID());
+                        */
+
+                        break;
+
+                    case REQUEST_IMAGE_CAPTURE:
+                        newUri = getPath(uri);
+
+                        break;
+
+                }
+            }
+
+        }else{
+            this.getLogging().debug(TAG, "resultCode may not be ok or data is null");
+        }
+
+
+
+
+
+
+
 
   /*
             try {
@@ -460,7 +518,7 @@ public class PictureActivity extends BaseActivity implements
                 e.printStackTrace();
             }
            */
-        }
+
     }
 
     private String getPath(Uri uri) {
@@ -476,6 +534,39 @@ public class PictureActivity extends BaseActivity implements
             return cursor.getString(column_index);
         }
         else return null;
+    }
+
+    @SuppressLint("NewApi")
+    private String getPath_API19(Context context, Uri uri) {
+        String filePath = "";
+        if (DocumentsContract.isDocumentUri(context, uri)) {
+            String wholeID = DocumentsContract.getDocumentId(uri);
+            getLogging().debug(TAG, "wholeID => " + wholeID);
+            String[] splits = wholeID.split(":");
+            if (splits.length == 2) {
+                String id = splits[1];
+                getLogging().debug(TAG, "getPath_API19 id => " + id);
+                String[] column = {MediaStore.Images.Media.DATA};
+
+                String sel = MediaStore.Images.Media._ID + "=?";
+                getLogging().debug(TAG, "getPath_API19 sel => " + sel);
+                Cursor cursor = context.getContentResolver().
+                        query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                column, sel, new String[]{id}, null);
+                int columnIndex = cursor.getColumnIndex(column[0]);
+                if (cursor.moveToFirst()) {
+                    filePath = cursor.getString(columnIndex);
+                }
+                cursor.close();
+            }
+        }else {
+            filePath = uri.getPath();
+        }
+
+        getLogging().debug(TAG, "getPath_API19 returning filepath => " + filePath);
+
+        return filePath;
+
     }
 
     /**
@@ -543,8 +634,10 @@ public class PictureActivity extends BaseActivity implements
                         this.getLogging().debug(TAG, "onReceiveResult UPLOAD_IMAGE_FILE -> jsonResult => " + jsonResult);
 
                         Album updatedAlbum = getParser().parseJsonToSpecificAlbum(jsonResult);
+                        this.getLogging().debug(TAG, "onReceiveResult UPLOAD_IMAGE_FILE -> updatedAlbum number of pictures => " + updatedAlbum.getPictureList().size());
 
-                        this.updateCurrentUserAlbum(updatedAlbum);
+                        this.setSelectedAlbum(updatedAlbum);
+                        //this.updateCurrentUserAlbum(updatedAlbum);
                         this.updateFragmentPicturesGridAdapter(updatedAlbum.getPictureList());
                         if(this.getFragmentPictures() != null) {
                             this.getFragmentPictures().closeUploadImageProgressDialog();

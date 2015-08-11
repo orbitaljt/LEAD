@@ -21,8 +21,6 @@ import com.orbital.lead.model.Tag;
 import com.orbital.lead.model.TagList;
 import com.orbital.lead.model.TagSet;
 import com.orbital.lead.model.User;
-import com.orbital.lead.model.Country;
-import com.orbital.lead.model.CountryList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -308,42 +306,6 @@ public class Parser {
 
 
                     list.addProject(mProject);
-
-                }
-            }
-
-            return list;
-
-        } catch (JSONException e){
-            mLogging.debug(TAG, "error => " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public CountryList parseJsonToCountryList(String json){
-        CountryList list = null;
-        try {
-            mLogging.debug(TAG, "parseJsonToCountryList");
-            JSONObject topObj = new JSONObject(json);
-            String code = topObj.getString(Constant.MESSAGE_JSON_CODE_TAG);
-            String msg = topObj.getString(Constant.MESSAGE_JSON_MESSAGE_TAG);
-
-            Message mMessage = new Message(code, msg);
-            if(this.getMessageType(mMessage) == EnumMessageType.SUCCESS){
-                list = new CountryList();
-
-                JSONArray detailArray = topObj.getJSONArray(Constant.MESSAGE_JSON_DETAIL_TAG);
-
-                for(int i=0; i < detailArray.length(); i++) {
-                    JSONObject countryObj = detailArray.getJSONObject(i);
-
-                    Country mCountry = new Country(countryObj.getString(Constant.MESSAGE_JSON_COUNTRY_TAG),
-                            countryObj.getString(Constant.MESSAGE_JSON_REGION_TAG),
-                            countryObj.getString(Constant.MESSAGE_JSON_COUNTRY_CODE_TAG));
-
-
-                    list.addCountry(mCountry);
 
                 }
             }
