@@ -3,6 +3,7 @@ package com.orbital.lead.controller.Activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -33,7 +34,10 @@ import com.orbital.lead.model.EnumOpenPictureActivityType;
 import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.PictureList;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -556,8 +560,6 @@ public class PictureActivity extends BaseActivity implements
 
             case Constant.DIALOG_REQUEST_OPEN_INTENT_CAMERA:
 
-
-
                 switch (this.getAndroidVersion()) {
 
                     case LESS_THAN_19:
@@ -572,7 +574,8 @@ public class PictureActivity extends BaseActivity implements
                             return;
                         }
 
-                        this.openCameraIntent(photoFile);
+                        //this.openCameraIntent(photoFile);
+                        this.openCameraIntent();
                         break;
                 }
 
@@ -639,6 +642,8 @@ public class PictureActivity extends BaseActivity implements
     /**
      * onActivityResult is used to receive the result from Intent (images)
      * **/
+
+/*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -649,8 +654,6 @@ public class PictureActivity extends BaseActivity implements
 
             Uri uri = data.getData();
 
-            //data.getExtras().get("data").to;
-
             this.getLogging().debug(TAG, "onActivityResult uri string => " + uri);
 
             if(uri != null) {
@@ -658,20 +661,6 @@ public class PictureActivity extends BaseActivity implements
                     case REQUEST_PICK_IMAGE_INTENT:
 
                         newUri = getPath(uri);
-
-                    /*
-                    switch (this.getAndroidVersion()) {
-
-                        case LESS_THAN_19:
-                            newUri = getPath(uri);
-                            this.getLogging().debug(TAG, "onActivityResult LESS_THAN_19 get path from uri string => " + newUri);
-                            break;
-                        case MORE_THAN_EQUAL_19:
-                            newUri = getPath_API19(this, uri);
-                            this.getLogging().debug(TAG, "onActivityResult MORE_THAN_EQUAL_19 get path from uri string => " + newUri);
-                            break;
-                    }
-                    */
 
 
                         this.getLogic().uploadNewPicture(this, newUri,
@@ -709,50 +698,83 @@ public class PictureActivity extends BaseActivity implements
             this.getLogging().debug(TAG, "resultCode may not be ok or data is null");
         }
 
+    }
+    */
 
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+        super.onActivityResult(requestCode, resultCode, data);
 
+        String imagePath = "";
 
+        if(resultCode == RESULT_OK ) {
 
+            switch(requestCode) {
+                case REQUEST_PICK_IMAGE_INTENT:
 
-  /*
-            try {
+                    imagePath = this.getPath(this.getUriBeforeAPI_19(data));
+                    getLogging().debug(TAG, "" + imagePath);
 
-                if (this.resultBitmap != null) {
-                    this.resultBitmap.recycle();
-                }
-                InputStream stream = getContentResolver().openInputStream(
-                        data.getData());
-                this.resultBitmap = BitmapFactory.decodeStream(stream);
-                stream.close();
+                    break;
 
-                this.getLogic().uploadNewPicture(this, this.resultBitmap,
-                                                CurrentLoginUser.getUser().getUserID(),
-                                                 this.getSelectedAlbum().getAlbumID());
+                case REQUEST_IMAGE_CAPTURE:
 
+                    if(data == null) {
+                        getLogging().debug(TAG, "data is null.. exiting");
+                        return;
+                    }
 
-            } catch (FileNotFoundException e) {
-                this.getLogging().debug(TAG, "onActivityResult error => " + e.getMessage());
-                e.printStackTrace();
+                    switch (this.getAndroidVersion()) {
 
-            } catch (IOException e) {
-                this.getLogging().debug(TAG, "onActivityResult error => " + e.getMessage());
-                e.printStackTrace();
+                        case LESS_THAN_19:
 
+                            imagePath = this.getPath(this.getUriBeforeAPI_19(data));
+                            getLogging().debug(TAG, "" + imagePath);
+
+                            break;
+
+                        case MORE_THAN_EQUAL_19:
+
+                            Bitmap bp = (Bitmap) data.getExtras().get("data");
+                            if (bp == null) {
+                                getLogging().debug(TAG, "Bitmap is null");
+                                return;
+                            }
+
+                            imagePath = getImagePathAfterAPI_19(bp);
+
+                            break;
+                    }
+
+                    if(!getParser().isStringEmpty(imagePath)) {
+                        getLogging().debug(TAG, "uploadNewPicture imagePath => " + imagePath);
+                        getLogging().debug(TAG, "uploadNewPicture getCurrentUser().getUserID() => " + getCurrentUser().getUserID());
+                        getLogging().debug(TAG, "uploadNewPicture getSelectedAlbum().getAlbumID() => " + getSelectedAlbum().getAlbumID());
+                        getLogic().uploadNewPicture(this,
+                                                    imagePath,
+                                                    this.getCurrentUser().getUserID(),
+                                                    this.getSelectedAlbum().getAlbumID());
+                    }
+
+                    break;
             }
-  */
+        }
 
 
+    }
 
-            /*
-            try {
+    private Uri getUriBeforeAPI_19(Intent data) {
+        if(data != null && data.getData() != null) {
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-           */
+            Uri uri = data.getData();
+            this.getLogging().debug(TAG, "onActivityResult uri string => " + uri);
 
+            return uri;
+        }
+
+        return null;
     }
 
 
@@ -771,10 +793,41 @@ public class PictureActivity extends BaseActivity implements
         else return null;
     }
 
+    private String getImagePathAfterAPI_19(Bitmap bp) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        bp.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+
+
+        File dest = new File(Environment.getExternalStorageDirectory()
+                + File.separator + "DCIM/Camera/" + "test.jpg");
+
+        FileOutputStream outputStream = null;
+
+        try {
+            dest.createNewFile();
+            outputStream = new FileOutputStream(dest);
+            outputStream.write(bytes.toByteArray());
+            outputStream.close();
+
+            getLogging().debug(TAG, "dest.getAbsolutePath() => " + dest.getAbsolutePath());
+
+            return dest.getAbsolutePath();
+        } catch(FileNotFoundException e) {
+            e.printStackTrace();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+
+        return Constant.STRING_EMPTY;
+
+    }
+
 
     private File createImageFile() throws IOException {
         String fileName = "test_image";
         File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        //File dir = new File(Environment.getExternalStorageDirectory()
+        //        + File.separator + "DCIM/Camera/" + "test.jpg");
 
         File image = File.createTempFile(fileName, ".jpg", dir);
 
