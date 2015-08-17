@@ -90,8 +90,12 @@ public class FacebookLogic {
         }
     }
 
+
+
     private void getFacebookAllAlbum(final Context context, String param) {
         mLogging.debug(TAG, "getFacebookAllAlbum");
+
+        this.getFacebookAlbumList().clearAll();
 
         GraphRequest request = GraphRequest.newMeRequest(
                 this.getCurrentFacebookAccessToken(),
@@ -100,17 +104,19 @@ public class FacebookLogic {
                     public void onCompleted(
                             JSONObject object,
                             GraphResponse response) {
-                        mLogging.debug(TAG, "response getRawResponse -> " + response.getRawResponse());
+
+                        //mLogging.debug(TAG, "response getRawResponse -> " + response.getRawResponse());
 
                         String data = response.getRawResponse();
                         if(!mParser.isStringEmpty(data)){
 
                             AlbumList currentAlbumList = ParserFacebook.getFacebookAlbumList(data);
+
                             String pageNextUrl = ParserFacebook.getFacebookAlbumListNextPageUrl(data); // include access token and after id
 
                             getFacebookAlbumList().addAlbum(currentAlbumList);
 
-                            mLogging.debug(TAG, "pageNextUrl -> " + pageNextUrl);
+                            //mLogging.debug(TAG, "pageNextUrl -> " + pageNextUrl);
 
                             if(mParser.isStringEmpty(pageNextUrl)){ //means no next page
                                 mLogging.debug(TAG, "no next page!!!");
@@ -145,9 +151,13 @@ public class FacebookLogic {
 
     private void getFacebookAlbumPictures(final Context context, final String albumID, String param) {
         if(mParser.isStringEmpty(albumID)) {
-            mLogging.debug(TAG, "album ID is empty or null.");
+            mLogging.debug(TAG, "getFacebookAlbumPictures album ID is empty or null.");
             return;
         }
+
+        mLogging.debug(TAG, "getFacebookAlbumPictures album ID => " + albumID);
+
+        this.getFacebookPictureList().clearAll();
 
         GraphRequest request = new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
@@ -226,7 +236,6 @@ public class FacebookLogic {
     private void returnFacebookAlbumListToContext(Context context) {
         mLogging.debug(TAG, "returnFacebookAlbumListToContext");
         if(context instanceof PictureActivity) {
-
             if(getFacebookAlbumList() != null){
                 mLogging.debug(TAG, "updateFragmentAlbumGridAdapter !!!!");
                 ((PictureActivity) context).updateFragmentAlbumGridAdapter(getFacebookAlbumList());
@@ -243,7 +252,7 @@ public class FacebookLogic {
         if(context instanceof PictureActivity) {
 
             if(getFacebookPictureList() != null){
-                mLogging.debug(TAG, "updateFragmentAlbumGridAdapter !!!!");
+                mLogging.debug(TAG, "updateFragmentPicturesGridAdapter !!!!");
                 ((PictureActivity) context).updateFragmentPicturesGridAdapter(getFacebookPictureList());
             }else {
                 mLogging.debug(TAG, "facebookAlbumList is null");

@@ -24,6 +24,7 @@ import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.CustomApplication;
 import com.orbital.lead.logic.CustomLogging;
+import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.Album;
 import com.orbital.lead.model.AlbumList;
 import com.orbital.lead.model.Constant;
@@ -42,6 +43,7 @@ public class GridAlbumsAdapter extends BaseAdapter{
     private AlbumList mAlbumList;
     private CustomLogging mLogging;
     private Parser mParser;
+    private Logic mLogic;
 
     private Animation inAnim;
     private Animation outAnim;
@@ -50,6 +52,7 @@ public class GridAlbumsAdapter extends BaseAdapter{
     public GridAlbumsAdapter(AlbumList albumList){
         this.initLogging();
         this.initParser();
+        this.initLogic();
         mLogging.debug(TAG, "GridAlbumsAdapter");
 
         this.mAlbumList = albumList;
@@ -118,39 +121,7 @@ public class GridAlbumsAdapter extends BaseAdapter{
         }
 
         public void setImage(final String url){
-            this.mAnimator.setDisplayedChild(1);
-
-            ImageLoader.getInstance()
-                    .displayImage(url, this.getImage(), mOptions,
-                            new SimpleImageLoadingListener(){
-                                @Override
-                                public void onLoadingStarted(String imageUri, View view) {
-                                    //holder.progressBar.setProgress(0);
-                                    //holder.progressBar.setVisibility(View.VISIBLE);
-                                    mLogging.debug(TAG, "onLoadingStarted");
-                                }
-
-                                @Override
-                                public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                                    //holder.progressBar.setVisibility(View.GONE);
-                                    mLogging.debug(TAG, "onLoadingFailed");
-                                    mAnimator.setDisplayedChild(2);
-                                }
-
-                                @Override
-                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                                    //holder.progressBar.setVisibility(View.GONE);
-                                    mLogging.debug(TAG, "onLoadingComplete");
-                                    mAnimator.setDisplayedChild(0);
-                                }
-                            },
-                            new ImageLoadingProgressListener() {
-                                @Override
-                                public void onProgressUpdate(String imageUri, View view, int current, int total) {
-                                   // mLogging.debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
-                                    //holder.progressBar.setProgress(Math.round(100.0f * current / total));
-                                }
-                            });
+            getLogic().showPicture(getContext(), this.mAnimator, this.getImage(), url);
         }
 
         public void setTextTitle(String val) {
@@ -207,15 +178,22 @@ public class GridAlbumsAdapter extends BaseAdapter{
         this.mParser = Parser.getInstance();
     }
 
+    private void initLogic() {
+        this.mLogic = Logic.getInstance();
+    }
+
     private void initAnimation(){
         this.inAnim = AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in);
-        this.outAnim = AnimationUtils.loadAnimation(getContext(),android.R.anim.fade_out);
+        this.outAnim = AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out);
     }
 
     private Parser getParser(){
         return this.mParser;
     }
 
+    private Logic getLogic() {
+        return this.mLogic;
+    }
 
 
 }

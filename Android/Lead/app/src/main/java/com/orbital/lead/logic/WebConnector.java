@@ -200,6 +200,18 @@ public class WebConnector {
     }
 
 
+    public static InputStream uploadFileUrl(final Context parentContext, String urlString, String type, HashMap<String, String> mapParam) throws IOException {
+        try{
+            return downloadUrl(urlString, type, mapParam);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+
+
 
     public static String convertStreamToString(InputStream is)
             throws IOException {

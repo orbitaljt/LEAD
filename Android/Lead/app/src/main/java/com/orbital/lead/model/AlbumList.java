@@ -91,6 +91,11 @@ public class AlbumList implements Parcelable {
         return this._arrayAlbum.size();
     }
 
+    public void clearAll() {
+        this._arrayAlbum = null;
+        this.initArray();
+    }
+
     private void initArray(){
         this._arrayAlbum = new ArrayList<Album>();
     }

@@ -34,6 +34,11 @@ public class PictureService extends IntentService  {
     private String albumID;
     private String userID;
     private String uploadFilePath;
+    private String fileName;
+    private String fileType;
+    private String fileUrl;
+    private boolean fromFacebook;
+    private boolean fromLead;
 
     private ResultReceiver receiver;
 
@@ -55,6 +60,11 @@ public class PictureService extends IntentService  {
 
         this.receiver = intent.getParcelableExtra(Constant.INTENT_SERVICE_EXTRA_RECEIVER_TAG);
 
+        if(intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG) != null){
+            this.mLogging.debug(TAG, "setServiceType" );
+            this.setServiceType((EnumPictureServiceType) intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG));
+        }
+
         if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG) != null){
             this.mLogging.debug(TAG, "setAlbumID" );
            this.setAlbumID(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG));
@@ -70,9 +80,25 @@ public class PictureService extends IntentService  {
             this.setUploadFilePath(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_PATH_TAG));
         }
 
-        if(intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG) != null){
-            this.mLogging.debug(TAG, "setServiceType" );
-            this.setServiceType((EnumPictureServiceType) intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG));
+        if(intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_URL_TAG) != null){
+            this.mLogging.debug(TAG, "setFileUrl" );
+            this.setFileUrl(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_URL_TAG));
+        }
+
+        if(intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_TYPE_TAG) != null){
+            this.setFileType(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_TYPE_TAG));
+        }
+
+        if(intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_NAME_TAG) != null){
+            this.setFileName(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_NAME_TAG));
+        }
+
+        if(intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FROM_FACEBOOK_TAG) != null){
+            this.setFromFacebook(intent.getBooleanExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FROM_FACEBOOK_TAG, false));
+        }
+
+        if(intent.getSerializableExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FROM_LEAD_TAG) != null){
+            this.setFromLead(intent.getBooleanExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FROM_LEAD_TAG, false));
         }
 
         returnBundle.putSerializable(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG, this.getServiceType()); // return the type of service
@@ -117,31 +143,37 @@ public class PictureService extends IntentService  {
                 case DELETE_ALBUM:
                     // delete a specific album
                     // requires album ID
-                    /*
-                    url = Constant.URL_CLIENT_SERVER;
-                    params = new HashMap<String, String>();
-
-                    params.put(Constant.URL_POST_PARAMETER_TAG_ALBUM_ID, this.getAlbumID());
-                    this.urlStream = WebConnector.downloadUrl(url, Constant.TYPE_DELETE_ALBUM, params);
-                    this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
-
-                    returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
-                    receiver.send(STATUS_FINISHED, returnBundle);
-
-                    break;
-                    */
 
                 case UPLOAD_IMAGE_FILE:
                     // upload an image file based
                     // requires user ID, album ID, file data
                     url = Constant.URL_CLIENT_SERVER;
                     this.urlStreamStr = WebConnector.uploadFile(this,
-                                                            Constant.TYPE_UPLOAD_IMAGE,
-                                                            url,
-                                                            this.getUserID(),
-                                                            this.getAlbumID(),
-                                                            this.getUploadFilePath(),
-                                                            EnumFileType.IMAGE);
+                            Constant.TYPE_UPLOAD_IMAGE,
+                            url,
+                            this.getUserID(),
+                            this.getAlbumID(),
+                            this.getUploadFilePath(),
+                            EnumFileType.IMAGE);
+
+                    returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
+                    receiver.send(STATUS_FINISHED, returnBundle);
+
+                    break;
+
+                case UPLOAD_FACEBOOK_IMAGE:
+                    url = Constant.URL_CLIENT_SERVER;
+                    params = new HashMap<String, String>();
+                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, this.getUserID());
+                    params.put(Constant.URL_POST_PARAMETER_TAG_ALBUM_ID, this.getAlbumID());
+                    params.put(Constant.URL_POST_PARAMETER_TAG_URL, this.getFileUrl());
+                    params.put(Constant.URL_POST_PARAMETER_TAG_FILE_NAME, this.getFileName());
+                    params.put(Constant.URL_POST_PARAMETER_TAG_FILE_TYPE, this.getFileType());
+                    params.put(Constant.URL_POST_PARAMETER_TAG_FROM_FACEBOOK, mParser.convertBooleanToString(this.getFromFacebook()));
+                    params.put(Constant.URL_POST_PARAMETER_TAG_FROM_LEAD, mParser.convertBooleanToString(this.getFromLead()));
+
+                    this.urlStream = WebConnector.uploadFileUrl(this, url, Constant.TYPE_UPLOAD_FACEBOOK_IMAGE, params);
+                    this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
 
                     returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
                     receiver.send(STATUS_FINISHED, returnBundle);
@@ -204,6 +236,26 @@ public class PictureService extends IntentService  {
         this.uploadFilePath = path;
     }
 
+    private void setFileName(String val) {
+        this.fileName = val;
+    }
+
+    private void setFileType(String val) {
+        this.fileType = val;
+    }
+
+    private void setFileUrl(String val) {
+        this.fileUrl = val;
+    }
+
+    private void setFromFacebook(boolean val) {
+        this.fromFacebook = val;
+    }
+
+    private void setFromLead(boolean val) {
+        this.fromLead = val;
+    }
+
     private EnumPictureServiceType getServiceType() {
         return this.serviceType;
     }
@@ -219,4 +271,28 @@ public class PictureService extends IntentService  {
     private String getUploadFilePath() {
         return this.uploadFilePath;
     }
+
+    private String getFileName() {
+        return this.fileName;
+    }
+
+    private String getFileType() {
+        return this.fileType;
+    }
+
+    private String getFileUrl() {
+        return this.fileUrl;
+    }
+
+    private boolean getFromFacebook() {
+        return this.fromFacebook;
+    }
+
+    private boolean getFromLead() {
+        return this.fromLead;
+    }
+
+
+
+
 }

@@ -25,6 +25,7 @@ import com.orbital.lead.controller.Service.PictureService;
 import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
+import com.orbital.lead.model.EnumOpenPictureActivityType;
 import com.orbital.lead.model.EnumPictureServiceType;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.Project;
@@ -207,7 +208,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
             public void onClick(View v) {
                 getLogging().debug(TAG, "mImageJournalCover onClick");
                 if(getAlbum() != null){
-                    getLogic().displayPictureActivity(getContext(), PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, getAlbum(), getJournal().getJournalID());
+                    getLogic().displayPictureActivity(getContext(), EnumOpenPictureActivityType.OPEN_FRAGMENT_LIST_PICTURES, getAlbum(), getJournal().getJournalID());
                 }
             }
         });
@@ -224,7 +225,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
             public void onClick(View v) {
                 getLogging().debug(TAG, "mTextPictureCount onClick");
                 if(getAlbum() != null){
-                    getLogic().displayPictureActivity(getContext(), PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, getAlbum(), getJournal().getJournalID());
+                    getLogic().displayPictureActivity(getContext(), EnumOpenPictureActivityType.OPEN_FRAGMENT_LIST_PICTURES, getAlbum(), getJournal().getJournalID());
                 }
             }
         });
@@ -297,39 +298,6 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         //.transform(new RoundedTransformation(10, 0))
         if(!this.getParser().isStringEmpty(url)){
             this.getLogic().showPicture(this, mAnimator, this.getImageJournalCover(), url);
-            /*
-            ImageLoader.getInstance()
-                    .displayImage(url, this.getImageJournalCover(), this.getCustomApplication().getDisplayImageOptions(),
-                            new SimpleImageLoadingListener(){
-                                @Override
-                                public void onLoadingStarted(String imageUri, View view) {
-                                    //holder.progressBar.setProgress(0);
-                                    //holder.progressBar.setVisibility(View.VISIBLE);
-                                    getLogging().debug(TAG, "onLoadingStarted");
-                                }
-
-                                @Override
-                                public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                                    //holder.progressBar.setVisibility(View.GONE);
-                                    getLogging().debug(TAG, "onLoadingFailed");
-                                    mAnimator.setDisplayedChild(2);
-                                }
-
-                                @Override
-                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                                    //holder.progressBar.setVisibility(View.GONE);
-                                    getLogging().debug(TAG, "onLoadingComplete");
-                                    mAnimator.setDisplayedChild(0);
-                                }
-                            },
-                            new ImageLoadingProgressListener() {
-                                @Override
-                                public void onProgressUpdate(String imageUri, View view, int current, int total) {
-                                    getLogging().debug(TAG, "onProgressUpdate => " + Math.round(100.0f * current / total));
-                                    //holder.progressBar.setProgress(Math.round(100.0f * current / total));
-                                }
-                            });
-               */
         }else{
             getLogging().debug(TAG, "setImageJournalCover -> Picture URL is empty");
             mAnimator.setDisplayedChild(2);

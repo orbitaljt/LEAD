@@ -24,6 +24,7 @@ import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerProjectListAdapte
 import com.orbital.lead.controller.RecyclerViewAdapter.RecyclerTagListAdapter;
 import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.EnumDialogEditJournalType;
+import com.orbital.lead.model.EnumOpenPictureActivityType;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.Project;
 import com.orbital.lead.model.ProjectList;
@@ -125,7 +126,7 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
                 return true;
 
             case R.id.action_image:
-                getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_LIST_PICTURES,
+                getLogic().displayPictureActivity(this, EnumOpenPictureActivityType.OPEN_FRAGMENT_LIST_PICTURES,
                         this.getNewJournal().getAlbum(), this.getNewJournal().getJournalID());
                 return true;
 

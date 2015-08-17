@@ -12,12 +12,16 @@ public class Constant {
     public static final String FRAGMENT_JOURNAL_LIST_NAME = "FragmentJournalList";
     public static final String FRAGMENT_PICTURES_NAME = "FragmentPictures";
     public static final String FRAGMENT_ALBUM_NAME = "FragmentAlbum";
+    public static final String FRAGMENT_FACEBOOK_SELECTION_ALBUM_NAME = "FragmentFacebookSelectionAlbum";
+    public static final String FRAGMENT_FACEBOOK_SELECTION_PICTURES_NAME = "FragmentFacebookSelectionPictures";
     public static final String FRAGMENT_PROFILE_NAME = "FragmentProfile";
 
     // Title
     public static final String TITLE_LEAD = "Lead";
     public static final String TITLE_SPECIFIC_JOURNAL = "My Journal";
     public static final String TITLE_FRAGMENT_ALBUM = "Album";
+    public static final String TITLE_FRAGMENT_CHOOSE_FACEBOOK_ALBUM = "Select Facebook Album";
+    public static final String TITLE_FRAGMENT_CHOOSE_FACEBOOK_PICTURE = "Choose A Picture";
     public static final String TITLE_FRAGMENT_PICTURES = "Pictures";
     public static final String TITLE_FRAGMENT_PROFILE = "Profile";
     public static final String TITLE_ADD_NEW_JOURNAL = "New Journal";
@@ -91,6 +95,8 @@ public class Constant {
     public static final String TYPE_GET_ALL_COUNTRIES = "1999";
     public static final String TYPE_UPLOAD_PROFILE_IMAGE_URL = "2000";
     public static final String TYPE_UPLOAD_IMAGE = "2001";
+    public static final String TYPE_UPLOAD_FACEBOOK_IMAGE = "2002";
+
     public static final String TYPE_FACEBOOK = "1";
 
 
@@ -171,7 +177,7 @@ public class Constant {
     */
 
     //public static final String FACEBOOK_DUMMY_AFTER_ID = "[after_id]";
-    public static final String FACEBOOK_GRAPH_ALBUM_QUERY = "albums.limit(5){id,cover_photo,name,created_time,updated_time,count,description}";
+    public static final String FACEBOOK_GRAPH_ALBUM_QUERY = "albums.limit(5){id,cover_photo,name,created_time,updated_time,count}"; //,description
     public static final String FACEBOOK_GRAPH_ALBUM_PICTURES_QUERY = "created_time,event,id,name,updated_time,source";
     public static final String FACEBOOK_JSON_ID_TAG = "id";
     public static final String FACEBOOK_JSON_PROFILE_PICTURE_TAG = "picture";
@@ -230,6 +236,19 @@ public class Constant {
     public static final String INTENT_SERVICE_EXTRA_TYPE_TAG = "type";
     public static final String INTENT_SERVICE_EXTRA_ALBUM_ID_TAG = "aid";
     public static final String INTENT_SERVICE_EXTRA_UPLOAD_FILE_PATH_TAG = "file_path";
+    public static final String INTENT_SERVICE_EXTRA_UPLOAD_FILE_URL_TAG = "url";
+    public static final String INTENT_SERVICE_EXTRA_UPLOAD_FILE_NAME_TAG = "filename";
+    public static final String INTENT_SERVICE_EXTRA_UPLOAD_FILE_TYPE_TAG = "filetype";
+    public static final String INTENT_SERVICE_EXTRA_UPLOAD_FROM_FACEBOOK_TAG = "from_fb";
+    public static final String INTENT_SERVICE_EXTRA_UPLOAD_FROM_LEAD_TAG = "from_lead";
+
+
+
+
+
+
+
+
 
     // intent service return result to main UI
     public static final String INTENT_SERVICE_RESULT_DOWNLOAD_STATUS_TAG = "download_status";
