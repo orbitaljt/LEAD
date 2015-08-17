@@ -8,7 +8,8 @@ public enum EnumPictureServiceType {
     GET_ALL_ALBUM ("get_all_album"),
     DELETE_ALBUM("delete_album"),
     UPLOAD_PROFILE_IMAGE_URL ("upload_profile_image_url"),
-    UPLOAD_IMAGE_FILE ("upload_image_file");
+    UPLOAD_IMAGE_FILE ("upload_image_file"),
+    UPLOAD_FACEBOOK_IMAGE ("upload_facebook_image");
 
     private String text;
 

@@ -2,8 +2,10 @@ package com.orbital.lead.controller.Activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -29,12 +31,15 @@ import com.orbital.lead.model.CountryList;
 import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumAndroidVersion;
 import com.orbital.lead.model.EnumJournalServiceType;
+import com.orbital.lead.model.EnumOpenPictureActivityType;
 import com.orbital.lead.model.EnumProjectServiceType;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.JournalList;
 import com.orbital.lead.model.ProjectList;
 import com.orbital.lead.model.TagSet;
 import com.orbital.lead.model.User;
+
+import java.io.File;
 
 
 public class BaseActivity extends AppCompatActivity
@@ -127,7 +132,7 @@ public class BaseActivity extends AppCompatActivity
                 getLogic().displayProfileActivity(this);
                 break;
             case 1: // Albums
-                getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_ALBUM, null, Constant.STRING_EMPTY);
+                //getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_ALBUM, null, Constant.STRING_EMPTY);
                 break;
             case 2: // Badge
                 break;
@@ -299,8 +304,32 @@ public class BaseActivity extends AppCompatActivity
         Intent intent = new Intent(
                 android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         if (intent.resolveActivity(getPackageManager()) != null) {
+
             this.getLogging().debug(TAG, "openCameraIntent startActivityForResult");
             startActivityForResult(intent, this.REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    protected void openCameraIntent(File outputFile) {
+        if(outputFile == null) {
+            this.getLogging().debug(TAG, "outputFile is null. Not running camera intent");
+            return;
+        }
+
+
+        Intent intent = new Intent(
+                android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+
+            this.getLogging().debug(TAG, "openCameraIntent startActivityForResult");
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(outputFile));
+            startActivityForResult(intent, this.REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    protected void openFacebookAlbum() {
+        if(this instanceof PictureActivity) {
+            ((PictureActivity) this).selectOpenFragment(EnumOpenPictureActivityType.SELECT_FACEBOOK_ALBUM);
         }
     }
 
@@ -413,6 +442,7 @@ public class BaseActivity extends AppCompatActivity
                         this.setCurrentUserProjectList(list);
 
                         break;
+
                 }
                 break;
 

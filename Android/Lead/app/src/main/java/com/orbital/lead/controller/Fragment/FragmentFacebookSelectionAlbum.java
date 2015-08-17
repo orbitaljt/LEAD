@@ -1,7 +1,6 @@
 package com.orbital.lead.controller.Fragment;
 
 import android.app.Activity;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -22,15 +21,15 @@ import com.orbital.lead.model.EnumOpenPictureActivityType;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link FragmentAlbum.OnFragmentInteractionListener} interface
+ * {@link FragmentFacebookSelectionAlbum.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link FragmentAlbum#newInstance} factory method to
+ * Use the {@link FragmentFacebookSelectionAlbum#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FragmentAlbum extends Fragment {
+public class FragmentFacebookSelectionAlbum extends Fragment {
     private final String TAG = this.getClass().getSimpleName();
 
-    public static final int REQUEST_OPEN_FRAGMENT_PICTURES = 1;
+    public static final int REQUEST_OPEN_FRAGMENT_FACEBOOK_SELECTION_PICTURES = 111;
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_IS_FACEBOOK_LOGIN = "isFacebookLogin";
@@ -39,6 +38,7 @@ public class FragmentAlbum extends Fragment {
     // TODO: Rename and change types of parameters
     private boolean mParamIsFacebookLogin;
     private String mParamCurrentFacebookAccessToken;
+    private EnumOpenPictureActivityType mParamOpenType;
 
     private OnFragmentInteractionListener mListener;
     private CustomLogging mLogging;
@@ -56,8 +56,8 @@ public class FragmentAlbum extends Fragment {
      * @return A new instance of fragment FragmentAlbum.
      */
     // TODO: Rename and change types and number of parameters
-    public static FragmentAlbum newInstance(boolean isFacebookLogin, String facebookAccessToken) {
-        FragmentAlbum fragment = new FragmentAlbum();
+    public static FragmentFacebookSelectionAlbum newInstance(boolean isFacebookLogin, String facebookAccessToken) {
+        FragmentFacebookSelectionAlbum fragment = new FragmentFacebookSelectionAlbum();
         Bundle args = new Bundle();
         args.putBoolean(ARG_IS_FACEBOOK_LOGIN, isFacebookLogin);
         args.putString(ARG_FACEBOOK_ACCESS_TOKEN, facebookAccessToken);
@@ -65,7 +65,7 @@ public class FragmentAlbum extends Fragment {
         return fragment;
     }
 
-    public FragmentAlbum() {
+    public FragmentFacebookSelectionAlbum() {
         // Required empty public constructor
     }
 
@@ -150,7 +150,7 @@ public class FragmentAlbum extends Fragment {
 
                 Album selectedAlbum = getAlbumList().get(position);
                 if(selectedAlbum != null) {
-                    mListener.onFragmentAlbumInteraction(FragmentAlbum.REQUEST_OPEN_FRAGMENT_PICTURES, selectedAlbum);
+                    mListener.onFragmentFacebookSelectionAlbumInteraction(FragmentFacebookSelectionAlbum.REQUEST_OPEN_FRAGMENT_FACEBOOK_SELECTION_PICTURES, selectedAlbum);
                 }else{
                     mLogging.debug(TAG, "onItemClick -> Selected album is null");
                 }
@@ -186,7 +186,7 @@ public class FragmentAlbum extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentAlbumInteraction(int request, Album selectedAlbum);
+        public void onFragmentFacebookSelectionAlbumInteraction(int request, Album selectedAlbum);
     }
 
     /*

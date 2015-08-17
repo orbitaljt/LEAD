@@ -217,12 +217,14 @@ public class ParserFacebook {
                 albumName = "";
             }
 
+            /*
             try{
                 description = dataObj.getString(Constant.FACEBOOK_JSON_DESCRIPTION_TAG); // some albums doesn't have description
             }catch (JSONException e){
                 mLogging.debug(TAG, "getFacebookSpecificAlbum description error =>" + e.getMessage());
                 description = "";
             }
+            */
 
             albumID = dataObj.getString(Constant.FACEBOOK_JSON_ID_TAG);
             createdTimeStamp = dataObj.getString(Constant.FACEBOOK_JSON_CREATED_TIME_TAG);

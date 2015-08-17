@@ -3,7 +3,6 @@ package com.orbital.lead.controller.Fragment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,22 +11,20 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.clans.fab.FloatingActionButton;
 import com.orbital.lead.Parser.Parser;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.Activity.PictureActivity;
-import com.orbital.lead.controller.ViewPagerAdapter.PagerImageAdapter;
 import com.orbital.lead.controller.GridAdapter.GridPicturesAdapter;
 import com.orbital.lead.controller.GridAdapter.MultiChoiceModeListener;
+import com.orbital.lead.controller.ViewPagerAdapter.PagerImageAdapter;
 import com.orbital.lead.logic.CustomLogging;
 import com.orbital.lead.logic.FacebookLogic;
 import com.orbital.lead.logic.Logic;
 import com.orbital.lead.model.Album;
 import com.orbital.lead.model.Constant;
-import com.orbital.lead.model.EnumOpenPictureActivityType;
 import com.orbital.lead.model.Picture;
 import com.orbital.lead.model.PictureList;
 import com.orbital.lead.widget.WrapContentHeightViewPager;
@@ -37,13 +34,15 @@ import java.util.ArrayList;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link FragmentPictures.OnFragmentInteractionListener} interface
+ * {@link FragmentFacebookSelectionPictures.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link FragmentPictures#newInstance} factory method to
+ * Use the {@link FragmentFacebookSelectionPictures#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FragmentPictures extends Fragment {
+public class FragmentFacebookSelectionPictures extends Fragment {
     private final String TAG = this.getClass().getSimpleName();
+
+    public static final int REQUEST_UPLOAD_FACEBOOK_IMAGE_FILE = 222;
 
     private static final String ARG_ALBUM = "album";
 
@@ -55,10 +54,8 @@ public class FragmentPictures extends Fragment {
     private Parser mParser;
     private FacebookLogic mFacebookLogic;
 
-    //private PictureActivity mPictureActivity;
     private GridView mGridView;
     private FloatingActionButton mFabAddPicture;
-    private AlertDialog mDialogOption;
     private AlertDialog mDialogPicturePreview;
     private AlertDialog mDialogUploadImageProgress;
     private GridPicturesAdapter mGridPicturesAdapter;
@@ -76,19 +73,20 @@ public class FragmentPictures extends Fragment {
      * @return A new instance of fragment FragmentAlbum.
      */
     //Context context,
-    public static FragmentPictures newInstance(Album album) {
-        FragmentPictures fragment = new FragmentPictures();
+    public static FragmentFacebookSelectionPictures newInstance(Album album) {
+        FragmentFacebookSelectionPictures fragment = new FragmentFacebookSelectionPictures();
 
         //mContext = context;
         //ArrayList<Picture> list = new ArrayList<Picture>(picList);
 
         Bundle args = new Bundle();
         args.putParcelable(ARG_ALBUM, album);
+        //args.putParcelableArrayList(ARG_PICTURE_LIST, list);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public FragmentPictures() {
+    public FragmentFacebookSelectionPictures() {
         // Required empty public constructor
     }
 
@@ -96,7 +94,6 @@ public class FragmentPictures extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.initLogging();
-        this.mLogging.debug(TAG, "onCreate");
         if (getArguments() != null) {
             mParamAlbum = getArguments().getParcelable(ARG_ALBUM);
         }
@@ -106,29 +103,19 @@ public class FragmentPictures extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         this.mLogging.debug(TAG, "onCreateView");
-        // Inflate the layout for this fragment
+        // Inflate the layout for this fragmentmm
         View rootView = inflater.inflate(R.layout.fragment_pictures, container, false);
-
 
         if(this.mParamAlbum != null){
             this.setPictureList(this.mParamAlbum.getPictureList());
-            this.mLogging.debug(TAG, "this.mParamAlbum.getPictureList() size => " + this.mParamAlbum.getPictureList().size());
-        }else{
-            this.mLogging.debug(TAG, "mParamAlbum is null!!!!");
         }
 
-        //if(!mParamAlbum.getIsFromFacebook()){
-            this.initLogic();
-            this.initParser();
-            this.initFacebookLogic();
-            this.initGridView(rootView, this.getPictureList());
-            this.initFabAddPicture(rootView, getActivity());
-        //}else{
-
-        //}
-
-
-
+        this.initLogic();
+        this.initParser();
+        this.initFacebookLogic();
+        this.initGridView(rootView, this.getPictureList());
+        this.initFabAddPicture(rootView);
+        this.hideFabAddPicture();
 
         return rootView;
     }
@@ -148,30 +135,19 @@ public class FragmentPictures extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        this.mLogging.debug(TAG, "onDestroyView");
-        super.onDestroyView();
-
-
-
-    }
-
-
-    @Override
     public void onDetach() {
-        this.mLogging.debug(TAG, "onDetach");
         super.onDetach();
         mListener = null;
     }
 
-    /*
-    public PictureActivity getPictureActivity(){
-        return this.mPictureActivity;
-    }
-    */
     public void updateGridPicturesAdapter(PictureList list) {
+        mLogging.debug(TAG, "updateGridPicturesAdapter list.size() => " + list.size());
         this.getPictureList().overrideList(list);
         this.mGridPicturesAdapter.notifyDataSetChanged();
+    }
+
+    private void initLogging(){
+        this.mLogging = CustomLogging.getInstance();
     }
 
     public void updateUploadImageProgressValue(int progressValue) {
@@ -181,7 +157,7 @@ public class FragmentPictures extends Fragment {
 
         if(this.textDialogUpdateProgress != null) {
             String text = Constant.STRING_UPDATE_PROGRESS_FORMAT.replace(Constant.DUMMY_NUMBER,
-                                                    getParser().convertIntegerToString(progressValue));
+                    getParser().convertIntegerToString(progressValue));
             this.textDialogUpdateProgress.setText(text);
         }
     }
@@ -191,15 +167,6 @@ public class FragmentPictures extends Fragment {
             this.mLogging.debug(TAG, "Closing upload image progress dialog");
             this.mDialogUploadImageProgress.dismiss();
         }
-    }
-
-    public int getPictureListSize() {
-        return this.getPictureList().size();
-    }
-
-
-    private void initLogging(){
-        this.mLogging = CustomLogging.getInstance();
     }
 
     private void initLogic() {
@@ -228,10 +195,17 @@ public class FragmentPictures extends Fragment {
         this.mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mLogging.debug(TAG, "onItemSelected -> " + position);
-                String url = getPictureList().getList().get(position).getThumbnailUrl();
-                mLogging.debug(TAG, "getThumbnailUrl -> " + url);
-                showPicturePreviewDialog(getActivity(), getPictureList().getList(), position);
+                String url = getPictureList().getList().get(position).getAcutalUrl();
+
+                mLogging.debug(TAG, "getAcutalUrl -> " + url);
+                mLogging.debug(TAG, "mParamAlbum.getAlbumID() -> " + mParamAlbum.getAlbumID());
+
+                if(mListener != null) {
+                    mListener.onFragmenFacebookSelectiontPicturesInteraction(REQUEST_UPLOAD_FACEBOOK_IMAGE_FILE, url);
+                }
+
+
+                //showPicturePreviewDialog(getActivity(), getPictureList().getList(), position);
             }
         });
 
@@ -241,14 +215,14 @@ public class FragmentPictures extends Fragment {
         this.mGridPicturesAdapter = new GridPicturesAdapter(list);
     }
 
-    private void initFabAddPicture(View v, final Context context) {
+    private void initFabAddPicture(View v) {
         this.mFabAddPicture = (FloatingActionButton) v.findViewById(R.id.fab_add_picture);
-        this.mFabAddPicture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showAddPictureOptionsDialog(context);
-            }
-        });
+    }
+
+    private void hideFabAddPicture() {
+        if(this.mFabAddPicture != null) {
+            this.mFabAddPicture.setVisibility(View.GONE);
+        }
     }
 
     private Parser getParser() {
@@ -312,56 +286,6 @@ public class FragmentPictures extends Fragment {
 
     }
 
-    private void showAddPictureOptionsDialog(Context mContext) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        if(mContext instanceof PictureActivity) { //may come from FragmentAlbum
-            LayoutInflater inflater = ((PictureActivity) mContext).getLayoutInflater();
-
-            final View dialogView = inflater.inflate(R.layout.dialog_add_picture_options_layout, null);
-
-            LinearLayout optionGallery = (LinearLayout) dialogView.findViewById(R.id.option_gallery);
-            LinearLayout optionFacebook = (LinearLayout) dialogView.findViewById(R.id.option_facebook);
-            LinearLayout optionCamera = (LinearLayout) dialogView.findViewById(R.id.option_camera);
-
-            if(!this.getFacebookLogic().getIsFacebookLogin()) { // not login using facebook
-                optionFacebook.setVisibility(View.INVISIBLE);
-            }
-
-            builder.setView(dialogView);
-
-            this.mDialogOption = builder.create();
-            this.mDialogOption.setCanceledOnTouchOutside(true);
-            this.mDialogOption.setCancelable(true);
-            this.mDialogOption.show();
-
-            optionGallery.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mDialogOption.dismiss();
-                    mListener.onFragmentPicturesInteraction(Constant.DIALOG_REQUEST_OPEN_INTENT_IMAGES);
-                }
-            });
-
-            optionCamera.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mDialogOption.dismiss();
-                    mListener.onFragmentPicturesInteraction(Constant.DIALOG_REQUEST_OPEN_INTENT_CAMERA);
-                }
-            });
-
-
-            optionFacebook.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mDialogOption.dismiss();
-                    mListener.onFragmentPicturesInteraction(Constant.DIALOG_REQUEST_OPEN_FACEBOOK_ALBUM);
-                }
-            });
-
-        }
-    }
-
     private void showUploadImageProgressDialog(Context mContext) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         if(mContext instanceof PictureActivity) {
@@ -380,7 +304,6 @@ public class FragmentPictures extends Fragment {
 
         }
     }
-
 
 
 
@@ -407,16 +330,16 @@ public class FragmentPictures extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentPicturesInteraction(int requestType);
+        public void onFragmenFacebookSelectiontPicturesInteraction(int requestType, String url);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
+    /*
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onFragmentPicturesInteraction(0);
+            mListener.onFragmenFacebookSelectiontPicturesInteraction(0);
         }
     }
-
+    */
 
 
 

@@ -31,6 +31,7 @@ import com.orbital.lead.model.Constant;
 import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumDialogEditJournalType;
 import com.orbital.lead.model.EnumJournalServiceType;
+import com.orbital.lead.model.EnumOpenPictureActivityType;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.Project;
 import com.orbital.lead.model.ProjectList;
@@ -199,9 +200,9 @@ public class EditSpecificJournalActivity extends BaseActivity implements
 
             case R.id.action_image:
                 if(this.getJournal() != null && this.getJournal().getAlbum() != null){
-                    getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, this.getJournal().getAlbum(), this.getJournal().getJournalID());
+                    getLogic().displayPictureActivity(this, EnumOpenPictureActivityType.OPEN_FRAGMENT_LIST_PICTURES, this.getJournal().getAlbum(), this.getJournal().getJournalID());
                 }else{
-                    getLogic().displayPictureActivity(this, PictureActivity.OPEN_FRAGMENT_LIST_PICTURES, null, this.getJournal().getJournalID());
+                    getLogic().displayPictureActivity(this, EnumOpenPictureActivityType.OPEN_FRAGMENT_LIST_PICTURES, null, this.getJournal().getJournalID());
                 }
 
                 return true;

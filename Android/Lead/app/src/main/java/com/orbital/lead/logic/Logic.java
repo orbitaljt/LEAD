@@ -28,6 +28,7 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.orbital.lead.Parser.Parser;
+import com.orbital.lead.Parser.ParserFacebook;
 import com.orbital.lead.R;
 import com.orbital.lead.controller.Activity.AddNewSpecificJournalActivity;
 import com.orbital.lead.controller.Activity.EditSpecificJournalActivity;
@@ -54,7 +55,9 @@ import com.orbital.lead.model.Country;
 import com.orbital.lead.model.CountryList;
 import com.orbital.lead.model.EnumDialogEditJournalType;
 import com.orbital.lead.model.EnumJournalServiceType;
+import com.orbital.lead.model.EnumOpenPictureActivityType;
 import com.orbital.lead.model.EnumPictureServiceType;
+import com.orbital.lead.model.EnumPictureType;
 import com.orbital.lead.model.EnumProjectServiceType;
 import com.orbital.lead.model.Journal;
 import com.orbital.lead.model.ProjectList;
@@ -177,7 +180,7 @@ public class Logic {
             this.getLogging().debug(TAG, "getUserSpecificAlbum => Album ID is empty.");
         }else{
             mLogging.debug(TAG, "getUserSpecificAlbum => Get specific album from web service with album ID => " + albumID);
-            this.executePictureService(context, EnumPictureServiceType.GET_SPECIFIC_ALBUM, albumID, "", "");
+            this.executePictureService(context, EnumPictureServiceType.GET_SPECIFIC_ALBUM, albumID, "", "", "");
         }
     }
 
@@ -186,7 +189,7 @@ public class Logic {
             this.getLogging().debug(TAG, "getUserAllAlbum => User ID is empty.");
         }else{
             mLogging.debug(TAG, "getUserAllAlbum => Get all album from web service with user ID => " + userID);
-            this.executePictureService(context, EnumPictureServiceType.GET_ALL_ALBUM, "", userID, "");
+            this.executePictureService(context, EnumPictureServiceType.GET_ALL_ALBUM, "", userID, "", "");
         }
     }
 
@@ -238,10 +241,26 @@ public class Logic {
                 this.getParser().isStringEmpty(filePath)){
             this.getLogging().debug(TAG, "uploadNewPicture => User ID or album ID or file path is empty.");
         }else{
-            this.executePictureService(context, EnumPictureServiceType.UPLOAD_IMAGE_FILE, albumID, userID, filePath);
+            this.executePictureService(context, EnumPictureServiceType.UPLOAD_IMAGE_FILE, albumID, userID, filePath, "");
         }
 
     }
+
+    public void uploadFacebookImage(Context context, String userID, String albumID, String url) {
+        this.executePictureService(context, EnumPictureServiceType.UPLOAD_FACEBOOK_IMAGE, albumID, userID, "", url);
+    }
+
+
+
+    public void uploadNewPictureURL(Context context, String url, String userID, String albumID) {
+        if(this.getParser().isStringEmpty(userID) || this.getParser().isStringEmpty(albumID) ||
+                this.getParser().isStringEmpty(url)){
+            this.getLogging().debug(TAG, "uploadNewPicture => User ID or album ID or URL is empty.");
+        }else{
+            this.executePictureService(context, EnumPictureServiceType.UPLOAD_IMAGE_FILE, albumID, userID, "", url);
+        }
+    }
+
 
     public void getNewJournaAlbumlID(Context context, String userID) {
         HttpAsyncJournal mAsync = new HttpAsyncJournal(context, EnumJournalServiceType.GET_NEW_JOURNAL_ALBUM_ID);
@@ -268,13 +287,13 @@ public class Logic {
         context.startActivity(newIntent);
     }
 
-    public void displayPictureActivity(Context context, String type, Album album, String journalID){
+    public void displayPictureActivity(Context context, EnumOpenPictureActivityType type, Album album, String journalID){
         //, ArrayList<Picture> picList
         mLogging.debug(TAG, "displayPictureActivity");
         Intent newIntent = new Intent(context, PictureActivity.class);
 
         Bundle mBundle = new Bundle();
-        mBundle.putString(Constant.BUNDLE_PARAM_OPEN_FRAGMENT_TYPE, type);
+        mBundle.putString(Constant.BUNDLE_PARAM_OPEN_FRAGMENT_TYPE, type.getText());
         mBundle.putString(Constant.BUNDLE_PARAM_JOURNAL_ID, journalID);
         mBundle.putParcelable(Constant.BUNDLE_PARAM_ALBUM, album);
 
@@ -754,7 +773,7 @@ public class Logic {
         mContext.startService(intent);
     }
 
-    private void executePictureService(Context mContext, EnumPictureServiceType serviceType, String albumID, String userID, String uploadFilePath) {
+    private void executePictureService(Context mContext, EnumPictureServiceType serviceType, String albumID, String userID, String uploadFilePath, String url) {
         Intent intent = new Intent(Intent.ACTION_SYNC, null, mContext, PictureService.class);
         switch(serviceType){
             case GET_SPECIFIC_ALBUM:
@@ -776,6 +795,33 @@ public class Logic {
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG, albumID); // album ID
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_PATH_TAG, uploadFilePath); // Upload File Path
                 break;
+
+            case UPLOAD_PROFILE_IMAGE_URL:
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, userID); // user ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG, albumID); // album ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_URL_TAG, url); // File URL
+                break;
+
+            case UPLOAD_FACEBOOK_IMAGE:
+
+                if(getParser().isStringEmpty(url)) {
+                    getLogging().debug(TAG, "url is error");
+                    return;
+                }
+
+                String fileName = ParserFacebook.getFacebookImageName(url);
+                EnumPictureType fileType = ParserFacebook.getPictureType(url);
+
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, userID); // user ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG, albumID); // album ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_URL_TAG, url); // File URL
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_NAME_TAG, fileName); // File name
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_TYPE_TAG, fileType.toString()); // File type
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FROM_FACEBOOK_TAG, true); // From facebook
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FROM_LEAD_TAG, false); // From lead
+
+                break;
+
         }
 
         intent.putExtra(Constant.INTENT_SERVICE_EXTRA_TYPE_TAG, serviceType);
