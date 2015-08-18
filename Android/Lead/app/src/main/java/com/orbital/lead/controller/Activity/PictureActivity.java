@@ -32,6 +32,7 @@ import com.orbital.lead.model.CurrentLoginUser;
 import com.orbital.lead.model.EnumFacebookQueryType;
 import com.orbital.lead.model.EnumOpenPictureActivityType;
 import com.orbital.lead.model.EnumPictureServiceType;
+import com.orbital.lead.model.Picture;
 import com.orbital.lead.model.PictureList;
 
 import java.io.ByteArrayOutputStream;
@@ -590,6 +591,19 @@ public class PictureActivity extends BaseActivity implements
     }
 
     @Override
+    public void OnFragmentPicturesSetAlbumCover(Picture picture) {
+        this.getLogging().debug(TAG, "OnFragmentPicturesSetAlbumCover picture ID => " + picture.getPictureID());
+        this.getLogging().debug(TAG, "OnFragmentPicturesSetAlbumCover getCurrentUser().getUserID() => " + getCurrentUser().getUserID());
+        this.getLogging().debug(TAG, "OnFragmentPicturesSetAlbumCover getSelectedAlbum().getAlbumID() => " + getSelectedAlbum().getAlbumID());
+
+        this.getLogic().setAlbumCover(this,
+                                    this.getCurrentUser().getUserID(),
+                                    this.getSelectedAlbum().getAlbumID(),
+                                    picture.getPictureID());
+
+    }
+
+    @Override
     public void onFragmentAlbumInteraction(int request, Album selectedAlbum) {
         this.setSelectedAlbum(selectedAlbum);
         switch(request){
@@ -968,6 +982,20 @@ public class PictureActivity extends BaseActivity implements
 
                         this.setSelectedAlbum(updatedAlbum);
                         this.updateFragmentPicturesGridAdapter(updatedAlbum.getPictureList());
+
+                        break;
+
+                    case SET_ALBUM_COVER:
+                        jsonResult = resultData.getString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG);
+                        this.getLogging().debug(TAG, "onReceiveResult UPLOAD_FACEBOOK_IMAGE -> jsonResult => " + jsonResult);
+
+                        getLogic().showToastShort(this, "Album cover has been set");
+
+                        updatedAlbum = getParser().parseJsonToSpecificAlbum(jsonResult);
+                        this.setSelectedAlbum(updatedAlbum);
+                        this.updateFragmentPicturesGridAdapter(updatedAlbum.getPictureList());
+
+                        break;
 
                 } //end switch
 

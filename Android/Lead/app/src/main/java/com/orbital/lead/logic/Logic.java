@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewAnimator;
 
 import com.nispok.snackbar.Snackbar;
@@ -180,7 +181,7 @@ public class Logic {
             this.getLogging().debug(TAG, "getUserSpecificAlbum => Album ID is empty.");
         }else{
             mLogging.debug(TAG, "getUserSpecificAlbum => Get specific album from web service with album ID => " + albumID);
-            this.executePictureService(context, EnumPictureServiceType.GET_SPECIFIC_ALBUM, albumID, "", "", "");
+            this.executePictureService(context, EnumPictureServiceType.GET_SPECIFIC_ALBUM, albumID, "", "", "", "");
         }
     }
 
@@ -189,7 +190,7 @@ public class Logic {
             this.getLogging().debug(TAG, "getUserAllAlbum => User ID is empty.");
         }else{
             mLogging.debug(TAG, "getUserAllAlbum => Get all album from web service with user ID => " + userID);
-            this.executePictureService(context, EnumPictureServiceType.GET_ALL_ALBUM, "", userID, "", "");
+            this.executePictureService(context, EnumPictureServiceType.GET_ALL_ALBUM, "", userID, "", "", "");
         }
     }
 
@@ -241,13 +242,13 @@ public class Logic {
                 this.getParser().isStringEmpty(filePath)){
             this.getLogging().debug(TAG, "uploadNewPicture => User ID or album ID or file path is empty.");
         }else{
-            this.executePictureService(context, EnumPictureServiceType.UPLOAD_IMAGE_FILE, albumID, userID, filePath, "");
+            this.executePictureService(context, EnumPictureServiceType.UPLOAD_IMAGE_FILE, albumID, userID, "", filePath, "");
         }
 
     }
 
     public void uploadFacebookImage(Context context, String userID, String albumID, String url) {
-        this.executePictureService(context, EnumPictureServiceType.UPLOAD_FACEBOOK_IMAGE, albumID, userID, "", url);
+        this.executePictureService(context, EnumPictureServiceType.UPLOAD_FACEBOOK_IMAGE, albumID, userID, "",  "", url);
     }
 
 
@@ -257,12 +258,21 @@ public class Logic {
                 this.getParser().isStringEmpty(url)){
             this.getLogging().debug(TAG, "uploadNewPicture => User ID or album ID or URL is empty.");
         }else{
-            this.executePictureService(context, EnumPictureServiceType.UPLOAD_IMAGE_FILE, albumID, userID, "", url);
+            this.executePictureService(context, EnumPictureServiceType.UPLOAD_IMAGE_FILE, albumID, userID, "", "", url);
+        }
+    }
+
+    public void setAlbumCover(Context context, String userID, String albumID, String pictureID) {
+        if(this.getParser().isStringEmpty(userID) || this.getParser().isStringEmpty(albumID) ||
+                this.getParser().isStringEmpty(pictureID)){
+            this.getLogging().debug(TAG, "uploadNewPicture => User ID or album ID or picture ID is empty.");
+        }else{
+            this.executePictureService(context, EnumPictureServiceType.SET_ALBUM_COVER, albumID, userID, pictureID, "", "");
         }
     }
 
 
-    public void getNewJournaAlbumlID(Context context, String userID) {
+    public void getNewJournalAlbumID(Context context, String userID) {
         HttpAsyncJournal mAsync = new HttpAsyncJournal(context, EnumJournalServiceType.GET_NEW_JOURNAL_ALBUM_ID);
         mAsync.execute(EnumJournalServiceType.GET_NEW_JOURNAL_ALBUM_ID.toString(), userID);
     }
@@ -279,12 +289,15 @@ public class Logic {
         mLogging.debug(TAG, "displaySpecificJournalActivity with journal ID => " + journal.getJournalID());
         Intent newIntent = new Intent(context, SpecificJournalActivity.class);
         Bundle mBundle = new Bundle();
-        //mBundle.putString(Constant.BUNDLE_PARAM_JOURNAL_ID, journal.getJournalID());
-        //mBundle.putString(Constant.BUNDLE_PARAM_JOURNAL_IMAGE_URL, journal.getPictureCoverUrl());
         mBundle.putParcelable(Constant.BUNDLE_PARAM_JOURNAL, journal);
 
         newIntent.putExtras(mBundle);
-        context.startActivity(newIntent);
+
+        if(context instanceof MainActivity) {
+            ((MainActivity) context).startActivityForResult(newIntent, MainActivity.START_SPECIFIC_JOURNAL_ACTIVITY);
+        }
+
+        //context.startActivity(newIntent);
     }
 
     public void displayPictureActivity(Context context, EnumOpenPictureActivityType type, Album album, String journalID){
@@ -773,7 +786,7 @@ public class Logic {
         mContext.startService(intent);
     }
 
-    private void executePictureService(Context mContext, EnumPictureServiceType serviceType, String albumID, String userID, String uploadFilePath, String url) {
+    private void executePictureService(Context mContext, EnumPictureServiceType serviceType, String albumID, String userID, String pictureID, String uploadFilePath, String url) {
         Intent intent = new Intent(Intent.ACTION_SYNC, null, mContext, PictureService.class);
         switch(serviceType){
             case GET_SPECIFIC_ALBUM:
@@ -819,6 +832,13 @@ public class Logic {
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FILE_TYPE_TAG, fileType.toString()); // File type
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FROM_FACEBOOK_TAG, true); // From facebook
                 intent.putExtra(Constant.INTENT_SERVICE_EXTRA_UPLOAD_FROM_LEAD_TAG, false); // From lead
+
+                break;
+
+            case SET_ALBUM_COVER:
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG, userID); // user ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG, albumID); // album ID
+                intent.putExtra(Constant.INTENT_SERVICE_EXTRA_PICTURE_ID_TAG, pictureID); // picture ID
 
                 break;
 
@@ -1113,7 +1133,15 @@ public class Logic {
 
     }
 
+    public void showToastLong(Context context, String message) {
+        Toast.makeText(context, message,
+                Toast.LENGTH_LONG).show();
+    }
 
+    public void showToastShort(Context context, String message) {
+        Toast.makeText(context, message,
+                Toast.LENGTH_SHORT).show();
+    }
 
 
 

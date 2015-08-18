@@ -47,6 +47,7 @@ public class BaseActivity extends AppCompatActivity
         JournalReceiver.Receiver,
         ProjectReceiver.Receiver{
 
+    public static final int START_SPECIFIC_JOURNAL_ACTIVITY = 0;
     public static final int START_ADD_NEW_SPECIFIC_JOURNAL_ACTIVITY = 1;
     public static final int START_EDIT_SPECIFIC_JOURNAL_ACTIVITY = 2;
     public static final int START_PICTURE_ACTIVITY = 3;
@@ -467,10 +468,30 @@ public class BaseActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
 
         switch(requestCode){
+            case START_EDIT_SPECIFIC_JOURNAL_ACTIVITY :
+                if(resultCode == Activity.RESULT_OK){
+                    Bundle b = data.getExtras();
+                    if (b != null) {
+                        String journalID = b.getString(Constant.BUNDLE_PARAM_JOURNAL_ID);
+                        boolean refresh = b.getBoolean(Constant.BUNDLE_PARAM_JOURNAL_TOGGLE_REFRESH);
+
+                        getLogging().debug(TAG, "onActivityResult journalID => " + journalID);
+                        getLogging().debug(TAG, "onActivityResult refresh => " + refresh);
+
+                        if(refresh) {
+                            ((SpecificJournalActivity) this).refreshJournal(journalID);
+                        }
+                    }
+                }
+                break;
+
             case START_PICTURE_ACTIVITY:
                 if(resultCode == Activity.RESULT_OK){
                     Bundle b = data.getExtras();
                     if (b != null) {
+
+                        getLogging().debug(TAG, "onActivityResult START_PICTURE_ACTIVITY ");
+
                         Album updatedAlbum = (Album) b.getParcelable(Constant.BUNDLE_PARAM_ALBUM);
                         String journalID = b.getString(Constant.BUNDLE_PARAM_JOURNAL_ID);
 
@@ -565,6 +586,9 @@ public class BaseActivity extends AppCompatActivity
         try{
             getLogging().debug(TAG, "updateCurrentUserAlbum trying...");
             this.getCurrentUser().getJournalList().get(journalID).setAlbum(album);
+            this.getCurrentUser().getJournalList().get(journalID).setPictureCoverID(album.getPictureCoverID());
+            this.getCurrentUser().getJournalList().get(journalID).setPictureCoverType(album.getPictureCoverType());
+
         }catch (Exception e) {
             e.printStackTrace();
         }

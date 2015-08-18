@@ -278,7 +278,7 @@ public class FragmentPictures extends Fragment {
     }
 
     /*============= Display Dialogs =================*/
-    private void showPicturePreviewDialog(Context mContext, ArrayList<Picture> list, int currentPosition){
+    private void showPicturePreviewDialog(Context mContext, final ArrayList<Picture> list, final int currentPosition){
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         if(mContext instanceof PictureActivity){ //may come from FragmentAlbum
             LayoutInflater inflater = ((PictureActivity) mContext).getLayoutInflater();
@@ -304,6 +304,14 @@ public class FragmentPictures extends Fragment {
             btnCancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    mDialogPicturePreview.dismiss();
+                }
+            });
+
+            btnSetCover.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.OnFragmentPicturesSetAlbumCover(list.get(currentPosition));
                     mDialogPicturePreview.dismiss();
                 }
             });
@@ -408,6 +416,7 @@ public class FragmentPictures extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentPicturesInteraction(int requestType);
+        public void OnFragmentPicturesSetAlbumCover(Picture picture);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

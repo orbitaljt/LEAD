@@ -158,6 +158,7 @@ public class MainActivity extends BaseActivity
     }
 
     public void updateFragmentMainUserJournalList(JournalList list){
+        this.getLogging().debug(TAG, "updateFragmentMainUserJournalList");
         this.getFragmentJournalList().updateJournalList(list);
     }
 
@@ -184,6 +185,8 @@ public class MainActivity extends BaseActivity
     private FragmentMainUserJournalList getFragmentJournalList(){
         return this.mFragmentJournalList;
     }
+
+
 
 
 
@@ -581,22 +584,47 @@ public class MainActivity extends BaseActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        Bundle b = null;
+
+        if(resultCode != Activity.RESULT_OK) {
+            getLogging().debug(TAG, "resultCode is not OK");
+            return;
+        }
+
+        if(data == null) {
+            getLogging().debug(TAG, "data is null");
+            return;
+        }
+
         switch(requestCode) {
             case START_ADD_NEW_SPECIFIC_JOURNAL_ACTIVITY:
-                if(resultCode == Activity.RESULT_OK) {
-                    Bundle b = data.getExtras();
-                    if (b != null) {
-                        boolean refresh = b.getBoolean(Constant.BUNDLE_PARAM_JOURNAL_LIST_TOGGLE_REFRESH);
+                getLogging().debug(TAG, "START_ADD_NEW_SPECIFIC_JOURNAL_ACTIVITY");
+                b = data.getExtras();
+                if (b != null) {
+                    boolean refresh = b.getBoolean(Constant.BUNDLE_PARAM_JOURNAL_LIST_TOGGLE_REFRESH);
 
-                        if(refresh) {
-                            // refresh the entire list again
-                            getLogging().debug(TAG, "refreshing fragment main journal list");
-                            this.updateFragmentMainUserJournalList(this.getCurrentUser().getJournalList());
-                        }
+                    if(refresh) {
+                        // refresh the entire list again
+                        getLogging().debug(TAG, "refreshing fragment main journal list");
+                        this.updateFragmentMainUserJournalList(this.getCurrentUser().getJournalList());
                     }
                 }
 
+                break;
 
+            case START_SPECIFIC_JOURNAL_ACTIVITY:
+                getLogging().debug(TAG, "START_SPECIFIC_JOURNAL_ACTIVITY");
+                b = data.getExtras();
+                if (b != null) {
+                    boolean refresh = b.getBoolean(Constant.BUNDLE_PARAM_JOURNAL_TOGGLE_REFRESH);
+                    getLogging().debug(TAG, "START_SPECIFIC_JOURNAL_ACTIVITY refresh => " + refresh);
+                    if(refresh) {
+                        // refresh the entire list again
+                        getLogging().debug(TAG, "refreshing fragment main journal list");
+                        this.updateFragmentMainUserJournalList(this.getCurrentUser().getJournalList());
+                    }
+                }
+                break;
         }
     }
 

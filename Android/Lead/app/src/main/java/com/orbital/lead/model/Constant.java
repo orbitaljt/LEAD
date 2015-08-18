@@ -62,6 +62,7 @@ public class Constant {
     public static final String URL_POST_PARAMETER_TAG_PASSWORD = "pw";
     public static final String URL_POST_PARAMETER_TAG_USER_ID = "uid";
     public static final String URL_POST_PARAMETER_TAG_FACEBOOK_USER_ID = "fb_uid";
+    public static final String URL_POST_PARAMETER_TAG_PICTURE_ID = "pid";
     public static final String URL_POST_PARAMETER_TAG_ALBUM_ID = "aid";
     public static final String URL_POST_PARAMETER_TAG_PICTURE_QUERY_QUANTITY = "pic_qq";
     //public static final String URL_POST_PARAMETER_TAG_USER_JOURNAL_LIST_ID = "jlid";
@@ -96,6 +97,7 @@ public class Constant {
     public static final String TYPE_UPLOAD_PROFILE_IMAGE_URL = "2000";
     public static final String TYPE_UPLOAD_IMAGE = "2001";
     public static final String TYPE_UPLOAD_FACEBOOK_IMAGE = "2002";
+    public static final String TYPE_SET_ALBUM_COVER = "2003";
 
     public static final String TYPE_FACEBOOK = "1";
 
@@ -235,6 +237,7 @@ public class Constant {
     public static final String INTENT_SERVICE_EXTRA_USER_PROFILE_PICTURE_FILENAME_TAG = "u_profile_pic_filename";
     public static final String INTENT_SERVICE_EXTRA_TYPE_TAG = "type";
     public static final String INTENT_SERVICE_EXTRA_ALBUM_ID_TAG = "aid";
+    public static final String INTENT_SERVICE_EXTRA_PICTURE_ID_TAG = "pid";
     public static final String INTENT_SERVICE_EXTRA_UPLOAD_FILE_PATH_TAG = "file_path";
     public static final String INTENT_SERVICE_EXTRA_UPLOAD_FILE_URL_TAG = "url";
     public static final String INTENT_SERVICE_EXTRA_UPLOAD_FILE_NAME_TAG = "filename";
