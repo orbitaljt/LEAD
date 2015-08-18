@@ -33,6 +33,7 @@ public class PictureService extends IntentService  {
     private String urlStreamStr;
     private String albumID;
     private String userID;
+    private String pictureID;
     private String uploadFilePath;
     private String fileName;
     private String fileType;
@@ -68,6 +69,11 @@ public class PictureService extends IntentService  {
         if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG) != null){
             this.mLogging.debug(TAG, "setAlbumID" );
            this.setAlbumID(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_ALBUM_ID_TAG));
+        }
+
+        if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_PICTURE_ID_TAG) != null){
+            this.mLogging.debug(TAG, "setPictureID" );
+            this.setPictureID(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_PICTURE_ID_TAG));
         }
 
         if(intent.getStringExtra(Constant.INTENT_SERVICE_EXTRA_USER_ID_TAG) != null){
@@ -180,6 +186,21 @@ public class PictureService extends IntentService  {
 
                     break;
 
+                case SET_ALBUM_COVER:
+                    url = Constant.URL_CLIENT_SERVER;
+                    params = new HashMap<String, String>();
+                    params.put(Constant.URL_POST_PARAMETER_TAG_USER_ID, this.getUserID());
+                    params.put(Constant.URL_POST_PARAMETER_TAG_ALBUM_ID, this.getAlbumID());
+                    params.put(Constant.URL_POST_PARAMETER_TAG_PICTURE_ID, this.getPictureID());
+
+                    this.urlStream = WebConnector.uploadFileUrl(this, url, Constant.TYPE_SET_ALBUM_COVER, params);
+                    this.urlStreamStr = WebConnector.convertStreamToString(this.urlStream);
+
+                    returnBundle.putString(Constant.INTENT_SERVICE_RESULT_JSON_STRING_TAG, this.urlStreamStr);
+                    receiver.send(STATUS_FINISHED, returnBundle);
+
+                    break;
+
                 default:
                     this.mLogging.debug(TAG, "onHandleIntent -> No service type found");
                     receiver.send(STATUS_ERROR, returnBundle);
@@ -228,6 +249,10 @@ public class PictureService extends IntentService  {
         this.albumID = id;
     }
 
+    private void setPictureID(String id){
+        this.pictureID = id;
+    }
+
     private void setUserID(String id) {
         this.userID = id;
     }
@@ -262,6 +287,10 @@ public class PictureService extends IntentService  {
 
     private String getAlbumID() {
         return this.albumID;
+    }
+
+    private String getPictureID() {
+        return this.pictureID;
     }
 
     private String getUserID() {
