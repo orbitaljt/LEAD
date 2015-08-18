@@ -67,6 +67,10 @@ public class Picture implements Parcelable {
         this._actualUrl = this.getParser().createPictureNormalUrl(picID, type, userID);
     }
 
+    public String getPictureID () {
+        return this._pictureID;
+    }
+
     public String getAlbumID(){
         return this._albumID;
     }

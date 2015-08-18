@@ -209,6 +209,10 @@ public class Journal implements Parcelable {
         this.pictureCoverID = val;
     }
 
+    public void setPictureCoverType(EnumPictureType type) {
+        this.pictureCoverType = type;
+    }
+
     public void setTitle(String val){
         this.title = val;
     }

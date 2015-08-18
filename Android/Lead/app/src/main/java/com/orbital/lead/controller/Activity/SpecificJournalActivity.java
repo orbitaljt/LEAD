@@ -58,7 +58,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        getLogging().debug(TAG, "onCreate");
         getLayoutInflater().inflate(R.layout.activity_specific_journal_layout, getBaseFrameLayout());
 
         this.setContext(this);
@@ -87,6 +87,9 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
 
             this.setJournal((Journal) getBundleExtra.getParcelable(Constant.BUNDLE_PARAM_JOURNAL));
             this.setJournalDetails(this.getJournal());
+
+            // run picture service first
+            this.getLogic().getUserSpecificAlbum(this, this.getJournal().getAlbum().getAlbumID());
 
         } else {
             getLogging().debug(TAG, "No bundle extra from getIntent()");
@@ -264,6 +267,9 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
     }
 
     private void setJournalDetails(Journal displayJournal) {
+        getLogging().debug(TAG, "setJournalDetails");
+        getLogging().debug(TAG, "displayJournal.getAlbum().getPictureCoverID() => " + displayJournal.getAlbum().getPictureCoverID());
+
         this.setImageJournalCover(this.getParser().createPictureCoverUrl(displayJournal.getPictureCoverID(),
                 displayJournal.getPictureCoverType().toString(),
                 CurrentLoginUser.getUser().getUserID()));
@@ -283,8 +289,7 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         Project project = getCurrentUser().getProjectList().findProject(displayJournal.getProject().getProjectID());
         this.setTextProject(project != null ? project.getName() : "");
 
-        // run picture service first
-        this.getLogic().getUserSpecificAlbum(this, displayJournal.getAlbum().getAlbumID());
+
     }
 
 
@@ -386,22 +391,8 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
         super.onActivityResult(requestCode, resultCode, data);
 
         switch(requestCode){
-            case START_EDIT_SPECIFIC_JOURNAL_ACTIVITY :
-                if(resultCode == Activity.RESULT_OK){
-                    Bundle b = data.getExtras();
-                    if (b != null) {
-                        String journalID = b.getString(Constant.BUNDLE_PARAM_JOURNAL_ID);
-                        boolean refresh = b.getBoolean(Constant.BUNDLE_PARAM_JOURNAL_TOGGLE_REFRESH);
 
-                        getLogging().debug(TAG, "onActivityResult journalID => " + journalID);
-                        getLogging().debug(TAG, "onActivityResult refresh => " + refresh);
 
-                        if(refresh) {
-                            this.refreshJournal(journalID);
-                        }
-                    }
-                }
-                break;
         }
     }
 
@@ -448,6 +439,12 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
                         if(this.getAlbum() != null) {
                             this.setTextPictureCount(this.getParser().convertIntegerToString(this.getAlbum().getPictureList().size()));
                         }
+
+
+                        if(this.getJournal() != null) {
+                            this.setJournalDetails(this.getJournal());
+                        }
+
                         break;
                 }
 

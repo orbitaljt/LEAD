@@ -188,6 +188,9 @@ public class User {
     }
 
     public ProjectList getProjectList() {
+        if(this.mProjectList == null) {
+            this.mProjectList = new ProjectList();
+        }
         return this.mProjectList;
     }
 

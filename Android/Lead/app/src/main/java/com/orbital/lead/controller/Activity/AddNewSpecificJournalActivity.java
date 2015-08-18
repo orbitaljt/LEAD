@@ -211,7 +211,7 @@ public class AddNewSpecificJournalActivity extends BaseActivity {
     }
 
     private void retrieveNewJournalAlbumID() {
-        this.getLogic().getNewJournaAlbumlID(this, this.getCurrentUser().getUserID());
+        this.getLogic().getNewJournalAlbumID(this, this.getCurrentUser().getUserID());
     }
 
     private void initNewJournal() {
