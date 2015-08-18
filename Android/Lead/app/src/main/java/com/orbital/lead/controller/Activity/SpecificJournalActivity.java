@@ -403,6 +403,13 @@ public class SpecificJournalActivity extends BaseActivity implements PictureRece
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+<<<<<<< HEAD
+=======
+        switch(requestCode){
+
+
+        }
+>>>>>>> origin/master
     }
 
 
